@@ -366,10 +366,10 @@ void page_t::_handler_plugin_start(MetaDisplay * display, MetaScreen * screen, C
 	//auto stage = meta_get_stage_for_screen(_screen);
 	auto window_group = meta_get_window_group_for_screen(_screen);
 
-	auto xparent = clutter_actor_get_parent(window_group);
+	//auto xparent = clutter_actor_get_parent(window_group);
 
 
-	log::printf("wndow-group = %p, xparent = %p, stage = %p\n", window_group, xparent, stage);
+	//log::printf("wndow-group = %p, xparent = %p, stage = %p\n", window_group, xparent, stage);
 	_viewport_group = clutter_actor_new();
 	clutter_actor_show(_viewport_group);
 
@@ -1039,7 +1039,7 @@ void page_t::update_viewport_layout() {
 	clutter_actor_set_size(_viewport_group, -1, -1);
 
 	auto window_group = meta_get_window_group_for_screen(_screen);
-	auto xparent = clutter_actor_get_parent(window_group);
+	//auto xparent = clutter_actor_get_parent(window_group);
 	//clutter_actor_set_child_below_sibling(xparent, _viewport_group, window_group);
 	//clutter_actor_set_child_above_sibling(xparent, _viewport_group, NULL);
 	//clutter_actor_set_child_above_sibling(xparent, _overlay_group, NULL);

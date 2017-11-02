@@ -3,6 +3,7 @@ const St = imports.gi.St;
 const Page = imports.gi.Page;
 const Main = imports.ui.main;
 const Tweener = imports.ui.tweener;
+const Lang = imports.lang;
 
 let page_shell;
 
@@ -43,7 +44,7 @@ var PageShell = new Lang.Class({
        //this._shellwm.disconnect('map', Lang.bind(this, this._mapWindow));
        //this._shellwm.disconnect('destroy', Lang.bind(this, this._destroyWindow));
 
-   }
+   },
 
    _minimizeWindow: function(shellwm, actor) {
 	   this._page.minimize(actor);
@@ -71,7 +72,7 @@ var PageShell = new Lang.Class({
    
    _switchWorkspace: function(shellwm, from, to, direction) {
 	   this._page.switch_workspace(from, to, direction);
-   },
+   }
    
 });
 
@@ -83,3 +84,5 @@ function enable() {
 function disable() {
 	page_shell = null;
 }
+
+
