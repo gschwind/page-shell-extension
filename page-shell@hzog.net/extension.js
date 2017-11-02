@@ -24,9 +24,27 @@ var PageShell = new Lang.Class({
        this._shellwm.connect('size-changed', Lang.bind(this, this._sizeChangedWindow));
        this._shellwm.connect('map', Lang.bind(this, this._mapWindow));
        this._shellwm.connect('destroy', Lang.bind(this, this._destroyWindow));
-       
+
+       Main.wm.allowKeybinding('make-notebook-window', Shell.ActionMode.ALL);
+       Main.layoutManager.uiGroup.add_actor_above(this._page.overlay_group, Main.layoutManager.modalDialogGroup);
+       Main.layoutManager._backgroundGroup.add_child(this._page.viewports_group);
+
    },
    
+   destroy: function() {
+       Main.layoutManager.uiGroup.remove_child(this._page.overlay_group);
+       Main.layoutManager._backgroundGroup.remove_child(this._page.viewports_group);
+
+       //this._shellwm.disconnect('switch-workspace', Lang.bind(this, this._switchWorkspace));
+       //this._shellwm.disconnect('minimize', Lang.bind(this, this._minimizeWindow));
+       //this._shellwm.disconnect('unminimize', Lang.bind(this, this._unminimizeWindow));
+       //this._shellwm.disconnect('size-change', Lang.bind(this, this._sizeChangeWindow));
+       //this._shellwm.disconnect('size-changed', Lang.bind(this, this._sizeChangedWindow));
+       //this._shellwm.disconnect('map', Lang.bind(this, this._mapWindow));
+       //this._shellwm.disconnect('destroy', Lang.bind(this, this._destroyWindow));
+
+   }
+
    _minimizeWindow: function(shellwm, actor) {
 	   this._page.minimize(actor);
    },
