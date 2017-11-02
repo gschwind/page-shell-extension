@@ -115,9 +115,8 @@ void view_floating_t::reconfigure() {
 
 	_client->_absolute_position = _client->_floating_wished_position;
 
-	// XXXXX TODO
-//	if (meta_window_is_tiled_with_custom_position(_client->meta_window()))
-//		meta_window_unmake_tiled_with_custom_position(_client->meta_window());
+	if (meta_window_is_tiled_with_custom_position(_client->meta_window()))
+		meta_window_unmake_tiled_with_custom_position(_client->meta_window());
 	_reconfigure_windows();
 
 }

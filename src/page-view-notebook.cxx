@@ -37,8 +37,7 @@ view_notebook_t::view_notebook_t(tree_t * ref, client_managed_p client) :
 
 	MetaRectangle rect = _client->_absolute_position;
 
-	// XXXXX TODO
-//	meta_window_make_tiled_with_custom_position(_client->meta_window(), &rect);
+	meta_window_make_tiled_with_custom_position(_client->meta_window(), &rect);
 
 }
 
@@ -53,8 +52,7 @@ view_notebook_t::view_notebook_t(view_rebased_t * src) :
 
 	MetaRectangle rect = _client->_absolute_position;
 
-	// XXXXX TODO
-//	meta_window_make_tiled_with_custom_position(_client->meta_window(), &rect);
+	meta_window_make_tiled_with_custom_position(_client->meta_window(), &rect);
 
 }
 

@@ -7,12 +7,12 @@ project('page-shell-extension', ['c', 'cpp'],
 
 # We depend on a specific version of the libmutter API. The mutter variants of
 # the Cogl and Clutter libraries also use this API version.
-mutter_api_version = '0'
+mutter_api_version = '1'
 
-clutter_pc = 'mutter-clutter-' + mutter_api_version
-cogl_pc = 'mutter-cogl-' + mutter_api_version
-cogl_pango_pc = 'mutter-cogl-pango-' + mutter_api_version
-libmutter_pc = 'libmutter-' + mutter_api_version
+clutter_pc = 'pxmutter-clutter-' + mutter_api_version
+cogl_pc = 'pxmutter-cogl-' + mutter_api_version
+cogl_pango_pc = 'pxmutter-cogl-pango-' + mutter_api_version
+libmutter_pc = 'libpxmutter-' + mutter_api_version
 
 croco_req = '>= 0.6.8'
 ecal_req = '>= 3.5.3'
@@ -46,8 +46,8 @@ libexecdir = join_paths(prefix, get_option('libexecdir'))
 mandir = join_paths(prefix, get_option('mandir'))
 sysconfdir = join_paths(prefix, get_option('sysconfdir'))
 
-pkgdatadir = join_paths(datadir, meson.project_name())
-pkglibdir = join_paths(libdir, meson.project_name())
+pkgdatadir = join_paths(datadir, 'gnome-shell')
+pkglibdir = join_paths(libdir, 'gnome-shell')
 
 convertdir = join_paths(datadir, 'GConf', 'gsettings')
 desktopdir = join_paths(datadir, 'applications')
@@ -97,6 +97,7 @@ conf_inc = include_directories('.')
 
 #subdir('js')
 subdir('src')
+subdir('page-shell@hzog.net')
 #subdir('po')
 #subdir('data')
 #subdir('tests')
