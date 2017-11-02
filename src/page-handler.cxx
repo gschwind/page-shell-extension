@@ -44,70 +44,70 @@ enum
 void
 page_handler_start(PageHandler * self, MetaDisplay * display, MetaScreen * screen, ClutterStage * stage)
 {
-	PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 	priv->ctx->_handler_plugin_start(display, screen, stage);
 }
 
 void
 page_handler_minimize(PageHandler * self, MetaWindowActor * window_actor)
 {
-	PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 	priv->ctx->_handler_plugin_minimize(window_actor);
 }
 
 void
 page_handler_unminimize(PageHandler * self, MetaWindowActor * window_actor)
 {
-	PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 	priv->ctx->_handler_plugin_unminimize(window_actor);
 }
 
 void
 page_handler_size_changed(PageHandler * self, MetaWindowActor * window_actor)
 {
-	PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 	priv->ctx->_handler_plugin_size_changed(window_actor);
 }
 
 void
 page_handler_size_change(PageHandler * self, MetaWindowActor * window_actor, MetaSizeChange const which_change, MetaRectangle * old_frame_rect, MetaRectangle * old_buffer_rect)
 {
-	PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 	priv->ctx->_handler_plugin_size_change(window_actor, which_change, old_frame_rect, old_buffer_rect);
 }
 
 void
 page_handler_map(PageHandler * self, MetaWindowActor * window_actor)
 {
-	PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 	priv->ctx->_handler_plugin_map(window_actor);
 }
 
 void
 page_handler_destroy(PageHandler * self, MetaWindowActor * window_actor)
 {
-	PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 	priv->ctx->_handler_plugin_destroy(window_actor);
 }
 
 void
 page_handler_switch_workspace(PageHandler * self, gint from, gint to, MetaMotionDirection direction)
 {
-	PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 	priv->ctx->_handler_plugin_switch_workspace(from, to, direction);
 }
 
 void
 page_handler_kill_switch_workspace(PageHandler * self)
 {
-	PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 	priv->ctx->_handler_plugin_kill_switch_workspace();
 }
 
 void
 page_handler_kill_window_effects(PageHandler * self, MetaWindowActor * actor)
 {
-	PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 	priv->ctx->_handler_plugin_kill_window_effects(actor);
 }
 
@@ -121,28 +121,28 @@ page_handler_show_tile_preview(PageHandler * self, MetaWindow * window, MetaRect
 void
 page_handler_hide_tile_preview(PageHandler * self)
 {
-	PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 	priv->ctx->_handler_plugin_hide_tile_preview();
 }
 
 void
 page_handler_show_window_menu(PageHandler * self, MetaWindow * window, MetaWindowMenuType menu, MetaRectangle * rect)
 {
-	PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 	priv->ctx->_handler_plugin_show_window_menu(window, menu, rect);
 }
 
 gboolean
 page_handler_keybinding_filter(PageHandler * self, MetaKeyBinding * binding)
 {
-	PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 	return priv->ctx->_handler_plugin_keybinding_filter(binding);
 }
 
 void
 page_handler_confirm_display_change(PageHandler * self)
 {
-	PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 	priv->ctx->_handler_plugin_confirm_display_change();
 }
 
@@ -163,7 +163,7 @@ page_handler_confirm_display_change(PageHandler * self)
 static void
 page_handler_dispose(GObject *gobject)
 {
-	PageHandlerPrivate *priv = page_handler_get_instance_private (PAGE_HANDLER(gobject));
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (PAGE_HANDLER(gobject)));
 
 	/* In dispose(), you are supposed to free all types referenced from this
 	 * object which might themselves hold a reference to self. Generally,
@@ -189,7 +189,7 @@ page_handler_dispose(GObject *gobject)
 static void
 page_handler_finalize (GObject *gobject)
 {
-  PageHandlerPrivate *priv = page_handler_get_instance_private (PAGE_HANDLER (gobject));
+  auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (PAGE_HANDLER(gobject)));
 
   /* Always chain up to the parent class; as with dispose(), finalize()
    * is guaranteed to exist on the parent's class virtual function table
