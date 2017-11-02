@@ -33,6 +33,14 @@ typedef struct {
 
 G_DEFINE_TYPE_WITH_PRIVATE (PageHandler, page_handler, G_TYPE_OBJECT)
 
+
+enum
+{
+  PROP_0,
+  PROP_VIEWPORT_GROUP,
+  PROP_OVERLAY_GROUP
+};
+
 void
 page_handler_start(PageHandler * self, MetaDisplay * display, MetaScreen * screen, ClutterStage * stage)
 {
@@ -190,6 +198,45 @@ page_handler_finalize (GObject *gobject)
 }
 
 static void
+page_handler_set_property(GObject         *object,
+                          guint            prop_id,
+                          const GValue    *value,
+                          GParamSpec      *pspec)
+{
+  PageHandler * self = PAGE_HANDLER (object);
+
+  switch (prop_id)
+    {
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
+}
+
+static void
+page_handler_get_property(GObject         *object,
+                          guint            prop_id,
+                          GValue          *value,
+                          GParamSpec      *pspec)
+{
+  PageHandler * self = PAGE_HANDLER (object);
+  PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+
+  switch (prop_id)
+    {
+    case PROP_VIEWPORT_GROUP:
+      g_value_set_object (value, priv->ctx->_viewport_group);
+      break;
+    case PROP_OVERLAY_GROUP:
+      g_value_set_object (value, priv->ctx->_overlay_group);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
+}
+
+static void
 page_handler_class_init (PageHandlerClass *klass)
 {
 	GObjectClass * gobject_class = G_OBJECT_CLASS(klass);
@@ -197,11 +244,24 @@ page_handler_class_init (PageHandlerClass *klass)
 
 	gobject_class->finalize = page_handler_finalize;
 	gobject_class->dispose = page_handler_dispose;
+	gobject_class->set_property = page_handler_set_property;
+	gobject_class->get_property = page_handler_get_property;
 
-	// No properties.
-//	gobject_class->set_property = meta_default_plugin_set_property;
-//	gobject_class->get_property = meta_default_plugin_get_property;
+	g_object_class_install_property (gobject_class,
+			PROP_VIEWPORT_GROUP,
+			g_param_spec_object ("viewport-group",
+								"Viewport Layer",
+								"Actor holding viewport actors",
+								CLUTTER_TYPE_ACTOR,
+								G_PARAM_READABLE));
 
+	g_object_class_install_property (gobject_class,
+			PROP_OVERLAY_GROUP,
+			g_param_spec_object ("overlay-group",
+								"Overlay Layer",
+								"Actor holding overlay actors",
+								CLUTTER_TYPE_ACTOR,
+								G_PARAM_READABLE));
 
 	//g_type_class_add_private(gobject_class, sizeof(PagePluginPrivate));
 
