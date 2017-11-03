@@ -99,7 +99,7 @@ conf_inc = include_directories('.')
 subdir('src')
 subdir('page-shell@hzog.net')
 subdir('gschemas')
-#subdir('po')
+subdir('page-data')
 #subdir('data')
 #subdir('tests')
 
