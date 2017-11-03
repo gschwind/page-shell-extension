@@ -114,7 +114,7 @@ page_handler_kill_window_effects(PageHandler * self, MetaWindowActor * actor)
 void
 page_handler_show_tile_preview(PageHandler * self, MetaWindow * window, MetaRectangle *tile_rect, int tile_monitor_number)
 {
-	PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 	priv->ctx->_handler_plugin_show_tile_preview(window, tile_rect, tile_monitor_number);
 }
 
@@ -220,7 +220,7 @@ page_handler_get_property(GObject         *object,
                           GParamSpec      *pspec)
 {
   PageHandler * self = PAGE_HANDLER (object);
-  PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 
   switch (prop_id)
     {
@@ -269,6 +269,6 @@ page_handler_class_init (PageHandlerClass *klass)
 
 static void page_handler_init(PageHandler * self)
 {
-	PageHandlerPrivate * priv = page_handler_get_instance_private (self);
+	auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (self));
 	priv->ctx = new page::page_t();
 }
