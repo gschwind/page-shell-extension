@@ -46,8 +46,8 @@ libexecdir = join_paths(prefix, get_option('libexecdir'))
 mandir = join_paths(prefix, get_option('mandir'))
 sysconfdir = join_paths(prefix, get_option('sysconfdir'))
 
-pkgdatadir = join_paths(datadir, 'gnome-shell')
-pkglibdir = join_paths(libdir, 'gnome-shell')
+pkgdatadir = join_paths(datadir, 'page-shell')
+pkglibdir = join_paths(libdir, 'page-shell')
 
 convertdir = join_paths(datadir, 'GConf', 'gsettings')
 desktopdir = join_paths(datadir, 'applications')
