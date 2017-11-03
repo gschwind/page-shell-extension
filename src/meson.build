@@ -1,6 +1,5 @@
 
 gnome_shell_cflags = [
-  '-fpermissive',
   '-DCLUTTER_ENABLE_EXPERIMENTAL_API',
   '-DCOGL_ENABLE_EXPERIMENTAL_API',
   '-DVERSION="@0@"'.format(meson.project_version()),
@@ -108,7 +107,7 @@ libshell_no_gir_sources = [
   libshell_private_sources
 ]
 
-libshell = library('page-shell',
+libshell = library('page-shell-extension',
   sources: libshell_gir_sources + libshell_no_gir_sources,
   dependencies: gnome_shell_deps + [mutter_dep, m_dep],
   include_directories: [ ],
