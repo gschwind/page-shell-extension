@@ -210,7 +210,7 @@ page_t::page_t() :
 	/* load configurations, from lower priority to high one */
 
 	/* load default configuration */
-	_conf.merge_from_file_if_exist(string{/*DATA_DIR*/ "/page/page.conf"});
+	_conf.merge_from_file_if_exist(string{GNOME_SHELL_DATADIR "page.conf"});
 
 	/* load homedir configuration */
 	{

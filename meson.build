@@ -83,15 +83,14 @@ cpp = meson.get_compiler('cpp')
 m_dep = cc.find_library('m', required: false)
 
 cdata = configuration_data()
-cdata.set_quoted('GETTEXT_PACKAGE', meson.project_name())
-cdata.set_quoted('VERSION', meson.project_version())
-cdata.set_quoted('PACKAGE_VERSION', meson.project_version())
+cdata.set('PKGDATADIR', pkgdatadir)
+configure_file(
+  input:  'page.conf.in',
+  output: 'page.conf',
+  configuration: cdata,
+  install_dir: pkgdatadir
+)
 
-#config_h = configure_file(
-#  input: 'config.h.meson',
-#  output: 'config.h',
-#  configuration: cdata
-#)
 
 conf_inc = include_directories('.')
 
