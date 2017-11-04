@@ -26,25 +26,17 @@ var PageShell = new Lang.Class({
        this._shellwm.connect('size-changed', Lang.bind(this, this._sizeChangedWindow));
        this._shellwm.connect('map', Lang.bind(this, this._mapWindow));
        this._shellwm.connect('destroy', Lang.bind(this, this._destroyWindow));
-
+       this._restackedId = global.screen.connect('restacked', Lang.bind(this, this._syncKnownWindows));
+       
        Main.wm.allowKeybinding('make-notebook-window', Shell.ActionMode.ALL);
        Main.layoutManager.uiGroup.insert_child_above(this._page.overlay_group, Main.layoutManager.modalDialogGroup);
        Main.layoutManager._backgroundGroup.add_child(this._page.viewport_group);
-
+              
    },
    
    destroy: function() {
        Main.layoutManager.uiGroup.remove_child(this._page.overlay_group);
        Main.layoutManager._backgroundGroup.remove_child(this._page.viewports_group);
-
-       //this._shellwm.disconnect('switch-workspace', Lang.bind(this, this._switchWorkspace));
-       //this._shellwm.disconnect('minimize', Lang.bind(this, this._minimizeWindow));
-       //this._shellwm.disconnect('unminimize', Lang.bind(this, this._unminimizeWindow));
-       //this._shellwm.disconnect('size-change', Lang.bind(this, this._sizeChangeWindow));
-       //this._shellwm.disconnect('size-changed', Lang.bind(this, this._sizeChangedWindow));
-       //this._shellwm.disconnect('map', Lang.bind(this, this._mapWindow));
-       //this._shellwm.disconnect('destroy', Lang.bind(this, this._destroyWindow));
-
    },
 
    _minimizeWindow: function(shellwm, actor) {
@@ -73,6 +65,15 @@ var PageShell = new Lang.Class({
    
    _switchWorkspace: function(shellwm, from, to, direction) {
 	   this._page.switch_workspace(from, to, direction);
+   },
+   
+   _syncKnownWindows: function() {
+       wl = global.get_window_actors();
+       for (i = 0; i < wl.length; ++i) {
+    	   this._page.map(wl[i]);
+       }
+       global.screen.disconnect(this._restackedId);
+       this._restackedId = 0;
    }
    
 });

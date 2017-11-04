@@ -506,6 +506,10 @@ void page_t::_handler_plugin_map(MetaWindowActor * window_actor)
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
 	MetaWindowType type;
 	ClutterActor * actor = CLUTTER_ACTOR(window_actor);
+
+	if(lookup_client_managed_with(window_actor) != nullptr)
+		return;
+
 	MetaWindow *meta_window = meta_window_actor_get_meta_window(window_actor);
 
 	auto main_actor = meta_get_stage_for_screen(_screen);
