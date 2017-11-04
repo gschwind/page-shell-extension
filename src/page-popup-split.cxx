@@ -41,7 +41,7 @@ popup_split_t::popup_split_t(tree_t * ref, shared_ptr<split_t> split) :
 	_position{split->to_root_position(split->allocation())},
 	_exposed{true}
 {
-	ClutterColor c{128u, 128u, 128u, 128u};
+	ClutterColor c{200u, 0u, 0u, 128u};
 	_actor[0] = clutter_actor_new();
 	clutter_actor_set_background_color(_actor[0], &c);
 
