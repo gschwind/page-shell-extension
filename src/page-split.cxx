@@ -235,6 +235,9 @@ auto split_t::button_press(ClutterEvent const * e)  -> button_action_e
 {
 	gfloat x, y;
 	clutter_event_get_coords(e, &x, &y);
+	auto winpos = get_window_position();
+	x -= winpos.x;
+	y -= winpos.y;
 	auto button = clutter_event_get_button(e);
 	auto time = clutter_event_get_time(e);
 
@@ -305,6 +308,9 @@ void split_t::compute_children_root_allocation(double split, rect & bpack0, rect
 bool split_t::button_motion(ClutterEvent const * e) {
 	gfloat x, y;
 	clutter_event_get_coords(e, &x, &y);
+	auto winpos = get_window_position();
+	x -= winpos.x;
+	y -= winpos.y;
 	auto time = clutter_event_get_time(e);
 
 	if(_split_bar_area.is_inside(x, y)) {
