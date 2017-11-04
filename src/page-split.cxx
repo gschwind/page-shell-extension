@@ -148,8 +148,6 @@ void split_t::compute_children_allocation(double split, rect & bpack0, rect & bp
 		}
 
 	}
-
-
 }
 
 void split_t::update_allocation() {

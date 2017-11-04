@@ -72,7 +72,11 @@ void popup_split_t::update_layout() {
 	rect rect0;
 	rect rect1;
 
-	_s_base.lock()->compute_children_allocation(_current_split, rect0, rect1);
+	auto split = _s_base.lock();
+	split->compute_children_allocation(_current_split, rect0, rect1);
+
+	rect0 = split->to_root_position(rect0);
+	rect1 = split->to_root_position(rect1);
 
 	array<xcb_rectangle_t, 8> rects;
 
