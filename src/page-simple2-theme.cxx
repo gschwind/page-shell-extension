@@ -1000,6 +1000,9 @@ void simple2_theme_t::render_split(cairo_t * cr,
 	CHECK_CAIRO(cairo_set_line_width(cr, 1.0));
 
 	rect sarea = s->allocation;
+
+	CHECK_CAIRO(cairo_save(cr));
+	cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
 	if (backgroun_px != nullptr) {
 		CHECK_CAIRO(cairo_set_source_surface(cr, backgroun_px, -s->root_x, -s->root_y));
 	} else {
@@ -1007,6 +1010,7 @@ void simple2_theme_t::render_split(cairo_t * cr,
 	}
 	CHECK_CAIRO(cairo_rectangle(cr, sarea.x, sarea.y, sarea.w, sarea.h));
 	CHECK_CAIRO(cairo_fill(cr));
+	CHECK_CAIRO(cairo_restore(cr));
 
 	if(s->has_mouse_over) {
 		cairo_save(cr);
