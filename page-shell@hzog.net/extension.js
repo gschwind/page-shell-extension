@@ -4,8 +4,9 @@ const Page = imports.gi.Page;
 const Main = imports.ui.main;
 const Tweener = imports.ui.tweener;
 const Lang = imports.lang;
+const Shell = imports.gi.Shell;
 
-let page_shell;
+var page_shell = null;
 
 function init() {
 
@@ -27,8 +28,8 @@ var PageShell = new Lang.Class({
        this._shellwm.connect('destroy', Lang.bind(this, this._destroyWindow));
 
        Main.wm.allowKeybinding('make-notebook-window', Shell.ActionMode.ALL);
-       Main.layoutManager.uiGroup.add_actor_above(this._page.overlay_group, Main.layoutManager.modalDialogGroup);
-       Main.layoutManager._backgroundGroup.add_child(this._page.viewports_group);
+       Main.layoutManager.uiGroup.insert_child_above(this._page.overlay_group, Main.layoutManager.modalDialogGroup);
+       Main.layoutManager._backgroundGroup.add_child(this._page.viewport_group);
 
    },
    
