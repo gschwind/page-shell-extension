@@ -65,7 +65,11 @@ void view_rebased_t::_reconfigure_windows()
 		if (meta_window_is_fullscreen(_client->meta_window()))
 			meta_window_unmake_fullscreen(_client->meta_window());
 		meta_window_unminimize(_client->meta_window());
-		meta_window_move_resize_frame(_client->_meta_window, FALSE, _client->_absolute_position.x, _client->_absolute_position.y, _client->_absolute_position.w, _client->_absolute_position.h);
+		meta_window_move_resize_frame(_client->_meta_window, FALSE,
+				_client->_absolute_position.x,
+				_client->_absolute_position.y,
+				_client->_absolute_position.w,
+				_client->_absolute_position.h);
 		//clutter_actor_show(CLUTTER_ACTOR(_client->meta_window_actor()));
 		log::printf("%s\n", _client->_absolute_position.to_string().c_str());
 	} else {

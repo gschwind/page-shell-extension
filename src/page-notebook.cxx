@@ -185,8 +185,7 @@ void notebook_t::activate(view_notebook_p vn, xcb_timestamp_t time)
 
 void notebook_t::update_client_position(view_notebook_p c) {
 	/* compute the window placement within notebook */
-	_client_position = _compute_client_size(c->_client);
-	c->_client->_absolute_position = to_root_position(_client_position);
+	c->_client->_absolute_position = to_root_position(_client_area);
 }
 
 void notebook_t::iconify_client(view_notebook_p x) {
@@ -626,7 +625,7 @@ void notebook_t::_update_theme_notebook(theme_notebook_t & theme_notebook) {
 
 	theme_notebook.allocation = _allocation;
 	if(_selected != nullptr) {
-		theme_notebook.client_position = _client_position;
+		theme_notebook.client_position = _client_area;
 	}
 	theme_notebook.is_default = is_default();
 

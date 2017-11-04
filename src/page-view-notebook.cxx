@@ -38,6 +38,11 @@ view_notebook_t::view_notebook_t(tree_t * ref, client_managed_p client) :
 	MetaRectangle rect = _client->_absolute_position;
 
 	meta_window_make_tiled_with_custom_position(_client->meta_window(), &rect);
+	meta_window_move_resize_frame(_client->meta_window(), FALSE,
+			_client->_absolute_position.x,
+			_client->_absolute_position.y,
+			_client->_absolute_position.w,
+			_client->_absolute_position.h);
 
 }
 
@@ -53,6 +58,11 @@ view_notebook_t::view_notebook_t(view_rebased_t * src) :
 	MetaRectangle rect = _client->_absolute_position;
 
 	meta_window_make_tiled_with_custom_position(_client->meta_window(), &rect);
+	meta_window_move_resize_frame(_client->meta_window(), FALSE,
+			_client->_absolute_position.x,
+			_client->_absolute_position.y,
+			_client->_absolute_position.w,
+			_client->_absolute_position.h);
 
 }
 
@@ -97,7 +107,11 @@ void view_notebook_t::_handler_position_changed(MetaWindow * window)
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
 //	/* disable frame move */
 	if (_is_client_owner())
-		meta_window_move_frame(window, FALSE, _client->_absolute_position.x, _client->_absolute_position.y);
+		meta_window_move_resize_frame(window, FALSE,
+				_client->_absolute_position.x,
+				_client->_absolute_position.y,
+				_client->_absolute_position.w,
+				_client->_absolute_position.h);
 }
 
 void view_notebook_t::_handler_size_changed(MetaWindow * window)
@@ -105,7 +119,11 @@ void view_notebook_t::_handler_size_changed(MetaWindow * window)
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
 //	/* disable frame resize */
 	if (_is_client_owner())
-		meta_window_move_resize_frame(window, FALSE, _client->_absolute_position.x, _client->_absolute_position.y, _client->_absolute_position.w, _client->_absolute_position.h);
+		meta_window_move_resize_frame(window, FALSE,
+				_client->_absolute_position.x,
+				_client->_absolute_position.y,
+				_client->_absolute_position.w,
+				_client->_absolute_position.h);
 }
 
 void view_notebook_t::xxactivate(xcb_timestamp_t time)

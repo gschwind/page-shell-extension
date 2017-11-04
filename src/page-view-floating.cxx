@@ -56,10 +56,7 @@ void view_floating_t::_init()
 
 	g_object_set(G_OBJECT(_client->meta_window_actor()), "no-shadow", FALSE, NULL);
 
-	MetaRectangle xrect;
-	meta_window_get_frame_rect(_client->_meta_window, &xrect);
-	_client->_floating_wished_position = rect(xrect.x, xrect.y, xrect.width,
-			xrect.height);
+	_client->_floating_wished_position = _client->position();
 
 //	// if x == 0 then place window at center of the screen
 //	if (_client->_floating_wished_position.x == 0) {
@@ -82,18 +79,12 @@ void view_floating_t::_init()
 
 void view_floating_t::_handler_position_changed(MetaWindow * window)
 {
-	MetaRectangle xrect;
-	meta_window_get_frame_rect(_client->_meta_window, &xrect);
-	_client->_floating_wished_position = rect(xrect.x, xrect.y, xrect.width,
-			xrect.height);
+	_client->_floating_wished_position = _client->position();
 }
 
 void view_floating_t::_handler_size_changed(MetaWindow * window)
 {
-	MetaRectangle xrect;
-	meta_window_get_frame_rect(_client->_meta_window, &xrect);
-	_client->_floating_wished_position = rect(xrect.x, xrect.y, xrect.width,
-			xrect.height);
+	_client->_floating_wished_position = _client->position();
 }
 
 void view_floating_t::remove_this_view()

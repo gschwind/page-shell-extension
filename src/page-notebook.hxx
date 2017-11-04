@@ -77,7 +77,6 @@ class notebook_t : public page_component_t {
 	view_notebook_p _selected;
 
 	rect _client_area;
-	rect _client_position;
 
 	struct {
 		rect button_close;
