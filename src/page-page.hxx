@@ -20,6 +20,7 @@
 extern "C" {
 #include <meta/keybindings.h>
 #include <meta/meta-plugin.h>
+#include <shell-global.h>
 }
 
 #include "page-time.hxx"

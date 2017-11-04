@@ -10,12 +10,13 @@ gnome_shell_cflags = [
   '-DGNOME_SHELL_PKGLIBDIR="@0@"'.format(pkglibdir)
 ]
 
-install_rpath = ':'.join([mutter_typelibdir, pkglibdir])
+install_rpath = ':'.join([mutter_typelibdir, shell_typelibdir, pkglibdir])
 
 gnome_shell_deps = [
   gjs_dep,
   clutter_dep,
   gi_dep,
+  shell_dep
 ]
 
 libshell_public_headers = [
@@ -109,11 +110,9 @@ libshell_no_gir_sources = [
 
 libshell = library('page-shell-extension',
   sources: libshell_gir_sources + libshell_no_gir_sources,
-  dependencies: gnome_shell_deps + [mutter_dep, m_dep],
-  include_directories: [ ],
+  dependencies: gnome_shell_deps + [mutter_dep, m_dep, shell_dep],
   c_args: gnome_shell_cflags,
   cpp_args: ['-std=c++11'] + gnome_shell_cflags,
-  link_with: [ ],
   build_rpath: mutter_typelibdir,
   install_rpath: install_rpath,
   install_dir: pkglibdir,
@@ -123,6 +122,7 @@ libshell = library('page-shell-extension',
 libshell_dep = declare_dependency(link_with: libshell)
 
 libshell_gir_includes = [
+  'Shell-0.1',
   'Clutter-@0@'.format(mutter_api_version),
   'ClutterX11-@0@'.format(mutter_api_version),
   'Meta-@0@'.format(mutter_api_version),
@@ -134,7 +134,8 @@ gnome.generate_gir(libshell,
   nsversion: '0.1',
   namespace: 'Page',
   includes: libshell_gir_includes,
-  extra_args: ['--quiet'],
+  extra_args: [ ],
+  dependencies: [ shell_dep ],
   install_dir_gir: pkgdatadir,
   install_dir_typelib: pkglibdir,
   install: true

@@ -45,6 +45,7 @@ libdir = join_paths(prefix, get_option('libdir'))
 libexecdir = join_paths(prefix, get_option('libexecdir'))
 mandir = join_paths(prefix, get_option('mandir'))
 sysconfdir = join_paths(prefix, get_option('sysconfdir'))
+includedir = join_paths(prefix, get_option('includedir'))
 
 pkgdatadir = join_paths(datadir, 'page-shell')
 pkglibdir = join_paths(libdir, 'page-shell')
@@ -71,10 +72,12 @@ gi_dep = dependency('gobject-introspection-1.0', version: gi_req)
 gjs_dep = dependency('gjs-1.0', version: gjs_req)
 clutter_dep = dependency(clutter_pc, version: mutter_req)
 mutter_dep = dependency(libmutter_pc, version: mutter_req)
+shell_dep = dependency('libpage-shell', version: mutter_req)
 schemas_dep = dependency('gsettings-desktop-schemas', version: schemas_req)
 
 
 mutter_typelibdir = mutter_dep.get_pkgconfig_variable('typelibdir')
+shell_typelibdir = shell_dep.get_pkgconfig_variable('typelibdir')
 python = find_program('python3')
 
 cc = meson.get_compiler('c')

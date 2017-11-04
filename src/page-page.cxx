@@ -1286,12 +1286,13 @@ void page_t::grab_start(shared_ptr<grab_handler_t> handler, guint32 time)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
 
+	auto global = shell_global_get();
 	assert(_grab_handler == nullptr);
-//	if (meta_plugin_begin_modal(_plugin, (MetaModalOptions)0, time)) {
+	if (shell_global_begin_modal(global, time, (MetaModalOptions)0)) {
 		_grab_handler = handler;
-//	} else {
-//		log::printf("FAIL GRAB\n");
-//	}
+	} else {
+		log::printf("FAIL GRAB\n");
+	}
 }
 
 void page_t::grab_stop(guint32 time)
@@ -1300,7 +1301,9 @@ void page_t::grab_stop(guint32 time)
 
 	assert(_grab_handler != nullptr);
 	_grab_handler = nullptr;
-//	meta_plugin_end_modal(_plugin, time);
+
+	auto global = shell_global_get();
+	shell_global_end_modal(global, time);
 }
 
 void page_t::overlay_add(shared_ptr<tree_t> x) {
