@@ -327,7 +327,7 @@ void workspace_t::switch_view_to_notebook(view_p v, xcb_timestamp_t time)
 
 void workspace_t::switch_notebook_to_floating(view_notebook_p vn, xcb_timestamp_t time)
 {
-	//printf("call %s\n", __PRETTY_FUNCTION__);
+	printf("call %s\n", __PRETTY_FUNCTION__);
 	vn->remove_this_view();
 	meta_window_move_resize_frame(vn->_client->meta_window(), FALSE, vn->_client->_floating_wished_position.x, vn->_client->_floating_wished_position.y, vn->_client->_floating_wished_position.w, vn->_client->_floating_wished_position.h);
 	auto vf = make_shared<view_floating_t>(vn.get());
@@ -551,11 +551,6 @@ auto workspace_t::_find_viewport_of(tree_p t) -> viewport_p {
 void workspace_t::_insert_view_floating(view_floating_p fv, xcb_timestamp_t time)
 {
 	auto c = fv->_client;
-
-//	auto wid = c->ensure_workspace();
-//	if (wid != ALL_DESKTOP) {
-//		//c->set_net_wm_desktop(_id);
-//	}
 
 	if (is_enable())
 		fv->acquire_client();

@@ -1283,46 +1283,6 @@ shared_ptr<workspace_t> const & page_t::current_workspace() const {
 	return _current_workspace;
 }
 
-//shared_ptr<workspace_t> const & page_t::get_workspace(int id) const {
-//	return _workspace_map[id];
-//}
-//
-//int page_t::get_workspace_count() const {
-//	return _workspace_map.size();
-//}
-//
-//void page_t::create_workspace(guint time) {
-//	auto d = make_shared<workspace_t>(this, time);
-//	_workspace_map.push_back(d);
-//	d->disable();
-//	d->show();
-//
-//	update_viewport_layout();
-//
-//	if(d != current_workspace()) {
-//		for (auto &x: current_workspace()->gather_children_root_first<view_t>()) {
-//			if (meta_window_is_always_on_all_workspaces(x->_client->meta_window())) {
-//				/** TODO: insert desktop **/
-//				auto const & type = typeid(*(x.get()));
-//				if (type == typeid(view_notebook_t)) {
-//					d->insert_as_notebook(x->_client, XCB_CURRENT_TIME);
-//				} else if (type == typeid(view_floating_t)) {
-//					d->insert_as_floating(x->_client, XCB_CURRENT_TIME);
-//				} else if (type == typeid(view_fullscreen_t)) {
-//					d->insert_as_fullscreen(x->_client, XCB_CURRENT_TIME);
-//				}
-//			}
-//		}
-//	}
-//}
-
-int page_t::left_most_border() {
-	return _left_most_border;
-}
-int page_t::top_most_border() {
-	return _top_most_border;
-}
-
 list<view_w> page_t::global_client_focus_history() {
 	return _global_focus_history;
 }

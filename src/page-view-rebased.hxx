@@ -35,7 +35,7 @@ public:
 	virtual ~view_rebased_t();
 
 	auto shared_from_this() -> view_rebased_p;
-	void _create_base_windows();
+
 	void _reconfigure_windows();
 	void _on_focus_change(client_managed_t * c);
 	/**

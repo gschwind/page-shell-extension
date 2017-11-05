@@ -41,9 +41,8 @@ view_rebased_t::view_rebased_t(view_rebased_t * src) :
 
 }
 
-view_rebased_t::~view_rebased_t()
-{
-	release_client();
+view_rebased_t::~view_rebased_t() {
+
 }
 
 auto view_rebased_t::shared_from_this() -> view_rebased_p
@@ -69,7 +68,7 @@ void view_rebased_t::_reconfigure_windows()
 				_client->_absolute_position.h);
 		//clutter_actor_show(CLUTTER_ACTOR(_client->meta_window_actor()));
 		log::printf("%s\n", _client->_absolute_position.to_string().c_str());
-	} else {
+	} else if (!_is_visible) {
 		log::printf("minimize %p\n", _client->meta_window());
 		meta_window_minimize(_client->meta_window());
 	}

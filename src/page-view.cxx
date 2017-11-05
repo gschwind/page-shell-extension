@@ -43,7 +43,8 @@ view_t::view_t(tree_t * ref, client_managed_p client) :
 
 view_t::~view_t()
 {
-	release_client();
+	if (_is_client_owner())
+		_client->release(this);
 }
 
 auto view_t::shared_from_this() -> view_p

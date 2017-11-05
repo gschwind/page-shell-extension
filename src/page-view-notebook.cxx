@@ -31,44 +31,18 @@ namespace page {
 view_notebook_t::view_notebook_t(tree_t * ref, client_managed_p client) :
 	view_rebased_t{ref, client}
 {
-	// disable move/resizes.
-	g_connect(_client->meta_window(), "position-changed", &view_notebook_t::_handler_position_changed);
-	g_connect(_client->meta_window(), "size-changed", &view_notebook_t::_handler_size_changed);
-
-	MetaRectangle rect = _client->_absolute_position;
-
-	meta_window_make_tiled_with_custom_position(_client->meta_window(), &rect);
-	meta_window_move_resize_frame(_client->meta_window(), FALSE,
-			_client->_absolute_position.x,
-			_client->_absolute_position.y,
-			_client->_absolute_position.w,
-			_client->_absolute_position.h);
 
 }
 
 view_notebook_t::view_notebook_t(view_rebased_t * src) :
 	view_rebased_t{src}
 {
-	// disable move/resizes.
-	g_connect(_client->meta_window(), "position-changed", &view_notebook_t::_handler_position_changed);
-	g_connect(_client->meta_window(), "size-changed", &view_notebook_t::_handler_size_changed);
-
-	//g_object_set(G_OBJECT(_client->meta_window_actor()), "no-shadow", TRUE, NULL);
-
-	MetaRectangle rect = _client->_absolute_position;
-
-	meta_window_make_tiled_with_custom_position(_client->meta_window(), &rect);
-	meta_window_move_resize_frame(_client->meta_window(), FALSE,
-			_client->_absolute_position.x,
-			_client->_absolute_position.y,
-			_client->_absolute_position.w,
-			_client->_absolute_position.h);
 
 }
 
 view_notebook_t::~view_notebook_t()
 {
-	g_disconnect_from_obj(_client->meta_window());
+
 }
 
 auto view_notebook_t::shared_from_this() -> view_notebook_p
@@ -138,6 +112,47 @@ void view_notebook_t::remove_this_view()
 	nbk->remove_view_notebook(shared_from_this());
 }
 
+void view_notebook_t::acquire_client()
+{
+	assert(_root->is_enable());
+
+	/* we already are the owner */
+	if (_is_client_owner())
+		return;
+
+	/* release the previous owner and aquire the client */
+	_client->acquire(this);
+
+	meta_window_change_workspace(_client->meta_window(), _root->_meta_workspace);
+
+	if (meta_window_is_fullscreen(_client->meta_window()))
+		meta_window_unmake_fullscreen(_client->meta_window());
+	if (meta_window_is_shaded(_client->meta_window()))
+		meta_window_unshade(_client->meta_window(), 0);
+
+	meta_window_make_tiled(_client->meta_window());
+	meta_window_move_resize_frame(_client->_meta_window, FALSE,
+			_client->_absolute_position.x,
+			_client->_absolute_position.y,
+			_client->_absolute_position.w,
+			_client->_absolute_position.h);
+
+	// disable move/resizes.
+	g_connect(_client->meta_window(), "position-changed", &view_notebook_t::_handler_position_changed);
+	g_connect(_client->meta_window(), "size-changed", &view_notebook_t::_handler_size_changed);
+
+	reconfigure();
+
+}
+
+void view_notebook_t::release_client()
+{
+	g_disconnect_from_obj(_client->meta_window());
+	if (meta_window_is_tiled(_client->meta_window()))
+		meta_window_unmake_tiled(_client->meta_window());
+	meta_window_unminimize(_client->meta_window());
+}
+
 void view_notebook_t::set_focus_state(bool is_focused)
 {
 	view_rebased_t::set_focus_state(is_focused);
@@ -148,7 +163,22 @@ void view_notebook_t::set_focus_state(bool is_focused)
 
 void view_notebook_t::reconfigure()
 {
-	_reconfigure_windows();
+	if(not _is_client_owner())
+		return;
+	meta_window_move_resize_frame(_client->_meta_window, FALSE,
+			_client->_absolute_position.x,
+			_client->_absolute_position.y,
+			_client->_absolute_position.w,
+			_client->_absolute_position.h);
+
+	if (_is_visible) {
+		meta_window_unminimize(_client->meta_window());
+	} else {
+		meta_window_minimize(_client->meta_window());
+	}
+
+	meta_window_actor_sync_visibility(_client->meta_window_actor());
+
 }
 
 } /* namespace page */

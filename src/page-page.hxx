@@ -375,8 +375,6 @@ public:
 	void split_bottom(notebook_p nbk, view_p c, xcb_timestamp_t time);
 	void apply_focus(xcb_timestamp_t tfocus);
 	void notebook_close(shared_ptr<notebook_t> nbk, xcb_timestamp_t time);
-	int  left_most_border();
-	int  top_most_border();
 	auto global_client_focus_history() -> list<view_w>;
 	auto net_client_list() -> list<client_managed_p> const &;
 	void make_surface_stats(int & size, int & count);

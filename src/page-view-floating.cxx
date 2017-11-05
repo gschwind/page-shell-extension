@@ -49,29 +49,7 @@ auto view_floating_t::shared_from_this() -> view_floating_p
 
 void view_floating_t::_init()
 {
-	g_connect(_client->meta_window(), "position-changed", &view_floating_t::_handler_position_changed);
-	g_connect(_client->meta_window(), "size-changed", &view_floating_t::_handler_size_changed);
-
-	g_object_set(G_OBJECT(_client->meta_window_actor()), "no-shadow", FALSE, NULL);
-
 	_client->_floating_wished_position = _client->position();
-
-//	// if x == 0 then place window at center of the screen
-//	if (_client->_floating_wished_position.x == 0) {
-//		_client->_floating_wished_position.x =
-//				(_root->primary_viewport()->raw_area().w
-//						- _client->_floating_wished_position.w) / 2;
-//	}
-//
-//	// if y == 0 then place window at center of the screen
-//	if (_client->_floating_wished_position.y == 0) {
-//		_client->_floating_wished_position.y =
-//				(_root->primary_viewport()->raw_area().h
-//						- _client->_floating_wished_position.h) / 2;
-//	}
-
-
-	_client->_absolute_position = _client->_floating_wished_position;
 
 }
 
@@ -91,20 +69,47 @@ void view_floating_t::remove_this_view()
 	_root->_ctx->schedule_repaint();
 }
 
+void view_floating_t::acquire_client()
+{
+	assert(_root->is_enable());
+
+	/* we already are the owner */
+	if (_is_client_owner())
+		return;
+
+	/* release the previous owner and aquire the client */
+	_client->acquire(this);
+
+	meta_window_change_workspace(_client->meta_window(), _root->_meta_workspace);
+
+	meta_window_unminimize(_client->meta_window());
+	if (meta_window_is_shaded(_client->meta_window()))
+		meta_window_unshade(_client->meta_window(), 0);
+	if (meta_window_is_fullscreen(_client->meta_window()))
+		meta_window_unmake_fullscreen(_client->meta_window());
+	if (meta_window_is_tiled(_client->meta_window()))
+		meta_window_unmake_tiled(_client->meta_window());
+
+	g_connect(_client->meta_window(), "position-changed", &view_floating_t::_handler_position_changed);
+	g_connect(_client->meta_window(), "size-changed", &view_floating_t::_handler_size_changed);
+
+	meta_window_actor_sync_visibility(_client->meta_window_actor());
+
+}
+
+void view_floating_t::release_client()
+{
+	g_disconnect_from_obj(_client->meta_window());
+}
+
 void view_floating_t::set_focus_state(bool is_focused)
 {
 	view_rebased_t::set_focus_state(is_focused);
 }
 
-void view_floating_t::reconfigure() {
-	//printf("call %s\n", __PRETTY_FUNCTION__);
-
-	_client->_absolute_position = _client->_floating_wished_position;
-
-	if (meta_window_is_tiled_with_custom_position(_client->meta_window()))
-		meta_window_unmake_tiled_with_custom_position(_client->meta_window());
-	_reconfigure_windows();
-
+void view_floating_t::reconfigure()
+{
+	// do nothing managed by gnome-shell
 }
 
 } /* namespace page */

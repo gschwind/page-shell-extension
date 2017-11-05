@@ -38,9 +38,6 @@ struct view_notebook_t : public view_rebased_t {
 	view_notebook_t(view_rebased_t * src);
 	virtual ~view_notebook_t();
 
-	void _create_base_windows();
-	void _reconfigure_base_windows();
-
 	auto shared_from_this() -> view_notebook_p;
 	bool is_iconic() const;
 	bool has_focus() const;
@@ -53,14 +50,16 @@ struct view_notebook_t : public view_rebased_t {
 	void _handler_position_changed(MetaWindow * window);
 	void _handler_size_changed(MetaWindow * window);
 
+	void set_client_area(rect const & area);
+
 	/**
 	 * view_t virtual API
 	 **/
 
 	virtual void xxactivate(xcb_timestamp_t time) override;
 	virtual void remove_this_view() override;
-	using view_t::acquire_client;
-	using view_t::release_client;
+	virtual void acquire_client() override;
+	virtual void release_client() override;
 	virtual void set_focus_state(bool is_focused) override;
 
 

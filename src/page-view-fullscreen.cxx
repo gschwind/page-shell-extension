@@ -29,7 +29,8 @@
 namespace page {
 
 view_fullscreen_t::view_fullscreen_t(tree_t * ref, client_managed_p client) :
-		view_rebased_t{ref, client}
+		view_rebased_t{ref, client},
+		revert_type{MANAGED_FLOATING}
 {
 
 }
@@ -49,20 +50,38 @@ void view_fullscreen_t::remove_this_view()
 	view_t::remove_this_view();
 }
 
-void view_fullscreen_t::reconfigure()
+void view_fullscreen_t::acquire_client()
 {
-	if (not _is_client_owner())
+	assert(_root->is_enable());
+
+	/* we already are the owner */
+	if (_is_client_owner())
 		return;
 
-	if (_root->is_enable() and _is_visible) {
-		if (meta_window_is_tiled_with_custom_position(_client->meta_window()))
-			meta_window_unmake_tiled_with_custom_position(_client->meta_window());
-		if (not meta_window_is_fullscreen(_client->meta_window()))
-			meta_window_make_fullscreen(_client->meta_window());
-	} else {
-		log::printf("minimize %p\n", _client->meta_window());
-		meta_window_minimize(_client->meta_window());
-	}
+	/* release the previous owner and aquire the client */
+	_client->acquire(this);
+
+	meta_window_change_workspace(_client->meta_window(), _root->_meta_workspace);
+
+	meta_window_unminimize(_client->meta_window());
+	if (meta_window_is_shaded(_client->meta_window()))
+		meta_window_unshade(_client->meta_window(), 0);
+	if (!meta_window_is_fullscreen(_client->meta_window()))
+		meta_window_make_fullscreen(_client->meta_window());
+
+	meta_window_actor_sync_visibility(_client->meta_window_actor());
+
+}
+
+void view_fullscreen_t::release_client()
+{
+	if (meta_window_is_fullscreen(_client->meta_window()))
+		meta_window_unmake_fullscreen(_client->meta_window());
+}
+
+void view_fullscreen_t::reconfigure()
+{
+	// Do nothing managed by regular gnome-shell
 }
 
 } /* namespace page */
