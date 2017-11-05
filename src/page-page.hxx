@@ -94,25 +94,10 @@ class page_t:
 	workspace_p _current_workspace;
 	map<MetaWorkspace *, workspace_p> _workspace_map;
 
-	weak_ptr<client_managed_t> _net_active_window;
-
-	view_w _actual_focussed_client;
-
-	pair<uint32_t, uint32_t> _current_focuced_client;
-
-public:
-	rect _root_position;
-
-	/** used to ignore map/unmap events **/
-	set<xcb_window_t> _page_windows;
-
 private:
 	shared_ptr<grab_handler_t> _grab_handler;
 
 public:
-
-	/** window that handle page identity for others clients */
-	xcb_window_t identity_window;
 
 	MetaDisplay * _display;
 	MetaScreen * _screen;
@@ -125,8 +110,6 @@ public:
 	page_configuration_t configuration;
 
 	config_handler_t _conf;
-
-	list<xcb_atom_t> supported_list;
 
 	string page_base_dir;
 	string _theme_engine;
@@ -152,20 +135,10 @@ public:
 
 	array<key_bind_cmd_t, 10> bind_cmd;
 
-	bool _schedule_repaint;
-	uint32_t frame_alarm;
-
 private:
-
-	xcb_timestamp_t _last_focus_time;
-	xcb_timestamp_t _last_button_press;
 
 	/** store all client in mapping order, older first **/
 	list<client_managed_p> _net_client_list;
-	list<view_w> _global_focus_history;
-
-	int _left_most_border;
-	int _top_most_border;
 
 	using key_handler_func = void (page_t::*)(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding);
 
@@ -348,11 +321,6 @@ public:
 	void mark_durty(shared_ptr<tree_t> t);
 
 	void process_pending_events();
-
-	bool global_focus_history_front(view_p & out);
-	void global_focus_history_remove(view_p in);
-	void global_focus_history_move_front(view_p in);
-	bool global_focus_history_is_empty();
 
 	/**
 	 * page_t virtual API

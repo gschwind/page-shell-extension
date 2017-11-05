@@ -53,8 +53,6 @@ private:
 
 	workspace_switch_direction_e _switch_direction;
 
-	list<view_w> _client_focus_history;
-
 	bool _is_enable;
 
 	void _init();
@@ -118,12 +116,6 @@ public:
 	void set_name(string const & s);
 	auto name() -> string const &;
 	void set_to_default_name();
-
-	auto client_focus_history() -> list<view_w>;
-	bool client_focus_history_front(view_p & out);
-	void client_focus_history_remove(view_p in);
-	void client_focus_history_move_front(view_p in);
-	bool client_focus_history_is_empty();
 
 	auto lookup_view_for(client_managed_p c) const -> view_p;
 	void set_focus(view_p new_focus, xcb_timestamp_t tfocus);

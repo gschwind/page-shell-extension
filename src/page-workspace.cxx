@@ -453,32 +453,6 @@ shared_ptr<viewport_t> workspace_t::primary_viewport() const {
 	return _primary_viewport.lock();
 }
 
-auto workspace_t::client_focus_history() -> list<view_w>
-{
-	return _client_focus_history;
-}
-
-bool workspace_t::client_focus_history_front(view_p & out) {
-	if(not client_focus_history_is_empty()) {
-		out = _client_focus_history.front().lock();
-		return true;
-	}
-	return false;
-}
-
-void workspace_t::client_focus_history_remove(view_p in) {
-	_client_focus_history.remove_if([in](view_w w) { return w.expired() or w.lock() == in; });
-}
-
-void workspace_t::client_focus_history_move_front(view_p in) {
-	move_front(_client_focus_history, in);
-}
-
-bool workspace_t::client_focus_history_is_empty() {
-	_client_focus_history.remove_if([](view_w const & w) { return w.expired(); });
-	return _client_focus_history.empty();
-}
-
 auto workspace_t::lookup_view_for(client_managed_p c) const -> view_p
 {
 	for (auto & x: gather_children_root_first<view_t>()) {
@@ -489,9 +463,6 @@ auto workspace_t::lookup_view_for(client_managed_p c) const -> view_p
 }
 
 void workspace_t::set_focus(view_p new_focus, xcb_timestamp_t time) {
-	if(new_focus) {
-		client_focus_history_move_front(new_focus);
-	}
 	_net_active_window = new_focus;
 	_ctx->apply_focus(time);
 }
@@ -510,18 +481,7 @@ void workspace_t::unmanage(client_managed_p mw)
 	/* if managed window have active clients */
 	log(LOG_MANAGE, "unmanaging : 0x%x '%s'\n", 0, mw->title().c_str());
 
-	client_focus_history_remove(v);
 	v->remove_this_view();
-
-	if (dynamic_pointer_cast<view_rebased_t>(v) != nullptr) {
-		if (_ctx->configuration._auto_refocus and has_focus) {
-			view_p focus;
-			if (client_focus_history_front(focus)) {
-				set_focus(focus, XCB_CURRENT_TIME);
-				focus->xxactivate(XCB_CURRENT_TIME);
-			}
-		}
-	}
 
 }
 

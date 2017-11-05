@@ -194,12 +194,8 @@ page_t::page_t() :
 {
 
 	_viewport_group = nullptr;
-	frame_alarm = 0;
 	_current_workspace = nullptr;
 	_grab_handler = nullptr;
-	_schedule_repaint = false;
-
-	identity_window = XCB_NONE;
 
 	char const * conf_file_name = 0;
 
@@ -230,11 +226,6 @@ page_t::page_t() :
 
 	page_base_dir = _conf.get_string("default", "theme_dir");
 	_theme_engine = _conf.get_string("default", "theme_engine");
-
-	_last_focus_time = XCB_TIME_CURRENT_TIME;
-	_last_button_press = XCB_TIME_CURRENT_TIME;
-	_left_most_border = std::numeric_limits<int>::max();
-	_top_most_border = std::numeric_limits<int>::max();
 
 	_theme = nullptr;
 
@@ -701,11 +692,6 @@ void page_t::_handler_meta_window_focus(MetaWindow * window)
 
 	auto mw = lookup_client_managed_with(window);
 	if (mw) {
-		_net_active_window = mw;
-		auto v = w->lookup_view_for(mw);
-		if (v)
-			w->client_focus_history_move_front(v);
-
 		for(auto & w: _workspace_map) {
 			auto v = w.second->lookup_view_for(mw);
 			if (v) {
@@ -993,10 +979,8 @@ shared_ptr<workspace_t> page_t::find_workspace_of(shared_ptr<tree_t> n) {
  * rule is that the first output get the area first, the last one is cut in
  * sub-rectangle that do not overlap previous allocated area.
  **/
-void page_t::update_viewport_layout() {
-	_left_most_border = 0;
-	_top_most_border = 0;
-
+void page_t::update_viewport_layout()
+{
 	for (auto & w : _workspace_map) {
 		w.second->update_viewports_layout();
 	}
@@ -1283,31 +1267,6 @@ shared_ptr<workspace_t> const & page_t::current_workspace() const {
 	return _current_workspace;
 }
 
-list<view_w> page_t::global_client_focus_history() {
-	return _global_focus_history;
-}
-
-bool page_t::global_focus_history_front(view_p & out) {
-	if(not global_focus_history_is_empty()) {
-		out = _global_focus_history.front().lock();
-		return true;
-	}
-	return false;
-}
-
-void page_t::global_focus_history_remove(view_p in) {
-	_global_focus_history.remove_if([in](view_w const & w) { return w.expired() or w.lock() == in; });
-}
-
-void page_t::global_focus_history_move_front(view_p in) {
-	move_front(_global_focus_history, in);
-}
-
-bool page_t::global_focus_history_is_empty() {
-	_global_focus_history.remove_if([](view_w const & w) { return w.expired(); });
-	return _global_focus_history.empty();
-}
-
 auto page_t::conf() const -> page_configuration_t const & {
 	return configuration;
 }
@@ -1319,8 +1278,7 @@ auto page_t::net_client_list() -> list<client_managed_p> const &
 
 void page_t::schedule_repaint()
 {
-	auto stage = meta_get_stage_for_screen(_screen);
-	clutter_actor_queue_redraw(stage);
+	clutter_actor_queue_redraw(CLUTTER_ACTOR(_stage));
 }
 
 void page_t::damage_all() {
