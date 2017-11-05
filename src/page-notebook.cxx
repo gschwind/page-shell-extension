@@ -48,6 +48,8 @@ notebook_t::notebook_t(tree_t * ref) :
 	_fading_notebook_layer->show();
 	_tooltips_layer->show();
 
+	this->connect(_ctx->on_focus_changed, this, &notebook_t::_client_focus_change);
+
 }
 
 notebook_t::~notebook_t()
@@ -904,7 +906,13 @@ void notebook_t::_client_destroy(client_managed_t * c) {
 	//throw exception_t("not expected call of %s", __PRETTY_FUNCTION__);
 }
 
-void notebook_t::_client_focus_change(client_managed_t * c) {
+void notebook_t::_client_focus_change(client_managed_p c)
+{
+	for (auto & x: _clients_tab_order) {
+		if (x->_client == c) {
+			activate(x, 0);
+		}
+	}
 	_update_all_layout();
 }
 

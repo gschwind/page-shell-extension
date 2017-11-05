@@ -472,17 +472,9 @@ void workspace_t::unmanage(client_managed_p mw)
 	auto v = lookup_view_for(mw);
 	if (v == nullptr)
 		return;
-
-	bool has_focus = false;
-	if (_net_active_window.lock() == v) {
-		has_focus = true;
-	}
-
 	/* if managed window have active clients */
 	log(LOG_MANAGE, "unmanaging : 0x%x '%s'\n", 0, mw->title().c_str());
-
 	v->remove_this_view();
-
 }
 
 auto workspace_t::_find_viewport_of(tree_p t) -> viewport_p {

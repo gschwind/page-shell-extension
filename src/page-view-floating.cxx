@@ -108,11 +108,6 @@ void view_floating_t::release_client()
 	_client->release(this);
 }
 
-void view_floating_t::set_focus_state(bool is_focused)
-{
-	view_rebased_t::set_focus_state(is_focused);
-}
-
 void view_floating_t::reconfigure()
 {
 	// do nothing managed by gnome-shell

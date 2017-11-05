@@ -306,7 +306,7 @@ void grab_bind_view_notebook_t::button_release(ClutterEvent const * e)
 		}
 
 		if (start_position.is_inside(x, y)) {
-			c->xxactivate(time);
+			c->parent_notebook()->activate(c, time);
 			_ctx->grab_stop(time);
 			return;
 		}
@@ -331,7 +331,8 @@ void grab_bind_view_notebook_t::button_release(ClutterEvent const * e)
 			_ctx->split_right(new_target, c, time);
 			break;
 		default:
-			c->xxactivate(time);
+			c->parent_notebook()->activate(c, time);
+			break;
 		}
 
 		_ctx->grab_stop(time);

@@ -42,11 +42,9 @@ public:
 	 * view_t API
 	 **/
 
-	using view_t::xxactivate;
 	using view_t::remove_this_view;
 	using view_t::acquire_client;
 	using view_t::release_client;
-	virtual void set_focus_state(bool is_focused) override;
 
 	/**
 	 * tree_t virtual API

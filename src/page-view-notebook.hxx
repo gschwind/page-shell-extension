@@ -56,12 +56,9 @@ struct view_notebook_t : public view_rebased_t {
 	 * view_t virtual API
 	 **/
 
-	virtual void xxactivate(xcb_timestamp_t time) override;
 	virtual void remove_this_view() override;
 	virtual void acquire_client() override;
 	virtual void release_client() override;
-	virtual void set_focus_state(bool is_focused) override;
-
 
 	/**
 	 * tree_t virtual API

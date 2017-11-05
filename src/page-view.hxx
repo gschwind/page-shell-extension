@@ -48,11 +48,9 @@ struct view_t : public tree_t {
 	 * view_t API
 	 **/
 
-	virtual void xxactivate(xcb_timestamp_t time);
 	virtual void remove_this_view();
 	virtual void acquire_client() = 0;
 	virtual void release_client() = 0;
-	virtual void set_focus_state(bool is_focused);
 
 	/**
 	 * tree_t API

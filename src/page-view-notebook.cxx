@@ -100,12 +100,6 @@ void view_notebook_t::_handler_size_changed(MetaWindow * window)
 				_client->_absolute_position.h);
 }
 
-void view_notebook_t::xxactivate(xcb_timestamp_t time)
-{
-	auto nbk = parent_notebook();
-	nbk->activate(shared_from_this(), time);
-}
-
 void view_notebook_t::remove_this_view()
 {
 	auto nbk = parent_notebook();
@@ -156,14 +150,6 @@ void view_notebook_t::release_client()
 		meta_window_unmake_tiled(_client->meta_window());
 
 	_client->release(this);
-}
-
-void view_notebook_t::set_focus_state(bool is_focused)
-{
-	view_rebased_t::set_focus_state(is_focused);
-	if (is_focused)
-		parent_notebook()->activate(shared_from_this(), 0);
-	parent_notebook()->_client_focus_change(_client.get());
 }
 
 void view_notebook_t::reconfigure()

@@ -135,6 +135,8 @@ public:
 
 	array<key_bind_cmd_t, 10> bind_cmd;
 
+	signal_t<client_managed_p> on_focus_changed;
+
 private:
 
 	/** store all client in mapping order, older first **/
@@ -228,7 +230,7 @@ public:
 	void _handler_screen_workspace_switched(MetaScreen * screen, gint arg1, gint arg2, MetaMotionDirection arg3);
 
 	void _handler_meta_window_focus(MetaWindow * window);
-	void _handler_window_unmanaged(MetaWindow * window);
+	void _handler_meta_window_unmanaged(MetaWindow * window);
 
 	void _handler_meta_display_accelerator_activated(MetaDisplay * metadisplay, guint arg1, guint arg2, guint arg3);
 	void _handler_meta_display_grab_op_begin(MetaDisplay * metadisplay, MetaScreen * arg1, MetaWindow * arg2, MetaGrabOp arg3);
@@ -331,9 +333,6 @@ public:
 	auto dpy() const -> MetaDisplay *;
 	void overlay_add(shared_ptr<tree_t> x);
 	auto current_workspace() const -> workspace_p const &;
-//	auto get_workspace(int id) const -> workspace_p const &;
-//	int  get_workspace_count() const;
-//	void create_workspace(guint time);
 	void grab_start(shared_ptr<grab_handler_t> handler, guint32 time);
 	void grab_stop(guint32 time);
 	void insert_window_in_notebook(shared_ptr<client_managed_t> x, shared_ptr<notebook_t> n, bool prefer_activate);
@@ -348,10 +347,7 @@ public:
 	void make_surface_stats(int & size, int & count);
 	void schedule_repaint();
 	void damage_all();
-
-	void activate(view_p c, xcb_timestamp_t time);
 	void sync_tree_view();
-
 	bool has_grab_handler();
 
 };

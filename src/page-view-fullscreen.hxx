@@ -43,11 +43,10 @@ struct view_fullscreen_t :
 	/**
 	 * view_t API
 	 **/
-	using view_t::xxactivate;
+
 	virtual void remove_this_view() override;
 	virtual void acquire_client() override;
 	virtual void release_client() override;
-	using view_rebased_t::set_focus_state;
 
 	/**
 	 * tree_t virtual API

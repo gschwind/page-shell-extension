@@ -125,7 +125,8 @@ class notebook_t : public page_component_t {
 
 	void _client_title_change(client_managed_t * c);
 	void _client_destroy(client_managed_t * c);
-	void _client_focus_change(client_managed_t * c);
+
+	void _client_focus_change(client_managed_p c);
 
 	void _update_allocation(rect & allocation);
 

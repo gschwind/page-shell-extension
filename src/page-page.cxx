@@ -478,7 +478,7 @@ void page_t::_handler_plugin_map(MetaWindowActor * window_actor)
 
 		auto meta_window = meta_window_actor_get_meta_window(window_actor);
 		g_connect(meta_window, "focus", &page_t::_handler_meta_window_focus);
-		g_connect(meta_window, "unmanaged", &page_t::_handler_window_unmanaged);
+		g_connect(meta_window, "unmanaged", &page_t::_handler_meta_window_unmanaged);
 
 		if (not meta_window_is_fullscreen(meta_window))
 			insert_as_notebook(mw, 0);
@@ -684,28 +684,13 @@ void page_t::_handler_screen_workspace_switched(MetaScreen * screen, gint arg1, 
 void page_t::_handler_meta_window_focus(MetaWindow * window)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
-
-	auto w = current_workspace();
-	if (not w->_net_active_window.expired()) {
-		w->_net_active_window.lock()->set_focus_state(false);
+	auto c = lookup_client_managed_with(window);
+	if (c != nullptr) {
+		on_focus_changed.signal(c);
 	}
-
-	auto mw = lookup_client_managed_with(window);
-	if (mw) {
-		for(auto & w: _workspace_map) {
-			auto v = w.second->lookup_view_for(mw);
-			if (v) {
-				v->set_focus_state(true);
-				schedule_repaint();
-			}
-		}
-	}
-
-	sync_tree_view();
-
 }
 
-void page_t::_handler_window_unmanaged(MetaWindow * window)
+void page_t::_handler_meta_window_unmanaged(MetaWindow * window)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
 	auto mw = lookup_client_managed_with(window);
@@ -1283,14 +1268,6 @@ void page_t::schedule_repaint()
 
 void page_t::damage_all() {
 	schedule_repaint();
-}
-
-void page_t::activate(view_p c, xcb_timestamp_t time)
-{
-	//printf("call %s\n", __PRETTY_FUNCTION__);
-	c->xxactivate(time);
-	sync_tree_view();
-
 }
 
 void page_t::sync_tree_view()

@@ -60,26 +60,10 @@ bool view_t::_is_client_owner()
 	return _client->current_owner_view() == this;
 }
 
-void view_t::xxactivate(xcb_timestamp_t time)
-{
-	raise();
-	_root->set_focus(shared_from_this(), time);
-}
-
 void view_t::remove_this_view()
 {
 	assert(_parent != nullptr);
 	_parent->remove(shared_from_this());
-}
-
-void view_t::set_focus_state(bool is_focused)
-{
-//	_client->_has_focus = is_focused;
-//	if (_client->_has_focus) {
-//		_client->net_wm_state_add(_NET_WM_STATE_FOCUSED);
-//	} else {
-//		_client->net_wm_state_remove(_NET_WM_STATE_FOCUSED);
-//	}
 }
 
 void view_t::hide()

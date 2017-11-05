@@ -51,16 +51,6 @@ auto view_rebased_t::shared_from_this() -> view_rebased_p
 	return static_pointer_cast<view_rebased_t>(tree_t::shared_from_this());
 }
 
-void view_rebased_t::set_focus_state(bool is_focused)
-{
-//	view_t::set_focus_state(is_focused);
-//	if (_client->_has_focus) {
-//		_ungrab_button_unsafe();
-//	} else {
-//		_grab_button_unsafe();
-//	}
-}
-
 auto view_rebased_t::get_default_view() const -> ClutterActor *
 {
 	return CLUTTER_ACTOR(_client->_meta_window_actor);
