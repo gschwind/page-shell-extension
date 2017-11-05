@@ -25,6 +25,16 @@ install_data([
   install_dir: join_paths(pkgdatadir, 'data')
 )
 
+install_data(
+  ['page.session'],
+  install_dir: join_paths(datadir, 'gnome-session', 'sessions')
+)
+
+install_data(
+  ['page.desktop'],
+  install_dir: join_paths(datadir, 'xsessions')
+)
+
 cdatax = configuration_data()
 cdatax.set('bindir', bindir)
 configure_file(

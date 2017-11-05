@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=PAGE
+Comment=This session logs you into PAGE
+Exec=gnome-session --session=page
+TryExec=gnome-session
+Icon=
+Type=Application
+# Do no change the following line, define that GNOME componants will be loaded.
+DesktopNames=GNOME
