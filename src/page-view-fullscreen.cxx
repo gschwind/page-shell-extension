@@ -64,8 +64,6 @@ void view_fullscreen_t::acquire_client()
 	meta_window_change_workspace(_client->meta_window(), _root->_meta_workspace);
 
 	meta_window_unminimize(_client->meta_window());
-	if (meta_window_is_shaded(_client->meta_window()))
-		meta_window_unshade(_client->meta_window(), 0);
 	if (!meta_window_is_fullscreen(_client->meta_window()))
 		meta_window_make_fullscreen(_client->meta_window());
 

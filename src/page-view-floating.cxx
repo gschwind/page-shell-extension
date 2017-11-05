@@ -83,8 +83,6 @@ void view_floating_t::acquire_client()
 	meta_window_change_workspace(_client->meta_window(), _root->_meta_workspace);
 
 	meta_window_unminimize(_client->meta_window());
-	if (meta_window_is_shaded(_client->meta_window()))
-		meta_window_unshade(_client->meta_window(), 0);
 	if (meta_window_is_fullscreen(_client->meta_window()))
 		meta_window_unmake_fullscreen(_client->meta_window());
 	if (meta_window_is_tiled(_client->meta_window()))
@@ -92,8 +90,6 @@ void view_floating_t::acquire_client()
 
 	g_connect(_client->meta_window(), "position-changed", &view_floating_t::_handler_position_changed);
 	g_connect(_client->meta_window(), "size-changed", &view_floating_t::_handler_size_changed);
-
-	meta_window_actor_sync_visibility(_client->meta_window_actor());
 
 }
 

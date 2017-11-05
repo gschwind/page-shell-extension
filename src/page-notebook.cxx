@@ -161,8 +161,9 @@ void notebook_t::activate(view_notebook_p vn, xcb_timestamp_t time)
 	assert(has_key(_clients_tab_order, vn));
 	_set_selected(vn);
 	vn->raise();
-	_root->set_focus(vn, time);
+	_ctx->sync_tree_view();
 	_ctx->schedule_repaint();
+	_root->set_focus(vn, time);
 }
 
 void notebook_t::update_client_position(view_notebook_p c) {
@@ -925,7 +926,8 @@ void notebook_t::show()
 	tree_t::show();
 
 	for (auto & x: _clients_tab_order) {
-		x->hide();
+		if (x != _selected)
+			x->hide();
 	}
 
 	if(_selected != nullptr) {
