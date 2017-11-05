@@ -329,20 +329,13 @@ void page_t::_handler_plugin_start(MetaDisplay * display, MetaScreen * screen, C
 		_theme = new simple2_theme_t{_conf};
 	}
 
+	log::printf("n_work_space =%d\n", meta_screen_get_n_workspaces(_screen));
+
+
+	_current_workspace = ensure_workspace(meta_screen_get_active_workspace(_screen));
+
 	MetaRectangle area;
-	auto workspace_list = meta_screen_get_workspaces(_screen);
-	for (auto l = workspace_list; l != NULL; l = l->next) {
-		auto meta_workspace = META_WORKSPACE(l->data);
-		auto d = make_shared<workspace_t>(this, meta_workspace);
-		_workspace_list.push_back(d);
-		d->disable();
-		d->show();
-		d->update_viewports_layout();
-		meta_workspace_get_work_area_all_monitors(meta_workspace, &area);
-	}
-
-	_current_workspace = lookup_workspace(meta_screen_get_active_workspace(_screen));
-
+	meta_workspace_get_work_area_all_monitors(_current_workspace->_meta_workspace, &area);
 	_theme->update(area.width, area.height);
 
 	_viewport_group = clutter_actor_new();
@@ -375,6 +368,8 @@ void page_t::_handler_plugin_start(MetaDisplay * display, MetaScreen * screen, C
 
 	g_connect(_screen, "monitors-changed", &page_t::_handler_screen_monitors_changed);
 	g_connect(_screen, "workareas-changed", &page_t::_handler_screen_workareas_changed);
+	g_connect(_screen, "workspace-added", &page_t::_handler_screen_workspace_added);
+	g_connect(_screen, "workspace-removed", &page_t::_handler_screen_workspace_removed);
 
 	g_connect(_display, "accelerator-activated", &page_t::_handler_meta_display_accelerator_activated);
 	g_connect(_display, "grab-op-begin”", &page_t::_handler_meta_display_grab_op_begin);
@@ -387,6 +382,8 @@ void page_t::_handler_plugin_start(MetaDisplay * display, MetaScreen * screen, C
 	update_viewport_layout();
 	update_workspace_visibility(0);
 	sync_tree_view();
+
+	switch_to_workspace(meta_screen_get_active_workspace_index(_screen), 0);
 
 }
 
@@ -442,10 +439,10 @@ void page_t::_handler_plugin_size_change(MetaWindowActor * window_actor, MetaSiz
 	{
 		auto mw = lookup_client_managed_with(window_actor);
 		if (mw) {
-			for (auto w : _workspace_list) {
-				auto v = w->lookup_view_for(mw);
+			for (auto & w : _workspace_map) {
+				auto v = w.second->lookup_view_for(mw);
 				if (v)
-					w->switch_view_to_fullscreen(v, 0);
+					w.second->switch_view_to_fullscreen(v, 0);
 			}
 		}
 	}
@@ -455,10 +452,10 @@ void page_t::_handler_plugin_size_change(MetaWindowActor * window_actor, MetaSiz
 	{
 		auto mw = lookup_client_managed_with(window_actor);
 		if (mw) {
-			for (auto w: _workspace_list) {
-				auto v = w->lookup_view_for(mw);
+			for (auto & w: _workspace_map) {
+				auto v = w.second->lookup_view_for(mw);
 				if (v)
-					w->switch_fullscreen_to_prefered_view_mode(v, 0);
+					w.second->switch_fullscreen_to_prefered_view_mode(v, 0);
 			}
 		}
 	}
@@ -512,7 +509,7 @@ void page_t::_handler_plugin_destroy(MetaWindowActor * actor)
 
 void page_t::_handler_plugin_switch_workspace(gint from, gint to, MetaMotionDirection direction)
 {
-	log::printf("call %s\n", __PRETTY_FUNCTION__);
+	log::printf("call %s %d %d %d\n", __PRETTY_FUNCTION__, from, to, static_cast<int>(direction));
 	switch_to_workspace(to, 0);
 }
 
@@ -673,14 +670,19 @@ void page_t::_handler_screen_workareas_changed(MetaScreen * screen)
 	update_viewport_layout();
 }
 
-void page_t::_handler_screen_workspace_added(MetaScreen * screen, gint arg1)
+void page_t::_handler_screen_workspace_added(MetaScreen * screen, gint index)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
+	ensure_workspace(meta_screen_get_workspace_by_index(screen, index));
 }
 
-void page_t::_handler_screen_workspace_removed(MetaScreen * screen, gint arg1)
+void page_t::_handler_screen_workspace_removed(MetaScreen * screen, gint index)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
+	// guess that no more windows belong to this workspace.
+	auto w = meta_screen_get_workspace_by_index(screen, index);
+	if (has_key(_workspace_map, w))
+		_workspace_map.erase(w);
 }
 
 void page_t::_handler_screen_workspace_switched(MetaScreen * screen, gint arg1, gint arg2, MetaMotionDirection arg3)
@@ -704,8 +706,8 @@ void page_t::_handler_meta_window_focus(MetaWindow * window)
 		if (v)
 			w->client_focus_history_move_front(v);
 
-		for(auto w: _workspace_list) {
-			auto v = w->lookup_view_for(mw);
+		for(auto & w: _workspace_map) {
+			auto v = w.second->lookup_view_for(mw);
 			if (v) {
 				v->set_focus_state(true);
 				schedule_repaint();
@@ -772,8 +774,8 @@ void page_t::unmanage(client_managed_p mw)
 	/* if window is in move/resize/notebook move, do cleanup */
 	cleanup_grab();
 
-	for (auto & d : _workspace_list) {
-		d->unmanage(mw);
+	for (auto & d : _workspace_map) {
+		d.second->unmanage(mw);
 	}
 
 	sync_tree_view();
@@ -784,7 +786,7 @@ void page_t::insert_as_fullscreen(client_managed_p c, xcb_timestamp_t time) {
 
 	workspace_p workspace;
 	if(not meta_window_is_always_on_all_workspaces(c->meta_window()))
-		workspace = lookup_workspace(meta_window_get_workspace(c->meta_window()));
+		workspace = ensure_workspace(meta_window_get_workspace(c->meta_window()));
 	else
 		workspace = current_workspace();
 
@@ -796,7 +798,7 @@ void page_t::insert_as_notebook(client_managed_p c, xcb_timestamp_t time)
 	//printf("call %s\n", __PRETTY_FUNCTION__);
 	workspace_p workspace;
 	if(not meta_window_is_always_on_all_workspaces(c->meta_window()))
-		workspace = lookup_workspace(meta_window_get_workspace(c->meta_window()));
+		workspace = ensure_workspace(meta_window_get_workspace(c->meta_window()));
 	else
 		workspace = current_workspace();
 
@@ -948,8 +950,8 @@ void page_t::notebook_close(notebook_p nbk, xcb_timestamp_t time) {
 vector<shared_ptr<tree_t>> page_t::get_all_children() const
 {
 	vector<shared_ptr<tree_t>> ret;
-	for(auto const & x: _workspace_list) {
-		auto tmp = x->get_all_children();
+	for(auto const & x: _workspace_map) {
+		auto tmp = x.second->get_all_children();
 		ret.insert(ret.end(), tmp.begin(), tmp.end());
 	}
 	return ret;
@@ -995,8 +997,8 @@ void page_t::update_viewport_layout() {
 	_left_most_border = 0;
 	_top_most_border = 0;
 
-	for (auto w : _workspace_list) {
-		w->update_viewports_layout();
+	for (auto & w : _workspace_map) {
+		w.second->update_viewports_layout();
 	}
 
 	MetaRectangle area;
@@ -1008,8 +1010,8 @@ void page_t::update_viewport_layout() {
 	clutter_actor_set_position(_viewport_group, 0.0, 0.0);
 	clutter_actor_set_size(_viewport_group, -1, -1);
 
-	for(auto w: _workspace_list) {
-		w->update_viewports_layout();
+	for(auto & w: _workspace_map) {
+		w.second->update_viewports_layout();
 	}
 
 }
@@ -1032,7 +1034,7 @@ void page_t::insert_as_floating(client_managed_p c, xcb_timestamp_t time) {
 
 	workspace_p workspace;
 	if(not meta_window_is_always_on_all_workspaces(c->meta_window()))
-		workspace = lookup_workspace(meta_window_get_workspace(c->meta_window()));
+		workspace = ensure_workspace(meta_window_get_workspace(c->meta_window()));
 	else
 		workspace = current_workspace();
 
@@ -1059,14 +1061,18 @@ auto page_t::lookup_client_managed_with(MetaWindowActor * w) const -> client_man
 	return nullptr;
 }
 
-auto page_t::lookup_workspace(MetaWorkspace * w) const -> workspace_p
+auto page_t::ensure_workspace(MetaWorkspace * w) -> workspace_p
 {
-	for (auto & i: _workspace_list) {
-		if (i->_meta_workspace == w) {
-			return i;
-		}
+	if (has_key(_workspace_map, w)) {
+		return _workspace_map[w];
+	} else {
+		auto d = make_shared<workspace_t>(this, w);
+		_workspace_map[w] = d;
+		d->disable();
+		d->show(); // make is visible by default
+		d->update_viewports_layout();
+		return d;
 	}
-	return nullptr;
 }
 
 
@@ -1089,7 +1095,7 @@ void page_t::print_state() const {
 
 void page_t::switch_to_workspace(unsigned int workspace_id, xcb_timestamp_t time) {
 	auto meta_workspace = meta_screen_get_workspace_by_index(_screen, workspace_id);
-	auto workspace = lookup_workspace(meta_workspace);
+	auto workspace = ensure_workspace(meta_workspace);
 	if(not workspace)
 		return;
 
@@ -1171,9 +1177,9 @@ void page_t::update_workspace_visibility(xcb_timestamp_t time) {
 	_current_workspace->enable(time);
 
 	/** hide only workspace that must be hidden first **/
-	for(auto w: _workspace_list) {
-		if(w != _current_workspace) {
-			w->disable();
+	for(auto & w: _workspace_map) {
+		if(w.second != _current_workspace) {
+			w.second->disable();
 		}
 	}
 
@@ -1277,38 +1283,38 @@ shared_ptr<workspace_t> const & page_t::current_workspace() const {
 	return _current_workspace;
 }
 
-shared_ptr<workspace_t> const & page_t::get_workspace(int id) const {
-	return _workspace_list[id];
-}
-
-int page_t::get_workspace_count() const {
-	return _workspace_list.size();
-}
-
-void page_t::create_workspace(guint time) {
-	auto d = make_shared<workspace_t>(this, time);
-	_workspace_list.push_back(d);
-	d->disable();
-	d->show();
-
-	update_viewport_layout();
-
-	if(d != current_workspace()) {
-		for (auto &x: current_workspace()->gather_children_root_first<view_t>()) {
-			if (meta_window_is_always_on_all_workspaces(x->_client->meta_window())) {
-				/** TODO: insert desktop **/
-				auto const & type = typeid(*(x.get()));
-				if (type == typeid(view_notebook_t)) {
-					d->insert_as_notebook(x->_client, XCB_CURRENT_TIME);
-				} else if (type == typeid(view_floating_t)) {
-					d->insert_as_floating(x->_client, XCB_CURRENT_TIME);
-				} else if (type == typeid(view_fullscreen_t)) {
-					d->insert_as_fullscreen(x->_client, XCB_CURRENT_TIME);
-				}
-			}
-		}
-	}
-}
+//shared_ptr<workspace_t> const & page_t::get_workspace(int id) const {
+//	return _workspace_map[id];
+//}
+//
+//int page_t::get_workspace_count() const {
+//	return _workspace_map.size();
+//}
+//
+//void page_t::create_workspace(guint time) {
+//	auto d = make_shared<workspace_t>(this, time);
+//	_workspace_map.push_back(d);
+//	d->disable();
+//	d->show();
+//
+//	update_viewport_layout();
+//
+//	if(d != current_workspace()) {
+//		for (auto &x: current_workspace()->gather_children_root_first<view_t>()) {
+//			if (meta_window_is_always_on_all_workspaces(x->_client->meta_window())) {
+//				/** TODO: insert desktop **/
+//				auto const & type = typeid(*(x.get()));
+//				if (type == typeid(view_notebook_t)) {
+//					d->insert_as_notebook(x->_client, XCB_CURRENT_TIME);
+//				} else if (type == typeid(view_floating_t)) {
+//					d->insert_as_floating(x->_client, XCB_CURRENT_TIME);
+//				} else if (type == typeid(view_fullscreen_t)) {
+//					d->insert_as_fullscreen(x->_client, XCB_CURRENT_TIME);
+//				}
+//			}
+//		}
+//	}
+//}
 
 int page_t::left_most_border() {
 	return _left_most_border;

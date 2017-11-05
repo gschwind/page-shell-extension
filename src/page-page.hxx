@@ -92,7 +92,7 @@ class page_t:
 	using callback_event_t = void (page_t::*) (xcb_generic_event_t const *);
 
 	workspace_p _current_workspace;
-	vector<workspace_p> _workspace_list;
+	map<MetaWorkspace *, workspace_p> _workspace_map;
 
 	weak_ptr<client_managed_t> _net_active_window;
 
@@ -315,7 +315,7 @@ public:
 
 	auto lookup_client_managed_with(MetaWindow * w) const -> client_managed_p;
 	auto lookup_client_managed_with(MetaWindowActor * actor) const -> client_managed_p;
-	auto lookup_workspace(MetaWorkspace * w) const -> workspace_p;
+	auto ensure_workspace(MetaWorkspace * w) -> workspace_p;
 
 	void raise_child(shared_ptr<tree_t> t);
 	void process_notebook_client_menu(shared_ptr<client_managed_t> c, int selected);
@@ -363,9 +363,9 @@ public:
 	auto dpy() const -> MetaDisplay *;
 	void overlay_add(shared_ptr<tree_t> x);
 	auto current_workspace() const -> workspace_p const &;
-	auto get_workspace(int id) const -> workspace_p const &;
-	int  get_workspace_count() const;
-	void create_workspace(guint time);
+//	auto get_workspace(int id) const -> workspace_p const &;
+//	int  get_workspace_count() const;
+//	void create_workspace(guint time);
 	void grab_start(shared_ptr<grab_handler_t> handler, guint32 time);
 	void grab_stop(guint32 time);
 	void insert_window_in_notebook(shared_ptr<client_managed_t> x, shared_ptr<notebook_t> n, bool prefer_activate);
