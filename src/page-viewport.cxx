@@ -108,23 +108,15 @@ void viewport_t::reconfigure()
 {
 	if(not _root->is_enable())
 		return;
-
-	auto _ctx = _root->_ctx;
-	auto _dpy = _root->_ctx->dpy();
-
 }
 
 void viewport_t::on_workspace_enable()
 {
-	auto _ctx = _root->_ctx;
-	auto _dpy = _root->_ctx->dpy();
 	reconfigure();
 }
 
 void viewport_t::on_workspace_disable()
 {
-	auto _ctx = _root->_ctx;
-	auto _dpy = _root->_ctx->dpy();
 
 }
 

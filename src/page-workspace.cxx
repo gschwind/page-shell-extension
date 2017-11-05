@@ -45,8 +45,8 @@ workspace_t::workspace_t(page_t * ctx, MetaWorkspace * workspace) :
 	tree_t{this},
 	_ctx{ctx},
 	_meta_workspace{workspace},
-	_default_pop{},
 	_primary_viewport{},
+	_default_pop{},
 	_switch_direction{WORKSPACE_SWITCH_LEFT},
 	_is_enable{false}
 {
@@ -57,8 +57,8 @@ workspace_t::workspace_t(page_t * ctx, guint32 time) :
 	tree_t{this},
 	_ctx{ctx},
 	_meta_workspace{nullptr},
-	_default_pop{},
 	_primary_viewport{},
+	_default_pop{},
 	_switch_direction{WORKSPACE_SWITCH_LEFT},
 	_is_enable{false}
 {
@@ -252,11 +252,8 @@ void workspace_t::insert_as_fullscreen(client_managed_p mw, xcb_timestamp_t time
 void workspace_t::insert_as_notebook(client_managed_p mw, xcb_timestamp_t time)
 {
 	//printf("call %s\n", __PRETTY_FUNCTION__);
-	/** select if the client want to appear mapped or iconic **/
-	bool activate = true;
 	ensure_default_notebook()->add_client(mw, time);
 	_ctx->sync_tree_view();
-
 }
 
 void workspace_t::insert_as_fullscreen(shared_ptr<client_managed_t> mw, shared_ptr<viewport_t> v) {

@@ -145,7 +145,7 @@ void dropdown_menu_t::draw(ClutterCanvas * canvas, cairo_t * cr, int width, int 
 
 void dropdown_menu_t::update_items_back_buffer(cairo_t * cr, int n)
 {
-	if (n >= 0 and n < _items.size()) {
+	if (n >= 0 and n < static_cast<int>(_items.size())) {
 		rect area(0, 24 * n, pop->_position.w, 24);
 		_ctx->theme()->render_menuentry(cr, _items[n]->get_theme_item(), area, n == _selected);
 	}
@@ -153,7 +153,7 @@ void dropdown_menu_t::update_items_back_buffer(cairo_t * cr, int n)
 
 void dropdown_menu_t::set_selected(int s)
 {
-	if(s >= 0 and s < _items.size() and s != _selected) {
+	if(s >= 0 and s < static_cast<int>(_items.size()) and s != _selected) {
 		std::swap(_selected, s);
 		pop->invalidate();
 	}

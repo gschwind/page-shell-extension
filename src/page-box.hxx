@@ -160,7 +160,11 @@ struct i_rect_t {
 	}
 
 	operator ClutterGeometry() {
-		ClutterGeometry ret = {x, y, w, h};
+		ClutterGeometry ret{
+			static_cast<gint>(x),
+			static_cast<gint>(y),
+			static_cast<guint>(w),
+			static_cast<guint>(h)};
 		return ret;
 	}
 

@@ -88,7 +88,6 @@ void grab_split_t::button_motion(ClutterEvent const * e)
 {
 	gfloat x, y;
 	clutter_event_get_coords(e, &x, &y);
-	auto button = clutter_event_get_button(e);
 	auto time = clutter_event_get_time(e);
 
 	if(_split.expired()) {
@@ -156,10 +155,10 @@ grab_bind_view_notebook_t::grab_bind_view_notebook_t(page_t * ctx,
 		workspace{x->workspace()},
 		c{x},
 		start_position{pos},
-		target_notebook{},
+		_button{button},
 		zone{NOTEBOOK_AREA_NONE},
-		pn0{},
-		_button{button}
+		target_notebook{},
+		pn0{}
 {
 	pn0 = clutter_actor_new();
 	ClutterColor c{200u, 0u, 0u, 128u};
@@ -264,6 +263,9 @@ void grab_bind_view_notebook_t::button_motion(ClutterEvent const * e)
 		case NOTEBOOK_AREA_CENTER:
 			geo = new_target->_area.popup_center;
 			break;
+		default:
+			geo = new_target->_area.popup_center;
+			break;
 		}
 		clutter_actor_save_easing_state(pn0);
 		clutter_actor_set_easing_mode(pn0, CLUTTER_EASE_IN_CUBIC);
@@ -342,9 +344,9 @@ grab_bind_view_floating_t::grab_bind_view_floating_t(page_t * ctx, view_floating
 		grab_default_t{ctx},
 		c{x},
 		start_position{pos},
-		target_notebook{},
+		_button{button},
 		zone{NOTEBOOK_AREA_NONE},
-		_button{button}
+		target_notebook{}
 {
 
 }
@@ -439,6 +441,8 @@ void grab_bind_view_floating_t::button_motion(ClutterEvent const * e)
 			break;
 		case NOTEBOOK_AREA_CENTER:
 //			pn0->move_resize(new_target->_area.popup_center);
+			break;
+		default:
 			break;
 		}
 	}

@@ -189,8 +189,6 @@ page_handler_dispose(GObject *gobject)
 static void
 page_handler_finalize (GObject *gobject)
 {
-  auto priv = reinterpret_cast<PageHandlerPrivate*>(page_handler_get_instance_private (PAGE_HANDLER(gobject)));
-
   /* Always chain up to the parent class; as with dispose(), finalize()
    * is guaranteed to exist on the parent's class virtual function table
    */
@@ -203,8 +201,6 @@ page_handler_set_property(GObject         *object,
                           const GValue    *value,
                           GParamSpec      *pspec)
 {
-  PageHandler * self = PAGE_HANDLER (object);
-
   switch (prop_id)
     {
     default:

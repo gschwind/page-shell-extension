@@ -53,9 +53,6 @@ auto view_rebased_t::shared_from_this() -> view_rebased_p
 
 void view_rebased_t::_reconfigure_windows()
 {
-	auto _ctx = _root->_ctx;
-	auto _dpy = _ctx->_display;
-
 	if(not _is_client_owner())
 		return;
 
@@ -76,7 +73,6 @@ void view_rebased_t::_reconfigure_windows()
 		log::printf("minimize %p\n", _client->meta_window());
 		meta_window_minimize(_client->meta_window());
 	}
-
 }
 
 void view_rebased_t::_on_focus_change(client_managed_t * c)
@@ -108,8 +104,6 @@ void view_rebased_t::on_workspace_enable()
 
 void view_rebased_t::on_workspace_disable()
 {
-	auto _ctx = _root->_ctx;
-	auto _dpy = _root->_ctx->dpy();
 	if (_is_client_owner()) {
 		log::printf("minimize %p\n", _client->meta_window());
 		meta_window_minimize(_client->meta_window());

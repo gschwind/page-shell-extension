@@ -202,7 +202,7 @@ class region_t {
 		if(_band_wall_count(prev_band) != _band_wall_count(next_band))
 			return false;
 
-		for(unsigned k = 0; k < _band_wall_count(prev_band); ++k) {
+		for(int k = 0; k < _band_wall_count(prev_band); ++k) {
 			if(_band_get_wall(prev_band, k) != _band_get_wall(next_band, k))
 				return false;
 		}
@@ -540,7 +540,7 @@ public:
 
 	region_t(vector<int> const & l) : _data{nullptr} {
 		clear();
-		for(int k = 0; k < l.size(); k += 4) {
+		for(unsigned k = 0; k < l.size(); k += 4) {
 			(*this) += region_t(l[k], l[k+1], l[k+2], l[k+3]);
 		}
 	}

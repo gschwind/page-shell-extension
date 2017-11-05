@@ -17,10 +17,10 @@
 namespace page {
 
 tree_t::tree_t(workspace_t * root) :
-	_root{root},
 	_parent{nullptr},
 	_is_visible{false},
-	_stack_is_locked{false}
+	_stack_is_locked{false},
+	_root{root}
 {
 
 }

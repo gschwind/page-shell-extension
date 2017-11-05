@@ -60,9 +60,6 @@ void view_t::move_all_window()
 	if (not _is_client_owner())
 		return;
 
-	auto _ctx = _root->_ctx;
-	auto _dpy = _root->_ctx->dpy();
-
 	if (_root->is_enable() and _is_visible) {
 		meta_window_unminimize(_client->_meta_window);
 		meta_window_move_resize_frame(_client->_meta_window, FALSE,
@@ -114,11 +111,7 @@ void view_t::set_focus_state(bool is_focused)
 
 void view_t::reconfigure()
 {
-	//printf("call %s\n", __PRETTY_FUNCTION__);
-	auto _ctx = _root->_ctx;
-
 	move_all_window();
-
 }
 
 void view_t::on_workspace_enable()

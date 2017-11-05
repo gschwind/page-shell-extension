@@ -30,8 +30,6 @@ class client_managed_t;
 class grab_bind_view_notebook_t;
 
 class notebook_t : public page_component_t {
-	time64_t const animation_duration;
-
 	page_t * _ctx;
 
 	rect _allocation;

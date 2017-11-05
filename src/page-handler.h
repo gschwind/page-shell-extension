@@ -31,22 +31,10 @@ extern "C" {
 G_BEGIN_DECLS
 
 /*
- * NOTES: "page" is a prefix and "plugin" is the name of plugin.
+ * NOTES: "page" is a prefix and "handler" is the name of the object type.
  */
 
-//#define PAGE_TYPE_HANDLER            (page_handler_get_type ())
-
 G_DECLARE_FINAL_TYPE (PageHandler, page_handler, PAGE, HANDLER, GObject)
-
-
-//#define PAGE_HANDLER(obj)            (G_TYPE_CHECK_INSTANCE_CAST((obj), PAGE_TYPE_HANDLER, PageHandler))
-//#define PAGE_HANDLER_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass),  PAGE_TYPE_HANDLER, PageHandlerClass))
-//#define PAGE_IS_HANDLER(obj)         (G_TYPE_CHECK_INSTANCE_TYPE((obj), PAGE_TYPE_HANDLER))
-//#define PAGE_IS_HANDLER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass),  PAGE_TYPE_HANDLER))
-//#define PAGE_HANDLER_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj),  PAGE_TYPE_HANDLER, PageHandlerClass))
-//
-//#define PAGE_HANDLER_GET_PRIVATE(obj) \
-//(G_TYPE_INSTANCE_GET_PRIVATE ((obj), PAGE_TYPE_HANDLER, PageHandlerPrivate))
 
 void
 page_handler_start(PageHandler * self, MetaDisplay * display, MetaScreen * screen, ClutterStage * stage);

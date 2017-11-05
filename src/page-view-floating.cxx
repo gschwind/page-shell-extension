@@ -52,8 +52,6 @@ void view_floating_t::_init()
 	g_connect(_client->meta_window(), "position-changed", &view_floating_t::_handler_position_changed);
 	g_connect(_client->meta_window(), "size-changed", &view_floating_t::_handler_size_changed);
 
-	auto _ctx = _root->_ctx;
-
 	g_object_set(G_OBJECT(_client->meta_window_actor()), "no-shadow", FALSE, NULL);
 
 	_client->_floating_wished_position = _client->position();
@@ -100,9 +98,6 @@ void view_floating_t::set_focus_state(bool is_focused)
 
 void view_floating_t::reconfigure() {
 	//printf("call %s\n", __PRETTY_FUNCTION__);
-
-	auto _ctx = _root->_ctx;
-	auto _dpy = _root->_ctx->dpy();
 
 	_client->_absolute_position = _client->_floating_wished_position;
 

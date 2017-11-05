@@ -42,15 +42,15 @@ struct theme_notebook_t {
 
 	theme_notebook_t() :
 		root_x{}, root_y{},
+		button_mouse_over{NOTEBOOK_BUTTON_NONE},
 		allocation{},
 		client_position{},
 		selected_client{},
+		client_count{0},
 		is_default{},
 		has_selected_client{},
 		can_vsplit{},
 		can_hsplit{},
-		button_mouse_over{NOTEBOOK_BUTTON_NONE},
-		client_count{0},
 		has_scroll_arrow{false}
 	{
 
@@ -58,15 +58,15 @@ struct theme_notebook_t {
 
 	theme_notebook_t(theme_notebook_t const & x) :
 		root_x{x.root_x}, root_y{x.root_y},
+		button_mouse_over{x.button_mouse_over},
 		allocation{x.allocation},
 		client_position{x.client_position},
 		selected_client{x.selected_client},
+		client_count{x.client_count},
 		is_default{x.is_default},
 		has_selected_client{x.has_selected_client},
-		button_mouse_over{x.button_mouse_over},
-		can_hsplit{x.can_hsplit},
 		can_vsplit{x.can_vsplit},
-		client_count{x.client_count},
+		can_hsplit{x.can_hsplit},
 		has_scroll_arrow{x.has_scroll_arrow}
 	{
 

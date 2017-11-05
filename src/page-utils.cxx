@@ -17,7 +17,7 @@ void log(log_module_e module, char const * fmt, ...) {
 	if (module == LOG_NONE or (module&g_log_flags)) {
 		va_list l;
 		va_start(l, fmt);
-		std:vfprintf(log::log_file, fmt, l);
+		std::vfprintf(log::log_file, fmt, l);
 		va_end(l);
 		fflush(log::log_file);
 	}

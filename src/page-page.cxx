@@ -312,7 +312,6 @@ page_t::~page_t() {
 
 void page_t::_handler_plugin_start(MetaDisplay * display, MetaScreen * screen, ClutterStage * stage)
 {
-
 	_display = display,
 	_screen = screen,
 	_stage = stage,
@@ -346,30 +345,6 @@ void page_t::_handler_plugin_start(MetaDisplay * display, MetaScreen * screen, C
 
 	_theme->update(area.width, area.height);
 
-//	{
-//		auto windows = meta_get_window_actors(_screen);
-//		for (auto l = windows; l != NULL; l = l->next) {
-//			auto meta_window_actor = META_WINDOW_ACTOR(l->data);
-//			_handler_plugin_map(meta_window_actor);
-//		}
-//
-//		auto wgroup = meta_get_window_group_for_screen(_screen);
-//		auto actors = clutter_actor_get_children(wgroup);
-//		for (auto l = actors; l != NULL; l = l->next) {
-//			auto cactor = CLUTTER_ACTOR(l->data);
-//			if(META_IS_WINDOW_ACTOR(cactor)) {
-//				_handler_plugin_map(META_WINDOW_ACTOR(cactor));
-//			}
-//		}
-//	}
-
-	//auto stage = meta_get_stage_for_screen(_screen);
-	auto window_group = meta_get_window_group_for_screen(_screen);
-
-	//auto xparent = clutter_actor_get_parent(window_group);
-
-
-	//log::printf("wndow-group = %p, xparent = %p, stage = %p\n", window_group, xparent, stage);
 	_viewport_group = clutter_actor_new();
 	clutter_actor_show(_viewport_group);
 
@@ -412,12 +387,6 @@ void page_t::_handler_plugin_start(MetaDisplay * display, MetaScreen * screen, C
 	update_viewport_layout();
 	update_workspace_visibility(0);
 	sync_tree_view();
-
-	//clutter_actor_show(stage);
-
-//	auto global = shell_global_get();
-//	shell_global_set_viewports_layer(global, _viewport_group);
-//	shell_global_set_overlay_layer(global, _overlay_group);
 
 }
 
@@ -505,14 +474,11 @@ void page_t::_handler_plugin_map(MetaWindowActor * window_actor)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
 	MetaWindowType type;
-	ClutterActor * actor = CLUTTER_ACTOR(window_actor);
 
 	if(lookup_client_managed_with(window_actor) != nullptr)
 		return;
 
 	MetaWindow *meta_window = meta_window_actor_get_meta_window(window_actor);
-
-	auto main_actor = meta_get_stage_for_screen(_screen);
 
 	type = meta_window_get_window_type(meta_window);
 
@@ -1042,13 +1008,6 @@ void page_t::update_viewport_layout() {
 	clutter_actor_set_position(_viewport_group, 0.0, 0.0);
 	clutter_actor_set_size(_viewport_group, -1, -1);
 
-	auto window_group = meta_get_window_group_for_screen(_screen);
-	//auto xparent = clutter_actor_get_parent(window_group);
-	//clutter_actor_set_child_below_sibling(xparent, _viewport_group, window_group);
-	//clutter_actor_set_child_above_sibling(xparent, _viewport_group, NULL);
-	//clutter_actor_set_child_above_sibling(xparent, _overlay_group, NULL);
-
-	int const n_monitor = meta_screen_get_n_monitors(_screen);
 	for(auto w: _workspace_list) {
 		w->update_viewports_layout();
 	}
@@ -1426,7 +1385,6 @@ void page_t::sync_tree_view()
 		}
 	}
 
-	auto window_group = meta_get_window_group_for_screen(_screen);
 	auto children = current_workspace()->gather_children_root_first<view_t>();
 	log::printf("found %lu children\n", children.size());
 	for(auto x: children) {

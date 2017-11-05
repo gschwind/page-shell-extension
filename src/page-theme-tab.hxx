@@ -23,16 +23,16 @@ struct theme_tab_t {
 		position{},
 		title{},
 		//icon{},
-		is_iconic{},
-		tab_color{}
+		tab_color{},
+		is_iconic{}
 	{ }
 
 	theme_tab_t(theme_tab_t const & x) :
 		position{x.position},
 		title{x.title},
 		//icon{x.icon},
-		is_iconic{x.is_iconic},
-		tab_color{x.tab_color}
+		tab_color{x.tab_color},
+		is_iconic{x.is_iconic}
 	{ }
 
 };

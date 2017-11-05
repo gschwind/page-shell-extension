@@ -22,16 +22,15 @@ using namespace std;
 notebook_t::notebook_t(tree_t * ref) :
 	page_component_t{ref},
 	_ctx{ref->_root->_ctx},
+	_theme_client_tabs_offset{0},
 	_is_default{false},
-	_selected{nullptr},
 	_exposay{false},
-	_mouse_over{nullptr, nullptr},
 	_can_hsplit{true},
 	_can_vsplit{true},
-	_theme_client_tabs_offset{0},
 	_has_scroll_arrow{false},
-	animation_duration{ref->_root->_ctx->conf()._fade_in_time},
-	_has_pending_fading_timeout{false}
+	_has_pending_fading_timeout{false},
+	_mouse_over{nullptr, nullptr},
+	_selected{nullptr}
 {
 	//printf("call %s (%p)\n", __PRETTY_FUNCTION__, this);
 
@@ -316,7 +315,7 @@ void notebook_t::_update_all_layout() {
 }
 
 rect notebook_t::_compute_client_size(shared_ptr<client_managed_t> c) {
-	dimention_t<unsigned> size(_client_area.w, _client_area.h);
+	dimention_t<int> size(_client_area.w, _client_area.h);
 			//c->compute_size_with_constrain(_client_area.w, _client_area.h);
 
 	/** if the client cannot fit into client_area, clip it **/
@@ -751,7 +750,7 @@ auto notebook_t::button_press(ClutterEvent const * e) -> button_action_e
 
 void notebook_t::_start_client_menu(view_notebook_p c, xcb_button_t button, gfloat x, gfloat y, xcb_timestamp_t time) {
 	std::vector<std::shared_ptr<dropdown_menu_t::item_t>> v;
-	for(unsigned k = 0; k < _ctx->get_workspace_count(); ++k) {
+	for(int k = 0; k < _ctx->get_workspace_count(); ++k) {
 		std::ostringstream os;
 		if(k == meta_workspace_index(workspace()->_meta_workspace)) {
 			os << "[[[ " << _ctx->get_workspace(k)->name() << " ]]]";
@@ -862,9 +861,6 @@ bool notebook_t::button_motion(ClutterEvent const * e)
 	auto winpos = get_window_position();
 	x -= winpos.x;
 	y -= winpos.y;
-//	log::printf("x = %f, y = %f\n", x, y);
-
-	auto time = clutter_event_get_time(e);
 
 	_update_mouse_over(x, y);
 	if(_allocation.is_inside(x, y))

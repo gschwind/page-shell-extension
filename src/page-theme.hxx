@@ -71,7 +71,7 @@ public:
 
 	struct {
 		margin_t margin;
-		unsigned width;
+		int width;
 	} split;
 
 	struct {

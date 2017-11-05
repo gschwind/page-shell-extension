@@ -51,9 +51,6 @@ void view_fullscreen_t::remove_this_view()
 
 void view_fullscreen_t::reconfigure()
 {
-	auto _ctx = _root->_ctx;
-	auto _dpy = _root->_ctx->dpy();
-
 	if (not _is_client_owner())
 		return;
 
@@ -66,7 +63,6 @@ void view_fullscreen_t::reconfigure()
 		log::printf("minimize %p\n", _client->meta_window());
 		meta_window_minimize(_client->meta_window());
 	}
-
 }
 
 } /* namespace page */

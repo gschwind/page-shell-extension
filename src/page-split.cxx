@@ -311,7 +311,6 @@ bool split_t::button_motion(ClutterEvent const * e) {
 	auto winpos = get_window_position();
 	x -= winpos.x;
 	y -= winpos.y;
-	auto time = clutter_event_get_time(e);
 
 	if(_split_bar_area.is_inside(x, y)) {
 		if(not _has_mouse_over) {
