@@ -131,10 +131,8 @@ auto client_managed_t::current_owner_view() const -> view_t *
 void client_managed_t::acquire(view_t * v)
 {
 	assert(v != nullptr);
-
 	if (_current_owner_view != nullptr)
 		release(_current_owner_view);
-
 	log::printf("acquire %p %s\n", v, typeid(*v).name());
 	_current_owner_view = v;
 }
@@ -143,14 +141,8 @@ void client_managed_t::release(view_t * v)
 	assert(v != nullptr);
 	if(_current_owner_view != v)
 		return;
-
 	log::printf("release %p %s\n", v, typeid(*v).name());
-
-	if (_current_owner_view != nullptr)
-		_current_owner_view->release_client();
-
 	_current_owner_view = nullptr;
-
 }
 
 void client_managed_t::focus(guint32 timestamp)

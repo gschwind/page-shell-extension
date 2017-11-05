@@ -42,7 +42,7 @@ view_notebook_t::view_notebook_t(view_rebased_t * src) :
 
 view_notebook_t::~view_notebook_t()
 {
-
+	release_client();
 }
 
 auto view_notebook_t::shared_from_this() -> view_notebook_p
@@ -147,10 +147,15 @@ void view_notebook_t::acquire_client()
 
 void view_notebook_t::release_client()
 {
+	/* already released */
+	if (not _is_client_owner())
+		return;
+
 	g_disconnect_from_obj(_client->meta_window());
 	if (meta_window_is_tiled(_client->meta_window()))
 		meta_window_unmake_tiled(_client->meta_window());
-	meta_window_unminimize(_client->meta_window());
+
+	_client->release(this);
 }
 
 void view_notebook_t::set_focus_state(bool is_focused)

@@ -68,8 +68,6 @@ public:
 	virtual void remove(tree_p t) override;
 
 	virtual void reconfigure() override;
-	virtual void on_workspace_enable() override;
-	virtual void on_workspace_disable() override;
 
 	//virtual bool button_press(xcb_button_press_event_t const * ev);
 	//virtual bool button_release(xcb_button_release_event_t const * ev);

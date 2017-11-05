@@ -37,7 +37,7 @@ view_fullscreen_t::view_fullscreen_t(tree_t * ref, client_managed_p client) :
 
 view_fullscreen_t::~view_fullscreen_t()
 {
-
+	release_client();
 }
 
 auto view_fullscreen_t::shared_from_this() -> view_fullscreen_p
@@ -75,8 +75,14 @@ void view_fullscreen_t::acquire_client()
 
 void view_fullscreen_t::release_client()
 {
+	/* already released */
+	if (not _is_client_owner())
+		return;
+
 	if (meta_window_is_fullscreen(_client->meta_window()))
 		meta_window_unmake_fullscreen(_client->meta_window());
+
+	_client->release(this);
 }
 
 void view_fullscreen_t::reconfigure()

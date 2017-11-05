@@ -59,8 +59,6 @@ struct view_fullscreen_t :
 	//virtual void remove(shared_ptr<tree_t> t);
 
 	virtual void reconfigure() override;
-	using view_rebased_t::on_workspace_enable;
-	using view_rebased_t::on_workspace_disable;
 
 	//virtual auto button_press(xcb_button_press_event_t const * ev) -> button_action_e override;
 	//virtual bool button_release(xcb_button_release_event_t const * ev);

@@ -43,8 +43,7 @@ view_t::view_t(tree_t * ref, client_managed_p client) :
 
 view_t::~view_t()
 {
-	if (_is_client_owner())
-		_client->release(this);
+
 }
 
 auto view_t::shared_from_this() -> view_p
@@ -54,23 +53,6 @@ auto view_t::shared_from_this() -> view_p
 
 void view_t::focus(xcb_timestamp_t t) {
 	_client->focus(t);
-}
-
-void view_t::move_all_window()
-{
-	if (not _is_client_owner())
-		return;
-
-	if (_root->is_enable() and _is_visible) {
-		meta_window_unminimize(_client->_meta_window);
-		meta_window_move_resize_frame(_client->_meta_window, FALSE,
-				_client->_absolute_position.x, _client->_absolute_position.y,
-				_client->_absolute_position.w, _client->_absolute_position.h);
-	} else {
-		log::printf("minimize %p\n", _client->meta_window());
-		meta_window_minimize(_client->_meta_window);
-	}
-
 }
 
 bool view_t::_is_client_owner()
@@ -90,16 +72,6 @@ void view_t::remove_this_view()
 	_parent->remove(shared_from_this());
 }
 
-void view_t::acquire_client()
-{
-	_client->acquire(this);
-}
-
-void view_t::release_client()
-{
-	_client->release(this);
-}
-
 void view_t::set_focus_state(bool is_focused)
 {
 //	_client->_has_focus = is_focused;
@@ -108,25 +80,6 @@ void view_t::set_focus_state(bool is_focused)
 //	} else {
 //		_client->net_wm_state_remove(_NET_WM_STATE_FOCUSED);
 //	}
-}
-
-void view_t::reconfigure()
-{
-	move_all_window();
-}
-
-void view_t::on_workspace_enable()
-{
-	acquire_client();
-	reconfigure();
-}
-
-void view_t::on_workspace_disable()
-{
-	if (_is_client_owner()) {
-		log::printf("minimize %p\n", _client->meta_window());
-		meta_window_minimize(_client->meta_window());
-	}
 }
 
 void view_t::hide()

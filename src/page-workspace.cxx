@@ -214,21 +214,11 @@ void workspace_t::attach(shared_ptr<client_managed_t> c) {
 void workspace_t::enable(xcb_timestamp_t time)
 {
 	_is_enable = true;
-	broadcast_on_workspace_enable();
-
-	view_p focus;
-	if(client_focus_history_front(focus)) {
-		set_focus(focus, time);
-	} else {
-		set_focus(nullptr, time);
-	}
-
 }
 
 void workspace_t::disable()
 {
 	_is_enable = false;
-	broadcast_on_workspace_disable();
 }
 
 bool workspace_t::is_enable()
@@ -373,8 +363,6 @@ void workspace_t::switch_floating_to_notebook(view_floating_p vf, xcb_timestamp_
 void workspace_t::switch_fullscreen_to_floating(view_fullscreen_p view, xcb_timestamp_t time)
 {
 	view->remove_this_view();
-
-	//meta_window_unmake_fullscreen(view->_client->_meta_window);
 	auto fv = make_shared<view_floating_t>(view.get());
 	_insert_view_floating(fv, time);
 }

@@ -62,6 +62,10 @@ class client_managed_t;
 using client_managed_p = shared_ptr<client_managed_t>;
 using client_managed_w = weak_ptr<client_managed_t>;
 
+class page_component_t;
+using page_component_p = shared_ptr<page_component_t>;
+using page_component_w = weak_ptr<page_component_t>;
+
 class page_t;
 class theme_t;
 class notebook_t;

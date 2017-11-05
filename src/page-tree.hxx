@@ -169,9 +169,6 @@ public:
 	bool broadcast_leave(ClutterEvent const * ev);
 	bool broadcast_enter(ClutterEvent const * ev);
 
-	void broadcast_on_workspace_enable();
-	void broadcast_on_workspace_disable();
-
 	rect to_root_position(rect const & r) const;
 
 	void raise(shared_ptr<tree_t> t = nullptr);
@@ -195,8 +192,6 @@ public:
 	virtual void clear();
 
 	virtual void reconfigure(); // used to place all windows taking in account the current tree state
-	virtual void on_workspace_enable();
-	virtual void on_workspace_disable();
 
 	virtual auto button_press(ClutterEvent const * ev) -> button_action_e;
 	virtual bool button_release(ClutterEvent const * ev);

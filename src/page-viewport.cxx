@@ -110,16 +110,6 @@ void viewport_t::reconfigure()
 		return;
 }
 
-void viewport_t::on_workspace_enable()
-{
-	reconfigure();
-}
-
-void viewport_t::on_workspace_disable()
-{
-
-}
-
 rect viewport_t::allocation() const {
 	return _work_area;
 }

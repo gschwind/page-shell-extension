@@ -143,16 +143,6 @@ void tree_t::reconfigure()
 
 }
 
-void tree_t::on_workspace_enable()
-{
-
-}
-
-void tree_t::on_workspace_disable()
-{
-
-}
-
 void tree_t::raise(shared_ptr<tree_t> t) {
 
 	if(_parent != nullptr) {
@@ -300,14 +290,6 @@ bool tree_t::broadcast_leave(ClutterEvent const * ev) {
 
 bool tree_t::broadcast_enter(ClutterEvent const * ev) {
 	return _broadcast_deep_first(&tree_t::enter, ev);
-}
-
-void tree_t::broadcast_on_workspace_enable() {
-	_broadcast_root_first(&tree_t::on_workspace_enable);
-}
-
-void tree_t::broadcast_on_workspace_disable() {
-	_broadcast_root_first(&tree_t::on_workspace_disable);
 }
 
 rect tree_t::to_root_position(rect const & r) const {

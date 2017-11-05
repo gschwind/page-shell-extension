@@ -50,7 +50,8 @@ notebook_t::notebook_t(tree_t * ref) :
 
 }
 
-notebook_t::~notebook_t() {
+notebook_t::~notebook_t()
+{
 	//printf("call %s (%p)\n", __PRETTY_FUNCTION__, this);
 	_clients_tab_order.clear();
 }
@@ -71,17 +72,17 @@ void notebook_t::add_client_from_view(view_rebased_p vr, xcb_timestamp_t time)
 	_add_client_view(vn, time);
 }
 
-void notebook_t::replace(shared_ptr<page_component_t> src, shared_ptr<page_component_t> by) {
+void notebook_t::replace(page_component_p src, page_component_p by)
+{
 	throw std::runtime_error("cannot replace in notebook");
 }
 
-void notebook_t::remove_view_notebook(view_notebook_p vn) {
+void notebook_t::remove_view_notebook(view_notebook_p vn)
+{
 	assert(has_key(_clients_tab_order, vn));
 
 	/** update selection **/
 	if (_selected == vn) {
-		// TODO
-		//_start_fading();
 		_selected->hide();
 		_selected = nullptr;
 	}
@@ -931,8 +932,9 @@ rect notebook_t::allocation() const {
 	return _allocation;
 }
 
-void notebook_t::show() {
-	_is_visible = true;
+void notebook_t::show()
+{
+	tree_t::show();
 
 	for (auto & x: _clients_tab_order) {
 		x->hide();
@@ -950,23 +952,6 @@ bool notebook_t::_has_client(client_managed_p c) {
 			return true;
 	}
 	return false;
-}
-
-void notebook_t::on_workspace_enable()
-{
-	for(auto & x: _clients_tab_order) {
-		update_client_position(x);
-		if (x != _selected) {
-			x->hide();
-		} else {
-			x->show();
-		}
-	}
-}
-
-void notebook_t::on_workspace_disable()
-{
-
 }
 
 auto notebook_t::shared_from_this() -> notebook_p {
@@ -1042,19 +1027,13 @@ void notebook_t::_close_view_notebook(view_notebook_p vn, xcb_timestamp_t time)
 	if(_selected != vn)
 		return;
 
-//	move_back<view_notebook_p>(_clients_tab_order, vn);
-//	if(not (_ctx->conf()._enable_shade_windows)
-//		and (_clients_tab_order.size() > 1)
-//		and (not _exposay)) {
-//		activate(_clients_tab_order.front(), time);
-//	}
-
 	/* Note: do not actually close a view_notebook, but prepare the close by activating another notebook if avalaible */
 	vn->delete_window(time);
 
 }
 
-void notebook_t::_set_theme_tab_offset(int x) {
+void notebook_t::_set_theme_tab_offset(int x)
+{
 	if(_theme_client_tabs.size() < 1) {
 		_theme_client_tabs_offset = 0;
 		return;
@@ -1070,7 +1049,8 @@ void notebook_t::_set_theme_tab_offset(int x) {
 	_theme_client_tabs_offset = x;
 }
 
-void notebook_t::queue_redraw() {
+void notebook_t::queue_redraw()
+{
 	tree_t::queue_redraw();
 }
 

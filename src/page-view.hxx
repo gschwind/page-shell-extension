@@ -50,8 +50,8 @@ struct view_t : public tree_t {
 
 	virtual void xxactivate(xcb_timestamp_t time);
 	virtual void remove_this_view();
-	virtual void acquire_client();
-	virtual void release_client();
+	virtual void acquire_client() = 0;
+	virtual void release_client() = 0;
 	virtual void set_focus_state(bool is_focused);
 
 	/**
@@ -63,9 +63,7 @@ struct view_t : public tree_t {
 	virtual auto get_node_name() const -> string;
 	// virtual void remove(shared_ptr<tree_t> t);
 
-	virtual void reconfigure() override;
-	virtual void on_workspace_enable() override;
-	virtual void on_workspace_disable() override;
+	virtual void reconfigure() = 0;
 
 	// virtual auto button_press(xcb_button_press_event_t const * ev)  -> button_action_e;
 	// virtual auto button_release(xcb_button_release_event_t const * ev)  -> button_action_e;

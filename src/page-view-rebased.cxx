@@ -41,48 +41,14 @@ view_rebased_t::view_rebased_t(view_rebased_t * src) :
 
 }
 
-view_rebased_t::~view_rebased_t() {
+view_rebased_t::~view_rebased_t()
+{
 
 }
 
 auto view_rebased_t::shared_from_this() -> view_rebased_p
 {
 	return static_pointer_cast<view_rebased_t>(tree_t::shared_from_this());
-}
-
-void view_rebased_t::_reconfigure_windows()
-{
-	if(not _is_client_owner())
-		return;
-
-	meta_window_change_workspace(_client->meta_window(), _root->_meta_workspace);
-
-	if (_is_visible and _root->is_enable()) {
-		if (meta_window_is_fullscreen(_client->meta_window()))
-			meta_window_unmake_fullscreen(_client->meta_window());
-		meta_window_unminimize(_client->meta_window());
-		meta_window_move_resize_frame(_client->_meta_window, FALSE,
-				_client->_absolute_position.x,
-				_client->_absolute_position.y,
-				_client->_absolute_position.w,
-				_client->_absolute_position.h);
-		//clutter_actor_show(CLUTTER_ACTOR(_client->meta_window_actor()));
-		log::printf("%s\n", _client->_absolute_position.to_string().c_str());
-	} else if (!_is_visible) {
-		log::printf("minimize %p\n", _client->meta_window());
-		meta_window_minimize(_client->meta_window());
-	}
-}
-
-void view_rebased_t::_on_focus_change(client_managed_t * c)
-{
-//	if (_client->_has_focus) {
-//		_client->net_wm_state_add(_NET_WM_STATE_FOCUSED);
-//		_ungrab_button_unsafe();
-//	} else {
-//		_client->net_wm_state_remove(_NET_WM_STATE_FOCUSED);
-//		_grab_button_unsafe();
-//	}
 }
 
 void view_rebased_t::set_focus_state(bool is_focused)
@@ -93,20 +59,6 @@ void view_rebased_t::set_focus_state(bool is_focused)
 //	} else {
 //		_grab_button_unsafe();
 //	}
-}
-
-void view_rebased_t::on_workspace_enable()
-{
-	acquire_client();
-	reconfigure();
-}
-
-void view_rebased_t::on_workspace_disable()
-{
-	if (_is_client_owner()) {
-		log::printf("minimize %p\n", _client->meta_window());
-		meta_window_minimize(_client->meta_window());
-	}
 }
 
 auto view_rebased_t::get_default_view() const -> ClutterActor *

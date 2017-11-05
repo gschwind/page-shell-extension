@@ -176,8 +176,6 @@ public:
 	virtual bool leave(ClutterEvent const * ev) override;
 
 	using tree_t::reconfigure;
-	virtual void on_workspace_enable() override;
-	virtual void on_workspace_disable() override;
 
 	virtual void queue_redraw();
 
@@ -186,7 +184,7 @@ public:
 	 **/
 	virtual void set_allocation(rect const & area);
 	virtual rect allocation() const;
-	virtual void replace(shared_ptr<page_component_t> src, shared_ptr<page_component_t> by);
+	virtual void replace(page_component_p src, page_component_p by);
 	virtual void get_min_allocation(int & width, int & height) const;
 
 	/**

@@ -39,7 +39,7 @@ view_floating_t::view_floating_t(view_rebased_t * src) :
 
 view_floating_t::~view_floating_t()
 {
-
+	release_client();
 }
 
 auto view_floating_t::shared_from_this() -> view_floating_p
@@ -99,7 +99,13 @@ void view_floating_t::acquire_client()
 
 void view_floating_t::release_client()
 {
+	/* already released */
+	if (not _is_client_owner())
+		return;
+
 	g_disconnect_from_obj(_client->meta_window());
+
+	_client->release(this);
 }
 
 void view_floating_t::set_focus_state(bool is_focused)

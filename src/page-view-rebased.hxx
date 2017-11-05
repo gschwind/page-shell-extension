@@ -58,8 +58,6 @@ public:
 	using view_t::remove;
 
 	virtual void reconfigure() = 0;
-	virtual void on_workspace_enable() override;
-	virtual void on_workspace_disable() override;
 
 	//virtual auto button_press(xcb_button_press_event_t const * ev) -> button_action_e override;
 	//virtual bool button_release(xcb_button_release_event_t const * ev);
