@@ -168,5 +168,12 @@ auto client_managed_t::position() -> rect
 	return rect(xrect);
 }
 
+auto client_managed_t::is_minimized() -> gboolean
+{
+	gboolean ret;
+	g_object_get(_meta_window, "minimized", &ret, NULL);
+	return ret;
+}
+
 }
 

@@ -107,6 +107,7 @@ struct client_managed_t :
 	void set_demands_attention();
 	auto title() const -> string;
 	auto position() -> rect;
+	auto is_minimized() -> gboolean;
 
 };
 

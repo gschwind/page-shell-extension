@@ -310,7 +310,6 @@ public:
 	/** debug function that try to print the state of page in stdout **/
 	void print_state() const;
 	void switch_to_workspace(unsigned int workspace, xcb_timestamp_t time);
-	void start_switch_to_workspace_animation(workspace_p workspace);
 	void update_fullscreen_clients_position();
 	void update_workspace_visibility(xcb_timestamp_t time);
 	void process_error(xcb_generic_event_t const * e);

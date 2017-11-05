@@ -65,7 +65,8 @@ auto view_notebook_t::title() const -> string
 	return _client->title();
 }
 
-void view_notebook_t::delete_window(xcb_timestamp_t t) {
+void view_notebook_t::delete_window(xcb_timestamp_t t)
+{
 	log::printf("request close for '%s'\n", title().c_str());
 	_client->delete_window(t);
 }
@@ -79,7 +80,7 @@ auto view_notebook_t::parent_notebook() -> notebook_p
 void view_notebook_t::_handler_position_changed(MetaWindow * window)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
-//	/* disable frame move */
+	/* disable frame move */
 	if (_is_client_owner())
 		meta_window_move_resize_frame(window, FALSE,
 				_client->_absolute_position.x,
@@ -91,7 +92,7 @@ void view_notebook_t::_handler_position_changed(MetaWindow * window)
 void view_notebook_t::_handler_size_changed(MetaWindow * window)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
-//	/* disable frame resize */
+	/* disable frame resize */
 	if (_is_client_owner())
 		meta_window_move_resize_frame(window, FALSE,
 				_client->_absolute_position.x,
@@ -135,7 +136,6 @@ void view_notebook_t::acquire_client()
 
 	reconfigure();
 
-
 }
 
 void view_notebook_t::release_client()
@@ -162,9 +162,11 @@ void view_notebook_t::reconfigure()
 			_client->_absolute_position.h);
 
 	if (_is_visible) {
-		meta_window_unminimize(_client->meta_window());
+		if (_client->is_minimized())
+			meta_window_unminimize(_client->meta_window());
 	} else {
-		meta_window_minimize(_client->meta_window());
+		if (not _client->is_minimized())
+			meta_window_minimize(_client->meta_window());
 	}
 
 }

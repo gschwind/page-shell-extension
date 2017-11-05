@@ -48,7 +48,7 @@ notebook_t::notebook_t(tree_t * ref) :
 	_fading_notebook_layer->show();
 	_tooltips_layer->show();
 
-	this->connect(_ctx->on_focus_changed, this, &notebook_t::_client_focus_change);
+	connect(_ctx->on_focus_changed, this, &notebook_t::_client_focus_change);
 
 }
 
@@ -147,12 +147,14 @@ void notebook_t::_add_client_view(view_notebook_p vn, xcb_timestamp_t time)
 	_selected = vn;
 	if(_is_visible) {
 		_selected->show();
+		_selected->raise();
 		_root->set_focus(_selected, time);
 	} else {
 		_selected->hide();
 	}
 
 	_selected->reconfigure();
+	_ctx->sync_tree_view();
 	_update_all_layout();
 }
 
