@@ -9,10 +9,10 @@ project('page-shell-extension', ['c', 'cpp'],
 # the Cogl and Clutter libraries also use this API version.
 mutter_api_version = '1'
 
-clutter_pc = 'pxmutter-clutter-' + mutter_api_version
-cogl_pc = 'pxmutter-cogl-' + mutter_api_version
-cogl_pango_pc = 'pxmutter-cogl-pango-' + mutter_api_version
-libmutter_pc = 'libpxmutter-' + mutter_api_version
+clutter_pc = 'page-mutter-clutter-' + mutter_api_version
+cogl_pc = 'page-mutter-cogl-' + mutter_api_version
+cogl_pango_pc = 'page-mutter-cogl-pango-' + mutter_api_version
+libmutter_pc = 'libpage-mutter-' + mutter_api_version
 
 croco_req = '>= 0.6.8'
 ecal_req = '>= 3.5.3'
