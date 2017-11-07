@@ -105,10 +105,13 @@ void client_managed_t::_handler_meta_window_unmanaged(MetaWindow * metawindow)
 
 void client_managed_t::_handler_meta_window_workspace_changed(MetaWindow * metawindow)
 {
-	log::printf("call %s\n", __PRETTY_FUNCTION__);
+	log::printf("call %s %x\n", __PRETTY_FUNCTION__, meta_window_get_workspace(_meta_window));
 	auto v = _ctx->current_workspace()->lookup_view_for(shared_from_this());
 	assert(v != nullptr);
 	auto w = _ctx->ensure_workspace(meta_window_get_workspace(_meta_window));
+
+	if (_ctx->current_workspace() == w)
+		return;
 
 	//printf("call %s\n", __PRETTY_FUNCTION__);
 	auto vx = dynamic_pointer_cast<view_floating_t>(v);
