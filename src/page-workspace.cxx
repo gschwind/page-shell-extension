@@ -38,7 +38,32 @@ void workspace_t::_init()
 	push_back(_fullscreen_layer);
 	push_back(_overlays_layer);
 
-	set_to_default_name();
+}
+
+void workspace_t::_handler_meta_workspace_window_added(MetaWorkspace * meta_workspace, MetaWindow * window)
+{
+	log::printf("call %s\n", __PRETTY_FUNCTION__);
+//
+//	auto c = _ctx->lookup_client_managed_with(window);
+//	if (c == nullptr)
+//		return;
+//
+//	if (meta_window_is_tiled(window)) {
+//		insert_as_notebook(c, 0);
+//	} else if (meta_window_is_fullscreen(window)) {
+//		insert_as_fullscreen(c, 0);
+//	} else {
+//		insert_as_floating(c, 0);
+//	}
+
+}
+
+void workspace_t::_handler_meta_workspace_window_removed(MetaWorkspace * meta_workspace, MetaWindow * window)
+{
+	log::printf("call %s\n", __PRETTY_FUNCTION__);
+//	auto c = _ctx->lookup_client_managed_with(window);
+//	if (c != nullptr)
+//		unmanage(c);
 }
 
 workspace_t::workspace_t(page_t * ctx, MetaWorkspace * workspace) :
@@ -51,24 +76,17 @@ workspace_t::workspace_t(page_t * ctx, MetaWorkspace * workspace) :
 	_is_enable{false}
 {
 	_init();
-}
 
-workspace_t::workspace_t(page_t * ctx, guint32 time) :
-	tree_t{this},
-	_ctx{ctx},
-	_meta_workspace{nullptr},
-	_primary_viewport{},
-	_default_pop{},
-	_switch_direction{WORKSPACE_SWITCH_LEFT},
-	_is_enable{false}
-{
-	_meta_workspace = meta_screen_append_new_workspace(ctx->_screen, FALSE, time);
-	_init();
+	g_connect(workspace, "window-added",
+			&workspace_t::_handler_meta_workspace_window_added);
+	g_connect(workspace, "window-removed",
+			&workspace_t::_handler_meta_workspace_window_removed);
+
 }
 
 workspace_t::~workspace_t()
 {
-
+	log::printf("call %s\n", __PRETTY_FUNCTION__);
 }
 
 auto workspace_t::shared_from_this() -> workspace_p
@@ -193,22 +211,6 @@ auto workspace_t::ensure_default_notebook() -> notebook_p {
 
 	return _default_pop.lock();
 
-}
-
-void workspace_t::attach(shared_ptr<client_managed_t> c) {
-	assert(c != nullptr);
-
-//	if(c->is(MANAGED_FULLSCREEN)) {
-//		_fullscreen_layer->push_back(c);
-//	} else {
-//		_floating_layer->push_back(c);
-//	}
-//
-//	if(_is_visible) {
-//		c->show();
-//	} else {
-//		c->hide();
-//	}
 }
 
 void workspace_t::enable(xcb_timestamp_t time)
@@ -427,20 +429,6 @@ void workspace_t::add_fullscreen(tree_p c)
 void workspace_t::add_overlay(tree_p t)
 {
 	_overlays_layer->push_back(t);
-}
-
-void workspace_t::set_name(string const & s) {
-	_name = s;
-}
-
-auto workspace_t::name() -> string const & {
-	return _name;
-}
-
-void workspace_t::set_to_default_name() {
-	std::ostringstream os;
-	os << "Workspace #" << meta_workspace_index(_meta_workspace);
-	_name = os.str();
 }
 
 void workspace_t::set_primary_viewport(shared_ptr<viewport_t> v) {

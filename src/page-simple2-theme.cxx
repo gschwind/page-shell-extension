@@ -77,8 +77,6 @@ rect simple2_theme_t::compute_notebook_menu_position(
 
 simple2_theme_t::simple2_theme_t(config_handler_t & conf)
 {
-	backgroun_px = nullptr;
-
 	notebook.margin.top = 4;
 	notebook.margin.bottom = 4;
 	notebook.margin.left = 4;
@@ -225,14 +223,6 @@ simple2_theme_t::simple2_theme_t(config_handler_t & conf)
 	bind_button_s = nullptr;
 	left_scroll_arrow_button_s = nullptr;
 	right_scroll_arrow_button_s = nullptr;
-
-	has_background = conf.has_key("simple_theme", "background_png");
-	if(has_background)
-		background_file = conf.get_string("simple_theme", "background_png");
-	scale_mode = "center";
-
-	if(conf.has_key("simple_theme", "scale_mode"))
-		scale_mode = conf.get_string("simple_theme", "scale_mode");
 
 	/* open icons */
 	if (hsplit_button_s == nullptr) {
@@ -429,11 +419,7 @@ void simple2_theme_t::render_notebook(cairo_t * cr, theme_notebook_t const * n) 
 		CHECK_CAIRO(cairo_save(cr)); // save #3
 		cairo_clip(cr, n->allocation);
 		cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-		if (backgroun_px != nullptr) {
-			CHECK_CAIRO(cairo_set_source_surface(cr, backgroun_px, -n->root_x, -n->root_y));
-		} else {
-			CHECK_CAIRO(cairo_set_source_color_alpha(cr, default_background_color));
-		}
+		CHECK_CAIRO(cairo_set_source_color_alpha(cr, default_background_color));
 		CHECK_CAIRO(cairo_paint(cr));
 		CHECK_CAIRO(cairo_restore(cr)); // restore #3
 	}
@@ -462,11 +448,7 @@ void simple2_theme_t::render_notebook(cairo_t * cr, theme_notebook_t const * n) 
 			{
 				CHECK_CAIRO(cairo_save(cr)); // store #1
 				cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-				if (backgroun_px != nullptr) {
-					CHECK_CAIRO(cairo_set_source_surface(cr, backgroun_px, -n->root_x, -n->root_y));
-				} else {
-					CHECK_CAIRO(cairo_set_source_color_alpha(cr, default_background_color));
-				}
+				CHECK_CAIRO(cairo_set_source_color_alpha(cr, default_background_color));
 				CHECK_CAIRO(cairo_rectangle(cr, a.x, a.y, a.w, a.h));
 				CHECK_CAIRO(cairo_fill(cr));
 				CHECK_CAIRO(cairo_restore(cr)); // restore #1
@@ -1003,11 +985,7 @@ void simple2_theme_t::render_split(cairo_t * cr,
 
 	CHECK_CAIRO(cairo_save(cr));
 	cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-	if (backgroun_px != nullptr) {
-		CHECK_CAIRO(cairo_set_source_surface(cr, backgroun_px, -s->root_x, -s->root_y));
-	} else {
-		CHECK_CAIRO(cairo_set_source_color_alpha(cr, default_background_color));
-	}
+	CHECK_CAIRO(cairo_set_source_color_alpha(cr, default_background_color));
 	CHECK_CAIRO(cairo_rectangle(cr, sarea.x, sarea.y, sarea.w, sarea.h));
 	CHECK_CAIRO(cairo_fill(cr));
 	CHECK_CAIRO(cairo_restore(cr));
@@ -1062,11 +1040,7 @@ void simple2_theme_t::render_empty(cairo_t * cr, rect const & area) const {
 	CHECK_CAIRO(cairo_save(cr));
 	cairo_clip(cr, area);
 	cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-	if (backgroun_px != nullptr) {
-		CHECK_CAIRO(cairo_set_source_surface(cr, backgroun_px, 0.0, 0.0));
-	} else {
-		CHECK_CAIRO(cairo_set_source_color_alpha(cr, default_background_color));
-	}
+	CHECK_CAIRO(cairo_set_source_color_alpha(cr, default_background_color));
 	CHECK_CAIRO(cairo_paint(cr));
 	CHECK_CAIRO(cairo_restore(cr));
 }
@@ -1563,199 +1537,6 @@ void simple2_theme_t::draw_hatched_i_rect(cairo_t * cr, int space, int x, int y,
 
 }
 
-void simple2_theme_t::update(int width, int height) {
-	create_background_img(width, height);
-}
-
-void simple2_theme_t::create_background_img(int width, int height) {
-
-	if(backgroun_px) {
-		cairo_surface_destroy(backgroun_px);
-		backgroun_px = nullptr;
-	}
-
-	if (has_background) {
-		if(not exists(background_file.c_str()))
-			throw wrong_config_file_t("background file not found!");
-
-		cairo_surface_t * tmp = cairo_image_surface_create_from_png(
-				background_file.c_str());
-
-		cairo_surface_t * image_background_s = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
-
-		/**
-		 * WARNING: transform order and set_source_surface have huge
-		 * Consequence.
-		 **/
-
-		double src_width = cairo_image_surface_get_width(tmp);
-		double src_height = cairo_image_surface_get_height(tmp);
-
-		if (src_width > 0 and src_height > 0) {
-
-			if (scale_mode == "stretch") {
-
-				cairo_t * cr = cairo_create(image_background_s);
-
-				CHECK_CAIRO(::cairo_set_source_rgb(cr, 0.5, 0.5, 0.5));
-				CHECK_CAIRO(cairo_rectangle(cr, 0, 0, width, height));
-				CHECK_CAIRO(cairo_fill(cr));
-
-				double x_ratio = width / src_width;
-				double y_ratio = height / src_height;
-				CHECK_CAIRO(cairo_scale(cr, x_ratio, y_ratio));
-				CHECK_CAIRO(cairo_set_source_surface(cr, tmp, 0, 0));
-				CHECK_CAIRO(cairo_rectangle(cr, 0, 0, src_width, src_height));
-				CHECK_CAIRO(cairo_fill(cr));
-
-				warn(cairo_get_reference_count(cr) == 1);
-				cairo_destroy(cr);
-
-			} else if (scale_mode == "zoom") {
-
-				cairo_t * cr = cairo_create(image_background_s);
-
-				CHECK_CAIRO(::cairo_set_source_rgb(cr, 0.5, 0.5, 0.5));
-				CHECK_CAIRO(cairo_rectangle(cr, 0, 0, width, height));
-				CHECK_CAIRO(cairo_fill(cr));
-
-				double x_ratio = width / (double)src_width;
-				double y_ratio = height / (double)src_height;
-
-				double x_offset;
-				double y_offset;
-
-				if (x_ratio > y_ratio) {
-
-					double yp = height / x_ratio;
-
-					x_offset = 0;
-					y_offset = (yp - src_height) / 2.0;
-
-					CHECK_CAIRO(cairo_scale(cr, x_ratio, x_ratio));
-					CHECK_CAIRO(cairo_set_source_surface(cr, tmp, x_offset, y_offset));
-					CHECK_CAIRO(cairo_rectangle(cr, 0, 0, src_width, yp));
-					CHECK_CAIRO(cairo_fill(cr));
-
-				} else {
-
-					double xp = width / y_ratio;
-
-					x_offset = (xp - src_width) / 2.0;
-					y_offset = 0;
-
-					CHECK_CAIRO(cairo_scale(cr, y_ratio, y_ratio));
-					CHECK_CAIRO(cairo_set_source_surface(cr, tmp, x_offset, y_offset));
-					CHECK_CAIRO(cairo_rectangle(cr, 0, 0, xp, src_height));
-					CHECK_CAIRO(cairo_fill(cr));
-				}
-
-				warn(cairo_get_reference_count(cr) == 1);
-				cairo_destroy(cr);
-
-			} else if (scale_mode == "center") {
-
-				cairo_t * cr = cairo_create(image_background_s);
-
-				CHECK_CAIRO(::cairo_set_source_rgb(cr, 0.5, 0.5, 0.5));
-				CHECK_CAIRO(cairo_rectangle(cr, 0, 0, width, height));
-				CHECK_CAIRO(cairo_fill(cr));
-
-				double x_offset = (width - src_width) / 2.0;
-				double y_offset = (height - src_height) / 2.0;
-
-				CHECK_CAIRO(cairo_set_source_surface(cr, tmp, x_offset, y_offset));
-				CHECK_CAIRO(cairo_rectangle(cr, max<double>(0.0, x_offset),
-						max<double>(0.0, y_offset),
-						min<double>(src_width, width),
-						min<double>(src_height, height)));
-				CHECK_CAIRO(cairo_fill(cr));
-
-				warn(cairo_get_reference_count(cr) == 1);
-				cairo_destroy(cr);
-
-			} else if (scale_mode == "scale" || scale_mode == "span") {
-
-				cairo_t * cr = cairo_create(image_background_s);
-
-				CHECK_CAIRO(::cairo_set_source_rgb(cr, 0.5, 0.5, 0.5));
-				CHECK_CAIRO(cairo_rectangle(cr, 0, 0, width, height));
-				CHECK_CAIRO(cairo_fill(cr));
-
-				double x_ratio = width / src_width;
-				double y_ratio = height / src_height;
-
-				double x_offset, y_offset;
-
-				if (x_ratio < y_ratio) {
-
-					double yp = height / x_ratio;
-
-					x_offset = 0;
-					y_offset = (yp - src_height) / 2.0;
-
-					CHECK_CAIRO(cairo_scale(cr, x_ratio, x_ratio));
-					CHECK_CAIRO(cairo_set_source_surface(cr, tmp, x_offset, y_offset));
-					CHECK_CAIRO(cairo_rectangle(cr, x_offset, y_offset, src_width, src_height));
-					CHECK_CAIRO(cairo_fill(cr));
-
-				} else {
-					double xp = width / y_ratio;
-
-					y_offset = 0;
-					x_offset = (xp - src_width) / 2.0;
-
-					CHECK_CAIRO(cairo_scale(cr, y_ratio, y_ratio));
-					CHECK_CAIRO(cairo_set_source_surface(cr, tmp, x_offset, y_offset));
-					CHECK_CAIRO(cairo_rectangle(cr, x_offset, y_offset, src_width, src_height));
-					CHECK_CAIRO(cairo_fill(cr));
-				}
-
-				warn(cairo_get_reference_count(cr) == 1);
-				cairo_destroy(cr);
-
-			} else if (scale_mode == "tile") {
-
-				cairo_t * cr = cairo_create(image_background_s);
-				CHECK_CAIRO(::cairo_set_source_rgb(cr, 0.5, 0.5, 0.5));
-				CHECK_CAIRO(cairo_rectangle(cr, 0, 0, width, height));
-				CHECK_CAIRO(cairo_fill(cr));
-
-				for (double x = 0; x < width; x += src_width) {
-					for (double y = 0; y < height; y += src_height) {
-						CHECK_CAIRO(cairo_identity_matrix(cr));
-						CHECK_CAIRO(cairo_translate(cr, x, y));
-						CHECK_CAIRO(cairo_set_source_surface(cr, tmp, 0, 0));
-						CHECK_CAIRO(cairo_rectangle(cr, 0, 0, width, height));
-						CHECK_CAIRO(cairo_fill(cr));
-					}
-				}
-
-				warn(cairo_get_reference_count(cr) == 1);
-				cairo_destroy(cr);
-
-			}
-
-		}
-
-		warn(cairo_surface_get_reference_count(tmp) == 1);
-		cairo_surface_destroy(tmp);
-
-		/* copy background to pixmap */
-		backgroun_px = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
-
-		cairo_t * cr = cairo_create(backgroun_px);
-		cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-		cairo_set_source_surface(cr, image_background_s, 0.0, 0.0);
-		cairo_paint(cr);
-		cairo_destroy(cr);
-
-		cairo_surface_destroy(image_background_s);
-
-	}
-
-}
-
 void simple2_theme_t::render_popup_split(cairo_t * cr, theme_split_t const * s,
 		double current_split) const {
 
@@ -1960,23 +1741,23 @@ auto simple2_theme_t::workspace_switch_popup(string const & workspace_name) cons
 
 }
 
-auto simple2_theme_t::get_background() const -> cairo_surface_t * {
-	return backgroun_px;
-}
-
-color_t const & simple2_theme_t::get_focused_color() const {
+color_t const & simple2_theme_t::get_focused_color() const
+{
 	return notebook_active_background_color;
 }
 
-color_t const & simple2_theme_t::get_selected_color() const {
+color_t const & simple2_theme_t::get_selected_color() const
+{
 	return notebook_selected_background_color;
 }
 
-color_t const & simple2_theme_t::get_normal_color() const {
+color_t const & simple2_theme_t::get_normal_color() const
+{
 	return notebook_normal_background_color;
 }
 
-color_t const & simple2_theme_t::get_mouse_over_color() const {
+color_t const & simple2_theme_t::get_mouse_over_color() const
+{
 	return notebook_mouse_over_background_color;
 }
 

@@ -322,12 +322,7 @@ void page_t::_handler_plugin_start(MetaDisplay * display, MetaScreen * screen, C
 
 	log::printf("n_work_space =%d\n", meta_screen_get_n_workspaces(_screen));
 
-
 	_current_workspace = ensure_workspace(meta_screen_get_active_workspace(_screen));
-
-	MetaRectangle area;
-	meta_workspace_get_work_area_all_monitors(_current_workspace->_meta_workspace, &area);
-	_theme->update(area.width, area.height);
 
 	_viewport_group = clutter_actor_new();
 	clutter_actor_show(_viewport_group);
@@ -670,10 +665,19 @@ void page_t::_handler_screen_workspace_added(MetaScreen * screen, gint index)
 void page_t::_handler_screen_workspace_removed(MetaScreen * screen, gint index)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
-	// guess that no more windows belong to this workspace.
-	auto w = meta_screen_get_workspace_by_index(screen, index);
-	if (has_key(_workspace_map, w))
-		_workspace_map.erase(w);
+
+	{
+		/* safest way to update workspace map, the index provided to remove is obsolete */
+		map<MetaWorkspace *, workspace_p> new_map;
+		for (auto wl = meta_screen_get_workspaces(screen); wl != NULL; wl = wl->next) {
+			auto w = reinterpret_cast<MetaWorkspace *>(wl->data);
+			if (has_key(_workspace_map, w))
+				new_map[w] = _workspace_map[w];
+		}
+		std::swap(_workspace_map, new_map);
+	}
+
+	log::printf("exit %s\n", __PRETTY_FUNCTION__);
 }
 
 void page_t::_handler_screen_workspace_switched(MetaScreen * screen, gint arg1, gint arg2, MetaMotionDirection arg3)
@@ -966,13 +970,6 @@ shared_ptr<workspace_t> page_t::find_workspace_of(shared_ptr<tree_t> n) {
  **/
 void page_t::update_viewport_layout()
 {
-	for (auto & w : _workspace_map) {
-		w.second->update_viewports_layout();
-	}
-
-	MetaRectangle area;
-	meta_workspace_get_work_area_all_monitors(META_WORKSPACE(current_workspace()->_meta_workspace), &area);
-	_theme->update(area.width, area.height);
 
 	clutter_actor_set_position(_overlay_group, 0.0, 0.0);
 	clutter_actor_set_size(_overlay_group, -1, -1);
@@ -982,7 +979,6 @@ void page_t::update_viewport_layout()
 	for(auto & w: _workspace_map) {
 		w.second->update_viewports_layout();
 	}
-
 }
 
 void page_t::remove_viewport(shared_ptr<workspace_t> d, shared_ptr<viewport_t> v) {

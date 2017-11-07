@@ -33,9 +33,6 @@ struct workspace_t: public tree_t {
 	MetaWorkspace * _meta_workspace;
 
 private:
-
-	string _name;
-
 	/* list of viewports in creation order, to make a sane reconfiguration */
 	vector<viewport_p> _viewport_outputs;
 
@@ -57,13 +54,17 @@ private:
 
 	void _init();
 
+	/* disable copy */
+	workspace_t(workspace_t const & v) = delete;
+	workspace_t & operator= (workspace_t const &) = delete;
+
+	void _handler_meta_workspace_window_added(MetaWorkspace * meta_workspace, MetaWindow * window);
+	void _handler_meta_workspace_window_removed(MetaWorkspace * meta_workspace, MetaWindow * window);
+
 public:
 	view_w _net_active_window;
 
 	workspace_t(page_t * ctx, MetaWorkspace * workspace);
-	workspace_t(page_t * ctx, guint time);
-	workspace_t(workspace_t const & v) = delete;
-	workspace_t & operator= (workspace_t const &) = delete;
 
 	virtual ~workspace_t();
 
@@ -78,7 +79,6 @@ public:
 	void set_primary_viewport(viewport_p v);
 	void update_viewports_layout();
 	void remove_viewport(viewport_p v);
-	void attach(shared_ptr<client_managed_t> c) __attribute__((deprecated));
 
 	void enable(xcb_timestamp_t time);
 	void disable();
@@ -112,10 +112,6 @@ public:
 	void add_floating(tree_p c);
 	void add_fullscreen(tree_p c);
 	void add_overlay(tree_p c);
-
-	void set_name(string const & s);
-	auto name() -> string const &;
-	void set_to_default_name();
 
 	auto lookup_view_for(client_managed_p c) const -> view_p;
 	void set_focus(view_p new_focus, xcb_timestamp_t tfocus);

@@ -176,8 +176,8 @@ private:
 
 private:
 	/* do no allow copy */
-	page_t(page_t const &);
-	page_t &operator=(page_t const &);
+	page_t(page_t const &) = delete;
+	page_t &operator=(page_t const &) = delete;
 
 public:
 	page_t();

@@ -56,8 +56,12 @@ viewport_t::viewport_t(tree_t * ref, rect const & area) :
 }
 
 viewport_t::~viewport_t() {
+	log::printf("call %s\n", __PRETTY_FUNCTION__);
+	g_disconnect_from_obj(_canvas);
+	g_disconnect_from_obj(_default_view);
 	g_object_unref(_canvas);
 	g_object_unref(_default_view);
+	log::printf("exit %s\n", __PRETTY_FUNCTION__);
 }
 
 void viewport_t::update_work_area(rect const & area)

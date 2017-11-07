@@ -157,47 +157,25 @@ void tiny_theme_t::render_notebook(cairo_t * cr, theme_notebook_t const * n) con
 	cairo_set_line_width(cr, 1.0);
 	cairo_new_path(cr);
 
-	if(backgroun_px != nullptr) {
-		rect tab_area{n->allocation};
-		tab_area.h = notebook.tab_height;
+	rect tab_area{n->allocation};
+	tab_area.h = notebook.tab_height;
 
-		cairo_save(cr);
-		cairo_clip(cr, tab_area);
-		cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-		cairo_set_source_surface(cr, backgroun_px, -n->root_x, -n->root_y);
-		cairo_paint(cr);
-		cairo_restore(cr);
+	cairo_save(cr);
+	cairo_clip(cr, tab_area);
+	cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+	cairo_set_source_color(cr, default_background_color);
+	cairo_paint(cr);
+	cairo_restore(cr);
 
-		rect body_area{n->allocation};
-		body_area.y += notebook.tab_height;
-		body_area.h -= notebook.tab_height;
-		cairo_save(cr);
-		cairo_clip(cr, body_area);
-		cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-		cairo_set_source_surface(cr, backgroun_px, -n->root_x, -n->root_y);
-		cairo_paint(cr);
-		cairo_restore(cr);
-	} else {
-		rect tab_area{n->allocation};
-		tab_area.h = notebook.tab_height;
-
-		cairo_save(cr);
-		cairo_clip(cr, tab_area);
-		cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-		cairo_set_source_color(cr, default_background_color);
-		cairo_paint(cr);
-		cairo_restore(cr);
-
-		rect body_area{n->allocation};
-		body_area.y += notebook.tab_height;
-		body_area.h -= notebook.tab_height;
-		cairo_save(cr);
-		cairo_clip(cr, body_area);
-		cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-		cairo_set_source_color(cr, default_background_color);
-		cairo_paint(cr);
-		cairo_restore(cr);
-	}
+	rect body_area{n->allocation};
+	body_area.y += notebook.tab_height;
+	body_area.h -= notebook.tab_height;
+	cairo_save(cr);
+	cairo_clip(cr, body_area);
+	cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+	cairo_set_source_color(cr, default_background_color);
+	cairo_paint(cr);
+	cairo_restore(cr);
 
 	cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
 
@@ -227,11 +205,7 @@ void tiny_theme_t::render_notebook(cairo_t * cr, theme_notebook_t const * n) con
 
 			cairo_save(cr);
 			cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-			if (backgroun_px != nullptr) {
-				cairo_set_source_surface(cr, backgroun_px, -n->root_x, -n->root_y);
-			} else {
-				cairo_set_source_color(cr, default_background_color);
-			}
+			cairo_set_source_color(cr, default_background_color);
 			cairo_rectangle(cr, a.x, a.y, a.w, a.h);
 			cairo_fill(cr);
 			cairo_restore(cr);
@@ -456,13 +430,7 @@ void tiny_theme_t::render_notebook_selected(
 	/** clip tabs **/
 	cairo_rectangle_arc_corner(cr, b.x, b.y, b.w, b.h+30.0, 6.5, CAIRO_CORNER_TOP);
 	cairo_clip(cr);
-
-	if(has_background) {
-		cairo_set_source_surface(cr, backgroun_px, -n.root_x, -n.root_y);
-	} else {
-		cairo_set_source_color(cr, default_background_color);
-	}
-
+	cairo_set_source_color(cr, default_background_color);
 	cairo_paint(cr);
 
 	cairo_set_source_color_alpha(cr, background_color);

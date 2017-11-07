@@ -17,6 +17,9 @@
 #include "page-utils.hxx"
 #include "page-grab-handlers.hxx"
 #include "page-view.hxx"
+#include "page-view-floating.hxx"
+#include "page-view-notebook.hxx"
+#include "page-view-fullscreen.hxx"
 
 namespace page {
 
@@ -103,6 +106,32 @@ void client_managed_t::_handler_meta_window_unmanaged(MetaWindow * metawindow)
 void client_managed_t::_handler_meta_window_workspace_changed(MetaWindow * metawindow)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
+	auto v = _ctx->current_workspace()->lookup_view_for(shared_from_this());
+	assert(v != nullptr);
+	auto w = _ctx->ensure_workspace(meta_window_get_workspace(_meta_window));
+
+	//printf("call %s\n", __PRETTY_FUNCTION__);
+	auto vx = dynamic_pointer_cast<view_floating_t>(v);
+	if (vx) {
+		vx->remove_this_view();
+		w->insert_as_floating(v->_client, 0);
+		return;
+	}
+
+	auto vf = dynamic_pointer_cast<view_fullscreen_t>(v);
+	if (vf) {
+		vf->remove_this_view();
+		w->insert_as_fullscreen(v->_client, 0);
+		return;
+	}
+
+	auto vn = dynamic_pointer_cast<view_notebook_t>(v);
+	if (vn) {
+		vn->remove_this_view();
+		w->insert_as_notebook(v->_client, 0);
+		return;
+	}
+
 }
 
 
