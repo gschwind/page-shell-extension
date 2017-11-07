@@ -213,7 +213,7 @@ auto workspace_t::ensure_default_notebook() -> notebook_p {
 
 }
 
-void workspace_t::enable(xcb_timestamp_t time)
+void workspace_t::enable()
 {
 	_is_enable = true;
 }
@@ -253,8 +253,7 @@ void workspace_t::insert_as_fullscreen(shared_ptr<client_managed_t> mw, shared_p
 	assert(v != nullptr);
 
 	auto fv = make_shared<view_fullscreen_t>(this, mw);
-	if(is_enable())
-		fv->acquire_client();
+	fv->acquire_client();
 
 	// unfullscreen client that already use this screen
 	for (auto & x : gather_children_root_first<view_fullscreen_t>()) {
@@ -479,10 +478,7 @@ auto workspace_t::_find_viewport_of(tree_p t) -> viewport_p {
 void workspace_t::_insert_view_floating(view_floating_p fv, xcb_timestamp_t time)
 {
 	auto c = fv->_client;
-
-	if (is_enable())
-		fv->acquire_client();
-
+	fv->acquire_client();
 	add_floating(fv);
 	fv->raise();
 	fv->show();

@@ -109,8 +109,6 @@ void view_notebook_t::remove_this_view()
 
 void view_notebook_t::acquire_client()
 {
-	assert(_root->is_enable());
-
 	/* we already are the owner */
 	if (_is_client_owner())
 		return;

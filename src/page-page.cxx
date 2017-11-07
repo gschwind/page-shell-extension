@@ -366,7 +366,6 @@ void page_t::_handler_plugin_start(MetaDisplay * display, MetaScreen * screen, C
 	g_connect(_display, "window-created", &page_t::_handler_meta_display_window_created);
 
 	update_viewport_layout();
-	update_workspace_visibility(0);
 	sync_tree_view();
 
 	switch_to_workspace(meta_screen_get_active_workspace_index(_screen), 0);
@@ -1066,23 +1065,11 @@ void page_t::switch_to_workspace(unsigned int workspace_id, xcb_timestamp_t time
 
 	if (workspace != current_workspace()) {
 		log::printf("switch to workspace #%p\n", meta_workspace);
+		_current_workspace->disable();
 		_current_workspace = workspace;
-		update_workspace_visibility(time);
+		_current_workspace->enable();
+		sync_tree_view();
 	}
-}
-
-void page_t::update_workspace_visibility(xcb_timestamp_t time) {
-	/** and show the workspace that have to be show **/
-	_current_workspace->enable(time);
-
-	/** hide only workspace that must be hidden first **/
-	for(auto & w: _workspace_map) {
-		if(w.second != _current_workspace) {
-			w.second->disable();
-		}
-	}
-
-	sync_tree_view();
 }
 
 /* Inspired from openbox */

@@ -80,7 +80,7 @@ public:
 	void update_viewports_layout();
 	void remove_viewport(viewport_p v);
 
-	void enable(xcb_timestamp_t time);
+	void enable();
 	void disable();
 	bool is_enable();
 

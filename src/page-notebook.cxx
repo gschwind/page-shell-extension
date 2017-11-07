@@ -128,8 +128,7 @@ void notebook_t::_set_selected(view_notebook_p c) {
 void notebook_t::_add_client_view(view_notebook_p vn, xcb_timestamp_t time)
 {
 	_notebook_view_layer->push_back(vn);
-	if(_root->is_enable())
-		vn->acquire_client();
+	vn->acquire_client();
 
 	_clients_tab_order.push_front(vn);
 

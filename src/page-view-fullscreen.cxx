@@ -52,8 +52,6 @@ void view_fullscreen_t::remove_this_view()
 
 void view_fullscreen_t::acquire_client()
 {
-	assert(_root->is_enable());
-
 	/* we already are the owner */
 	if (_is_client_owner())
 		return;

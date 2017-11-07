@@ -311,7 +311,6 @@ public:
 	void print_state() const;
 	void switch_to_workspace(unsigned int workspace, xcb_timestamp_t time);
 	void update_fullscreen_clients_position();
-	void update_workspace_visibility(xcb_timestamp_t time);
 	void process_error(xcb_generic_event_t const * e);
 	void start_compositor();
 	void stop_compositor();
