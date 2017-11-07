@@ -29,13 +29,13 @@
 namespace page {
 
 view_notebook_t::view_notebook_t(tree_t * ref, client_managed_p client) :
-	view_rebased_t{ref, client}
+	view_t{ref, client}
 {
 
 }
 
-view_notebook_t::view_notebook_t(view_rebased_t * src) :
-	view_rebased_t{src}
+view_notebook_t::view_notebook_t(view_t * src) :
+	view_t{src, src->_client}
 {
 
 }

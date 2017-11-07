@@ -21,13 +21,13 @@
 #ifndef SRC_VIEW_FULLSCREEN_HXX_
 #define SRC_VIEW_FULLSCREEN_HXX_
 
-#include "page-view-rebased.hxx"
+#include "page-view.hxx"
 #include "page-client-managed.hxx"
 
 namespace page {
 
 struct view_fullscreen_t :
-		public view_rebased_t
+		public view_t
 {
 
 	managed_window_type_e revert_type;

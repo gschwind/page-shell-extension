@@ -22,17 +22,19 @@
 #define SRC_VIEW_FLOATING_HXX_
 
 #include "page-page-types.hxx"
-#include "page-view-rebased.hxx"
+#include "page-view.hxx"
 extern "C" {
 #include "meta/meta-plugin.h"
 }
 
 namespace page {
 
-struct view_floating_t : public view_rebased_t {
+struct view_floating_t :
+	public view_t
+{
 
 	view_floating_t(tree_t * ref, client_managed_p client);
-	view_floating_t(view_rebased_t * src);
+	view_floating_t(view_t * src);
 	virtual ~view_floating_t();
 
 	auto shared_from_this() -> view_floating_p;

@@ -59,7 +59,6 @@ libshell_private_headers = [
   'page-view.hxx',
   'page-view-notebook.hxx',
   'page-viewport.hxx',
-  'page-view-rebased.hxx',
   'page-workspace.hxx'
 ]
 
@@ -87,7 +86,6 @@ libshell_private_sources = [
   'page-view-fullscreen.cxx',
   'page-view-notebook.cxx',
   'page-viewport.cxx',
-  'page-view-rebased.cxx',
   'page-workspace.cxx',
   'page-init.cxx'
 ]

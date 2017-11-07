@@ -54,10 +54,6 @@ class view_floating_t;
 using view_floating_p = shared_ptr<view_floating_t>;
 using view_floating_w = weak_ptr<view_floating_t>;
 
-class view_rebased_t;
-using view_rebased_p = shared_ptr<view_rebased_t>;
-using view_rebased_w = weak_ptr<view_rebased_t>;
-
 class client_managed_t;
 using client_managed_p = shared_ptr<client_managed_t>;
 using client_managed_w = weak_ptr<client_managed_t>;

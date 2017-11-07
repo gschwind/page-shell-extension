@@ -29,7 +29,7 @@
 namespace page {
 
 view_fullscreen_t::view_fullscreen_t(tree_t * ref, client_managed_p client) :
-		view_rebased_t{ref, client},
+		view_t{ref, client},
 		revert_type{MANAGED_FLOATING}
 {
 

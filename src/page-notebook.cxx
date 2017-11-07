@@ -66,7 +66,7 @@ bool notebook_t::add_client(client_managed_p c, xcb_timestamp_t time) {
 	return true;
 }
 
-void notebook_t::add_client_from_view(view_rebased_p vr, xcb_timestamp_t time)
+void notebook_t::add_client_from_view(view_p vr, xcb_timestamp_t time)
 {
 	assert(not _has_client(vr->_client));
 	assert(vr != nullptr);

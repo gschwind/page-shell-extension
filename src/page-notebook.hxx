@@ -196,7 +196,7 @@ public:
 	void update_client_position(view_notebook_p c);
 	void iconify_client(view_notebook_p x);
 	bool add_client(client_managed_p c, xcb_timestamp_t time);
-	void add_client_from_view(view_rebased_p c, xcb_timestamp_t time);
+	void add_client_from_view(view_p c, xcb_timestamp_t time);
 
 	/* TODO : remove it */
 	friend struct grab_bind_view_notebook_t;

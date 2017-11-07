@@ -27,15 +27,17 @@ extern "C" {
 
 #include "page-page-types.hxx"
 
-#include "page-view-rebased.hxx"
+#include "page-view.hxx"
 #include "page-icon-handler.hxx"
 
 namespace page {
 
-struct view_notebook_t : public view_rebased_t {
+struct view_notebook_t :
+	public view_t
+{
 
 	view_notebook_t(tree_t * ref, client_managed_p client);
-	view_notebook_t(view_rebased_t * src);
+	view_notebook_t(view_t * src);
 	virtual ~view_notebook_t();
 
 	auto shared_from_this() -> view_notebook_p;
