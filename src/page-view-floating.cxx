@@ -78,8 +78,6 @@ void view_floating_t::acquire_client()
 	/* release the previous owner and aquire the client */
 	_client->acquire(this);
 
-	meta_window_change_workspace(_client->meta_window(), _root->_meta_workspace);
-
 	meta_window_unminimize(_client->meta_window());
 	if (meta_window_is_fullscreen(_client->meta_window()))
 		meta_window_unmake_fullscreen(_client->meta_window());

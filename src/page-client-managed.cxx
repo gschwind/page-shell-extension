@@ -105,36 +105,76 @@ void client_managed_t::_handler_meta_window_unmanaged(MetaWindow * metawindow)
 
 void client_managed_t::_handler_meta_window_workspace_changed(MetaWindow * metawindow)
 {
-	log::printf("call %s %x\n", __PRETTY_FUNCTION__, meta_window_get_workspace(_meta_window));
-	auto v = _ctx->current_workspace()->lookup_view_for(shared_from_this());
-	assert(v != nullptr);
-	auto w = _ctx->ensure_workspace(meta_window_get_workspace(_meta_window));
+	log::printf("call %s %x %s\n", __PRETTY_FUNCTION__,
+			meta_window_get_workspace(_meta_window),
+			meta_window_is_on_all_workspaces(_meta_window)?"true":"false");
 
-	if (_ctx->current_workspace() == w)
-		return;
+	assert(_current_owner_view != nullptr);
+	auto cw = _current_owner_view->_root->shared_from_this();
+	auto v = _current_owner_view->shared_from_this();
 
-	//printf("call %s\n", __PRETTY_FUNCTION__);
-	auto vx = dynamic_pointer_cast<view_floating_t>(v);
-	if (vx) {
-		vx->remove_this_view();
-		w->insert_as_floating(v->_client, 0);
-		return;
+	if (meta_window_is_on_all_workspaces(_meta_window)) {
+		auto vx = dynamic_pointer_cast<view_floating_t>(v);
+		if (vx) {
+			vx->remove_this_view();
+			for (auto &w: _ctx->_workspace_map) {
+				w.second->insert_as_floating(v->_client, 0);
+			}
+			auto x = _ctx->current_workspace()->lookup_view_for(shared_from_this());
+			x->acquire_client();
+			return;
+		}
+
+		auto vf = dynamic_pointer_cast<view_fullscreen_t>(v);
+		if (vf) {
+			vf->remove_this_view();
+			for (auto &w: _ctx->_workspace_map) {
+				w.second->insert_as_fullscreen(v->_client, 0);
+			}
+			auto x = _ctx->current_workspace()->lookup_view_for(shared_from_this());
+			x->acquire_client();
+			return;
+		}
+
+		auto vn = dynamic_pointer_cast<view_notebook_t>(v);
+		if (vn) {
+			vn->remove_this_view();
+			for (auto &w: _ctx->_workspace_map) {
+				w.second->insert_as_floating(v->_client, 0);
+			}
+			auto x = _ctx->current_workspace()->lookup_view_for(shared_from_this());
+			x->acquire_client();
+			return;
+		}
+	} else {
+		auto tw = _ctx->ensure_workspace(meta_window_get_workspace(_meta_window));
+
+		/* do nothing we are already on the right workspace */
+		if (cw == tw)
+			return;
+
+		//printf("call %s\n", __PRETTY_FUNCTION__);
+		auto vx = dynamic_pointer_cast<view_floating_t>(v);
+		if (vx) {
+			vx->remove_this_view();
+			tw->insert_as_floating(v->_client, 0);
+			return;
+		}
+
+		auto vf = dynamic_pointer_cast<view_fullscreen_t>(v);
+		if (vf) {
+			vf->remove_this_view();
+			tw->insert_as_fullscreen(v->_client, 0);
+			return;
+		}
+
+		auto vn = dynamic_pointer_cast<view_notebook_t>(v);
+		if (vn) {
+			vn->remove_this_view();
+			tw->insert_as_notebook(v->_client, 0);
+			return;
+		}
 	}
-
-	auto vf = dynamic_pointer_cast<view_fullscreen_t>(v);
-	if (vf) {
-		vf->remove_this_view();
-		w->insert_as_fullscreen(v->_client, 0);
-		return;
-	}
-
-	auto vn = dynamic_pointer_cast<view_notebook_t>(v);
-	if (vn) {
-		vn->remove_this_view();
-		w->insert_as_notebook(v->_client, 0);
-		return;
-	}
-
 }
 
 

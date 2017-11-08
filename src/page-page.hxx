@@ -92,6 +92,8 @@ class page_t:
 	using callback_event_t = void (page_t::*) (xcb_generic_event_t const *);
 
 	workspace_p _current_workspace;
+
+public:
 	map<MetaWorkspace *, workspace_p> _workspace_map;
 
 private:

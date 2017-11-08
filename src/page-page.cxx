@@ -95,6 +95,11 @@ void page_t::_handler_key_make_notebook_window(MetaDisplay * display, MetaScreen
 		log::printf("managed client not found\n");
 		return;
 	}
+
+	/* windows on all workspaces are not alowed to be bound */
+	if (meta_window_is_on_all_workspaces(mw->meta_window()))
+		return;
+
 	auto v = current_workspace()->lookup_view_for(mw);
 	if (v == nullptr) {
 		log::printf("view not found\n");
