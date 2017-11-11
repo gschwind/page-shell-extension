@@ -5,6 +5,7 @@ const Main = imports.ui.main;
 const Tweener = imports.ui.tweener;
 const Lang = imports.lang;
 const Shell = imports.gi.Shell;
+const GIRepository = imports.gi.GIRepository;
 
 var page_shell = null;
 
@@ -15,6 +16,9 @@ function init() {
 var PageShell = new Lang.Class({
     Name: 'WindowManager',
    _init: function() {
+	   print("XXXXX");
+	   print(GIRepository.Repository.get_search_path());
+	   
 	   this._page = new Page.Handler();
 	   this._page.start(global.display, global.screen, global.stage);
 	   this._shellwm = global.window_manager;

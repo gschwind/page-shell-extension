@@ -1,5 +1,5 @@
 project('page-shell-extension', ['c', 'cpp'],
-  version: '3.27.1',
+  version: '3.24.0',
   meson_version: '>= 0.42.0',
   license: 'GPLv2+',
   default_options: ['cpp_std=c++11']
@@ -7,7 +7,7 @@ project('page-shell-extension', ['c', 'cpp'],
 
 # We depend on a specific version of the libmutter API. The mutter variants of
 # the Cogl and Clutter libraries also use this API version.
-mutter_api_version = '1'
+mutter_api_version = '0'
 
 clutter_pc = 'page-mutter-clutter-' + mutter_api_version
 cogl_pc = 'page-mutter-cogl-' + mutter_api_version

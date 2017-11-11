@@ -34,7 +34,11 @@ G_BEGIN_DECLS
  * NOTES: "page" is a prefix and "handler" is the name of the object type.
  */
 
+#define PAGE_TYPE_HANDLER page_handler_get_type ()
 G_DECLARE_FINAL_TYPE (PageHandler, page_handler, PAGE, HANDLER, GObject)
+
+PageHandler *
+page_handler_new(void);
 
 void
 page_handler_start(PageHandler * self, MetaDisplay * display, MetaScreen * screen, ClutterStage * stage);

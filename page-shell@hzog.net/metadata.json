@@ -1,1 +1,6 @@
-{"name": "Page Shell", "description": "Tiled window manager for gnome-shell", "uuid": "page-shell@hzog.net", "shell-version": ["3.24.3"]}
+{
+	"name": "Page Shell",
+	"description": "Tiled window manager for gnome-shell",
+	"uuid": "page-shell@hzog.net",
+	"shell-version": ["3.24.3"]
+}

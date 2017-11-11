@@ -12,7 +12,9 @@
 #include <xcb/xcb.h>
 #include <memory>
 
-#include <clutter/clutter.h>
+extern "C" {
+#include <meta/meta-plugin.h>
+}
 
 namespace page {
 
