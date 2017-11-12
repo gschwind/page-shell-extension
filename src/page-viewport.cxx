@@ -166,9 +166,9 @@ rect viewport_t::get_window_position() const
 /* mark renderable_page for redraw */
 void viewport_t::queue_redraw()
 {
-	_root->_ctx->schedule_repaint();
 	if(_canvas)
 		clutter_content_invalidate(_canvas);
+	_root->_ctx->schedule_repaint();
 }
 
 auto viewport_t::get_default_view() const -> ClutterActor *

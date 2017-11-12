@@ -77,6 +77,10 @@ grab_split_t::~grab_split_t() {
 		_ctx->schedule_repaint();
 		_ps->detach_myself();
 	}
+
+	if (not _split.expired())
+		_split.lock()->queue_redraw();
+
 }
 
 void grab_split_t::button_press(ClutterEvent const * e) {

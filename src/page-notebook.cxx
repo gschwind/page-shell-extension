@@ -151,7 +151,7 @@ void notebook_t::activate(view_notebook_p vn, guint32 time)
 	assert(has_key(_clients_tab_order, vn));
 	_set_selected(vn);
 	vn->raise();
-	_ctx->schedule_repaint();
+	queue_redraw();
 	_root->set_focus(vn, time);
 }
 
@@ -283,7 +283,7 @@ void notebook_t::_update_all_layout() {
 	_update_theme_notebook(_theme_notebook);
 	_update_notebook_buttons_area();
 
-	_ctx->schedule_repaint();
+	queue_redraw();
 }
 
 rect notebook_t::_compute_client_size(shared_ptr<client_managed_t> c) {
