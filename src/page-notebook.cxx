@@ -23,7 +23,6 @@ notebook_t::notebook_t(tree_t * ref) :
 	_ctx{ref->_root->_ctx},
 	_theme_client_tabs_offset{0},
 	_is_default{false},
-	_exposay{false},
 	_can_hsplit{true},
 	_can_vsplit{true},
 	_has_scroll_arrow{false},
@@ -36,16 +35,10 @@ notebook_t::notebook_t(tree_t * ref) :
 	_stack_is_locked = true;
 
 	_notebook_view_layer = make_shared<tree_t>(_root);
-	_fading_notebook_layer = make_shared<tree_t>(_root);
-	_tooltips_layer = make_shared<tree_t>(_root);
 
 	push_back(_notebook_view_layer);
-	push_back(_fading_notebook_layer);
-	push_back(_tooltips_layer);
 
 	_notebook_view_layer->show();
-	_fading_notebook_layer->show();
-	_tooltips_layer->show();
 
 	connect(_ctx->on_focus_changed, this, &notebook_t::_client_focus_change);
 

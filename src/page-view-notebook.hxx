@@ -46,7 +46,6 @@ struct view_notebook_t :
 	bool is_iconic() const;
 	bool has_focus() const;
 	auto title() const -> string;
-	//auto icon() const -> shared_ptr<icon16>;
 	void delete_window(guint32 t);
 
 	auto parent_notebook() -> notebook_p;

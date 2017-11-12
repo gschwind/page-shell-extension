@@ -34,8 +34,6 @@ class notebook_t : public page_component_t {
 	rect _allocation;
 
 	tree_p _notebook_view_layer;
-	tree_p _fading_notebook_layer;
-	tree_p _tooltips_layer;
 
 	theme_notebook_t _theme_notebook;
 
@@ -44,7 +42,6 @@ class notebook_t : public page_component_t {
 	rect _theme_client_tabs_area;
 
 	bool _is_default;
-	bool _exposay;
 
 	bool _can_hsplit;
 	bool _can_vsplit;
