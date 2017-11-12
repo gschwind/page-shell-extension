@@ -90,7 +90,6 @@ void notebook_t::remove_view_notebook(view_notebook_p vn)
 	}
 
 	// cleanup
-	disconnect(vn->_client->on_destroy);
 	g_disconnect_from_obj(vn->_client->meta_window());
 
 	_clients_tab_order.remove(vn);
@@ -131,7 +130,7 @@ void notebook_t::_add_client_view(view_notebook_p vn, xcb_timestamp_t time)
 
 	_clients_tab_order.push_front(vn);
 
-	connect(vn->_client->on_destroy, this, &notebook_t::_client_destroy);
+	g_connect(vn->_client->meta_window(), "unmanaged", &notebook_t::_client_destroy);
 	g_connect(vn->_client->meta_window(), "notify::title", &notebook_t::_client_title_change);
 
 	update_client_position(vn);
@@ -894,14 +893,13 @@ void notebook_t::_client_title_change(MetaWindow * meta_window, GParamSpec * psp
 	queue_redraw();
 }
 
-void notebook_t::_client_destroy(client_managed_t * c) {
+void notebook_t::_client_destroy(MetaWindow * meta_window)
+{
 	for (auto & x: _clients_tab_order) {
-		if (x->_client.get() == c) {
+		if (x->_client->meta_window() == meta_window) {
 			remove(x);
 		}
 	}
-
-	//throw exception_t("not expected call of %s", __PRETTY_FUNCTION__);
 }
 
 void notebook_t::_client_focus_change(client_managed_p c)

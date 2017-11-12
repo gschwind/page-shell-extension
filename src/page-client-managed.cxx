@@ -57,7 +57,6 @@ client_managed_t::client_managed_t(page_t * ctx, MetaWindowActor * actor) :
 
 client_managed_t::~client_managed_t()
 {
-	on_destroy.signal(this);
 	g_object_unref(_meta_window_actor);
 	g_object_unref(_meta_window);
 }
