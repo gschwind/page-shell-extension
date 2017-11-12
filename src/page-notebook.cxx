@@ -169,7 +169,7 @@ void notebook_t::activate(view_notebook_p vn, xcb_timestamp_t time)
 
 void notebook_t::update_client_position(view_notebook_p c) {
 	/* compute the window placement within notebook */
-	c->_absolute_position = to_root_position(_client_area);
+	c->_client_area = to_root_position(_client_area);
 }
 
 void notebook_t::iconify_client(view_notebook_p x) {
