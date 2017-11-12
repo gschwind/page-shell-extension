@@ -34,12 +34,9 @@ class notebook_t : public page_component_t {
 
 	rect _allocation;
 
-	time64_t _swap_start;
-
 	tree_p _notebook_view_layer;
 	tree_p _fading_notebook_layer;
 	tree_p _tooltips_layer;
-
 
 	theme_notebook_t _theme_notebook;
 

@@ -54,7 +54,6 @@ libshell_private_headers = [
   'page-theme-notebook.hxx',
   'page-theme-split.hxx',
   'page-theme-tab.hxx',
-  'page-time.hxx',
   'page-tiny-theme.hxx',
   'page-tree.hxx',
   'page-utils.hxx',

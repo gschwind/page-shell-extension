@@ -44,10 +44,6 @@ private:
 	viewport_w _primary_viewport;
 	notebook_w _default_pop;
 
-	static time64_t const _switch_duration;
-
-	time64_t _switch_start_time;
-
 	workspace_switch_direction_e _switch_direction;
 
 	bool _is_enable;

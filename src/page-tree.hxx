@@ -19,7 +19,6 @@
 
 #include "page-page-types.hxx"
 #include "page-utils.hxx"
-#include "page-time.hxx"
 
 enum button_action_e {
 	BUTTON_ACTION_CONTINUE,

@@ -37,7 +37,6 @@ extern "C" {
 #include "page-utils.hxx"
 
 #include "page-page-types.hxx"
-#include "page-time.hxx"
 #include "page-client-managed.hxx"
 #include "page-grab-handlers.hxx"
 
@@ -59,8 +58,6 @@ extern "C" {
 #define _NET_WM_STATE_TOGGLE 2
 
 namespace page {
-
-time64_t const page_t::default_wait{1000000000L / 120L};
 
 void page_t::_handler_key_binding::call(MetaDisplay * display,
 		MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event,

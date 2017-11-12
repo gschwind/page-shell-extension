@@ -23,8 +23,6 @@ extern "C" {
 #include <shell-global.h>
 }
 
-#include "page-time.hxx"
-
 #include "page-config-handler.hxx"
 
 #include "page-theme.hxx"
@@ -77,9 +75,6 @@ class page_t:
 		public connectable_t,
 		public g_connectable_t
 {
-
-	static time64_t const default_wait;
-
 	workspace_p _current_workspace;
 
 public:

@@ -22,8 +22,6 @@ namespace page {
 
 using namespace std;
 
-time64_t const workspace_t::_switch_duration{0.5};
-
 void workspace_t::_init()
 {
 	_stack_is_locked = true;
