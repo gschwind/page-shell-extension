@@ -90,9 +90,8 @@ void notebook_t::remove_view_notebook(view_notebook_p vn)
 	}
 
 	// cleanup
-
-	disconnect(vn->_client->on_title_change);
 	disconnect(vn->_client->on_destroy);
+	g_disconnect_from_obj(vn->_client->meta_window());
 
 	_clients_tab_order.remove(vn);
 
@@ -133,7 +132,7 @@ void notebook_t::_add_client_view(view_notebook_p vn, xcb_timestamp_t time)
 	_clients_tab_order.push_front(vn);
 
 	connect(vn->_client->on_destroy, this, &notebook_t::_client_destroy);
-	connect(vn->_client->on_title_change, this, &notebook_t::_client_title_change);
+	g_connect(vn->_client->meta_window(), "notify::title", &notebook_t::_client_title_change);
 
 	update_client_position(vn);
 
@@ -885,16 +884,13 @@ void notebook_t::_mouse_over_set() {
 	}
 }
 
-void notebook_t::_client_title_change(client_managed_t * c) {
-	for(auto & x: _client_buttons) {
-		if(c == std::get<1>(x).lock()->_client.get()) {
-			std::get<2>(x)->title = c->title();
-		}
-	}
-
-	if(_selected and c == _selected->_client.get()) {
-		_theme_notebook.selected_client.title = c->title();
-	}
+void notebook_t::_client_title_change(MetaWindow * meta_window, GParamSpec * pspec)
+{
+	if (_selected == nullptr)
+		return;
+	if (meta_window != _selected->_client->meta_window())
+		return;
+	_theme_notebook.selected_client.title = _selected->title();
 	queue_redraw();
 }
 

@@ -123,7 +123,7 @@ class notebook_t : public page_component_t {
 	rect _compute_notebook_close_position() const;
 	rect _compute_notebook_menu_position() const;
 
-	void _client_title_change(client_managed_t * c);
+	void _client_title_change(MetaWindow * meta_window, GParamSpec * pspec);
 	void _client_destroy(client_managed_t * c);
 
 	void _client_focus_change(client_managed_p c);
