@@ -19,7 +19,6 @@
 
 #include "page-page-component.hxx"
 #include "page-client-managed.hxx"
-#include "page-dropdown-menu.hxx"
 #include "page-page-types.hxx"
 
 namespace page {
@@ -138,8 +137,6 @@ class notebook_t : public page_component_t {
 	bool is_default() const;
 
 	bool _has_client(client_managed_p c);
-
-	void _start_client_menu(view_notebook_p c, xcb_button_t button, gfloat x, gfloat y, guint32 time);
 
 	void _scroll_left(int x);
 	void _scroll_right(int x);

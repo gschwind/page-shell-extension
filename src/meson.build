@@ -37,7 +37,6 @@ libshell_private_headers = [
   'page-client-managed.hxx',
   'page-color.hxx',
   'page-config-handler.hxx',
-  'page-dropdown-menu.hxx',
   'page-exception.hxx',
   'page-grab-handlers.hxx',
   'page-notebook.hxx',
@@ -72,7 +71,6 @@ libshell_sources = [
 libshell_private_sources = [
   'page-client-managed.cxx',
   'page-config-handler.cxx',
-  'page-dropdown-menu.cxx',
   'page-grab-handlers.cxx',
   'page-notebook.cxx',
   'page-page-component.cxx',

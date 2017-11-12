@@ -31,8 +31,6 @@ extern "C" {
 
 #include "page-popup-split.hxx"
 
-#include "page-dropdown-menu.hxx"
-
 #include "page-page-component.hxx"
 #include "page-notebook.hxx"
 #include "page-split.hxx"

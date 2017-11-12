@@ -11,7 +11,6 @@
 
 #include "page-page.hxx"
 #include "page-workspace.hxx"
-#include "page-dropdown-menu.hxx"
 #include "page-grab-handlers.hxx"
 #include "page-view-notebook.hxx"
 
@@ -697,19 +696,7 @@ auto notebook_t::button_press(ClutterEvent const * e) -> button_action_e
 		} else if (_area.undck_client.is_inside(x, y)) {
 
 		} else {
-			for(auto & i: _client_buttons) {
-				if(std::get<0>(i).is_inside(x, y)) {
-					_start_client_menu(std::get<1>(i).lock(), button, x, y, time);
-					return BUTTON_ACTION_HAS_ACTIVE_GRAB;
-				}
-			}
 
-//			for(auto & i: _exposay_buttons) {
-//				if(std::get<0>(i).is_inside(x, y)) {
-//					_start_client_menu(std::get<1>(i).lock(), e->detail, e->root_x, e->root_y, e->time);
-//					return BUTTON_ACTION_HAS_ACTIVE_GRAB;
-//				}
-//			}
 		}
 	}
 //	else if (e->child == XCB_NONE and e->detail == XCB_BUTTON_INDEX_4) {
@@ -725,43 +712,6 @@ auto notebook_t::button_press(ClutterEvent const * e) -> button_action_e
 //	}
 
 	return BUTTON_ACTION_CONTINUE;
-
-}
-
-void notebook_t::_start_client_menu(view_notebook_p c, xcb_button_t button, gfloat x, gfloat y, guint32 time) {
-//	std::vector<std::shared_ptr<dropdown_menu_t::item_t>> v;
-//	for(int k = 0; k < _ctx->get_workspace_count(); ++k) {
-//		std::ostringstream os;
-//		if(k == meta_workspace_index(workspace()->_meta_workspace)) {
-//			os << "[[[ " << _ctx->get_workspace(k)->name() << " ]]]";
-//		} else {
-//			os << "Send to " << _ctx->get_workspace(k)->name();
-//		}
-//		auto func =
-//			[this, c, k] (guint32 t) {
-//				if (k != meta_workspace_index(workspace()->_meta_workspace)) {
-//					//c->_client->set_current_workspace(k);
-//					c->remove_this_view();
-//					_ctx->get_workspace(k)->insert_as_notebook(c->_client, t);
-//				}
-//			};
-//		v.push_back(std::make_shared<dropdown_menu_t::item_t>(nullptr, os.str(), func));
-//		log::printf("Add menu: %s\n", os.str().c_str());
-//	}
-//
-//	{
-//		auto func = [this, c] (guint32 t) {
-//			_ctx->create_workspace(t);
-//			auto selected = _ctx->get_workspace_count()-1;
-//			//c->_client->set_current_workspace(selected);
-//			c->remove_this_view();
-//			_ctx->get_workspace(selected)->insert_as_notebook(c->_client, t);
-//		};
-//		v.push_back(std::make_shared<dropdown_menu_t::item_t>(nullptr, "To new workspace", func));
-//		log::printf("Add menu: %s\n", "To new workspace");
-//	}
-//
-//	_ctx->grab_start(make_shared<dropdown_menu_t>(this, v, button, x, y+4, 300, rect(x-10, y-10, 20, 20)), time);
 
 }
 

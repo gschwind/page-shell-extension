@@ -32,12 +32,8 @@ struct margin_t {
 	int right;
 };
 
-struct theme_dropdown_menu_entry_t
+class theme_t
 {
-	std::string label;
-};
-
-class theme_t {
 
 public:
 
@@ -88,7 +84,6 @@ public:
 			unsigned int height, std::string const & title) const = 0;
 
 	virtual void render_popup_split(cairo_t * cr, theme_split_t const * s, double current_split) const = 0;
-	virtual void render_menuentry(cairo_t * cr, theme_dropdown_menu_entry_t const & item, rect const & area, bool selected) const = 0;
 
 	virtual cairo_surface_t * workspace_switch_popup(string const & worspace_name) const = 0;
 
