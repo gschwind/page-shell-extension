@@ -88,7 +88,6 @@ struct client_managed_t :
 
 	signal_t<client_managed_t *> on_destroy;
 	signal_t<client_managed_t *> on_title_change;
-	signal_t<client_managed_t *> on_configure_notify;
 	signal_t<client_managed_t *> on_unmanage;
 
 	/* wrappers */

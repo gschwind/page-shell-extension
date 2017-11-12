@@ -92,7 +92,6 @@ void client_managed_t::_handler_meta_window_raised(MetaWindow * metawindow)
 void client_managed_t::_handler_meta_window_size_changed(MetaWindow * window)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
-	on_configure_notify.signal(this);
 }
 
 void client_managed_t::_handler_meta_window_unmanaged(MetaWindow * metawindow)
