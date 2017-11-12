@@ -57,12 +57,6 @@ struct client_managed_t :
 	 **/
 	rect _floating_wished_position;
 
-	/**
-	 * The position of the client window relative to root window, even if the
-	 * client is rebased to another window.
-	 **/
-	rect _absolute_position;
-
 	view_t * _current_owner_view;
 
 	/* private to avoid copy */

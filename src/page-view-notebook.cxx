@@ -83,10 +83,10 @@ void view_notebook_t::_handler_position_changed(MetaWindow * window)
 	/* disable frame move */
 	if (_is_client_owner())
 		meta_window_move_resize_frame(window, FALSE,
-				_client->_absolute_position.x,
-				_client->_absolute_position.y,
-				_client->_absolute_position.w,
-				_client->_absolute_position.h);
+				_absolute_position.x,
+				_absolute_position.y,
+				_absolute_position.w,
+				_absolute_position.h);
 }
 
 void view_notebook_t::_handler_size_changed(MetaWindow * window)
@@ -95,10 +95,10 @@ void view_notebook_t::_handler_size_changed(MetaWindow * window)
 	/* disable frame resize */
 	if (_is_client_owner())
 		meta_window_move_resize_frame(window, FALSE,
-				_client->_absolute_position.x,
-				_client->_absolute_position.y,
-				_client->_absolute_position.w,
-				_client->_absolute_position.h);
+				_absolute_position.x,
+				_absolute_position.y,
+				_absolute_position.w,
+				_absolute_position.h);
 }
 
 void view_notebook_t::remove_this_view()
@@ -121,10 +121,10 @@ void view_notebook_t::acquire_client()
 
 	meta_window_make_tiled(_client->meta_window());
 	meta_window_move_resize_frame(_client->_meta_window, FALSE,
-			_client->_absolute_position.x,
-			_client->_absolute_position.y,
-			_client->_absolute_position.w,
-			_client->_absolute_position.h);
+			_absolute_position.x,
+			_absolute_position.y,
+			_absolute_position.w,
+			_absolute_position.h);
 
 	// disable move/resizes.
 	g_connect(_client->meta_window(), "position-changed", &view_notebook_t::_handler_position_changed);
@@ -152,10 +152,10 @@ void view_notebook_t::reconfigure()
 	if(not _is_client_owner())
 		return;
 	meta_window_move_resize_frame(_client->_meta_window, FALSE,
-			_client->_absolute_position.x,
-			_client->_absolute_position.y,
-			_client->_absolute_position.w,
-			_client->_absolute_position.h);
+			_absolute_position.x,
+			_absolute_position.y,
+			_absolute_position.w,
+			_absolute_position.h);
 
 	if (_is_visible) {
 		if (_client->is_minimized())

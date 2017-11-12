@@ -30,7 +30,6 @@ client_managed_t::client_managed_t(page_t * ctx, MetaWindowActor * actor) :
 	_meta_window_actor{actor},
 	_meta_window{meta_window_actor_get_meta_window(actor)},
 	_floating_wished_position{},
-	_absolute_position{},
 	_current_owner_view{nullptr}
 {
 	g_object_ref(_meta_window_actor);
@@ -41,7 +40,6 @@ client_managed_t::client_managed_t(page_t * ctx, MetaWindowActor * actor) :
 	//printf("window default position = %s\n", pos.to_string().c_str());
 
 	_floating_wished_position = pos;
-	_absolute_position = pos;
 
 	g_connect(_meta_window, "focus",
 			&client_managed_t::_handler_meta_window_focus);

@@ -36,6 +36,12 @@ struct view_notebook_t :
 	public view_t
 {
 
+	/**
+	 * The position of the client window relative to root window, even if the
+	 * client is rebased to another window.
+	 **/
+	rect _absolute_position;
+
 	view_notebook_t(tree_t * ref, client_managed_p client);
 	view_notebook_t(view_t * src);
 	virtual ~view_notebook_t();
