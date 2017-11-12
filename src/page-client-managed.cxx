@@ -187,10 +187,6 @@ void client_managed_t::set_floating_wished_position(rect const & pos) {
 	_floating_wished_position = pos;
 }
 
-rect const & client_managed_t::get_wished_position() {
-	return _absolute_position;
-}
-
 rect const & client_managed_t::get_floating_wished_position() {
 	return _floating_wished_position;
 }

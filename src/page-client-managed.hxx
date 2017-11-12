@@ -97,7 +97,6 @@ struct client_managed_t :
 	signal_t<client_managed_t *> on_configure_notify;
 	signal_t<client_managed_t *> on_unmanage;
 
-	auto get_wished_position() -> rect const &;
 	void set_floating_wished_position(rect const & pos);
 	auto get_floating_wished_position() -> rect const & ;
 
