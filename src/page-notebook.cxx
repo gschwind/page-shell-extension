@@ -58,7 +58,7 @@ notebook_t::~notebook_t()
 	_clients_tab_order.clear();
 }
 
-bool notebook_t::add_client(client_managed_p c, xcb_timestamp_t time) {
+bool notebook_t::add_client(client_managed_p c, guint32 time) {
 	assert(not _has_client(c));
 	assert(c != nullptr);
 	auto vn = make_shared<view_notebook_t>(this, c);
@@ -66,7 +66,7 @@ bool notebook_t::add_client(client_managed_p c, xcb_timestamp_t time) {
 	return true;
 }
 
-void notebook_t::add_client_from_view(view_p vr, xcb_timestamp_t time)
+void notebook_t::add_client_from_view(view_p vr, guint32 time)
 {
 	assert(not _has_client(vr->_client));
 	assert(vr != nullptr);
@@ -123,7 +123,7 @@ void notebook_t::_set_selected(view_notebook_p c) {
 	}
 }
 
-void notebook_t::_add_client_view(view_notebook_p vn, xcb_timestamp_t time)
+void notebook_t::_add_client_view(view_notebook_p vn, guint32 time)
 {
 	_notebook_view_layer->push_back(vn);
 	vn->acquire_client();
@@ -154,7 +154,7 @@ void notebook_t::_add_client_view(view_notebook_p vn, xcb_timestamp_t time)
 	_update_all_layout();
 }
 
-void notebook_t::activate(view_notebook_p vn, xcb_timestamp_t time)
+void notebook_t::activate(view_notebook_p vn, guint32 time)
 {
 	assert(has_key(_clients_tab_order, vn));
 	_set_selected(vn);
@@ -728,7 +728,7 @@ auto notebook_t::button_press(ClutterEvent const * e) -> button_action_e
 
 }
 
-void notebook_t::_start_client_menu(view_notebook_p c, xcb_button_t button, gfloat x, gfloat y, xcb_timestamp_t time) {
+void notebook_t::_start_client_menu(view_notebook_p c, xcb_button_t button, gfloat x, gfloat y, guint32 time) {
 //	std::vector<std::shared_ptr<dropdown_menu_t::item_t>> v;
 //	for(int k = 0; k < _ctx->get_workspace_count(); ++k) {
 //		std::ostringstream os;
@@ -738,7 +738,7 @@ void notebook_t::_start_client_menu(view_notebook_p c, xcb_button_t button, gflo
 //			os << "Send to " << _ctx->get_workspace(k)->name();
 //		}
 //		auto func =
-//			[this, c, k] (xcb_timestamp_t t) {
+//			[this, c, k] (guint32 t) {
 //				if (k != meta_workspace_index(workspace()->_meta_workspace)) {
 //					//c->_client->set_current_workspace(k);
 //					c->remove_this_view();
@@ -750,7 +750,7 @@ void notebook_t::_start_client_menu(view_notebook_p c, xcb_button_t button, gflo
 //	}
 //
 //	{
-//		auto func = [this, c] (xcb_timestamp_t t) {
+//		auto func = [this, c] (guint32 t) {
 //			_ctx->create_workspace(t);
 //			auto selected = _ctx->get_workspace_count()-1;
 //			//c->_client->set_current_workspace(selected);
@@ -1003,7 +1003,7 @@ void  notebook_t::_scroll_left(int x) {
 	queue_redraw();
 }
 
-void notebook_t::_close_view_notebook(view_notebook_p vn, xcb_timestamp_t time)
+void notebook_t::_close_view_notebook(view_notebook_p vn, guint32 time)
 {
 
 	if(_selected != vn)

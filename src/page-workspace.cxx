@@ -228,20 +228,20 @@ bool workspace_t::is_enable()
 	return _is_enable;
 }
 
-void workspace_t::insert_as_floating(client_managed_p c, xcb_timestamp_t time)
+void workspace_t::insert_as_floating(client_managed_p c, guint32 time)
 {
 	auto fv = make_shared<view_floating_t>(this, c);
 	_insert_view_floating(fv, time);
 }
 
-void workspace_t::insert_as_fullscreen(client_managed_p mw, xcb_timestamp_t time)
+void workspace_t::insert_as_fullscreen(client_managed_p mw, guint32 time)
 {
 	//printf("call %s\n", __PRETTY_FUNCTION__);
 	auto v = get_any_viewport();
 	insert_as_fullscreen(mw, v);
 }
 
-void workspace_t::insert_as_notebook(client_managed_p mw, xcb_timestamp_t time)
+void workspace_t::insert_as_notebook(client_managed_p mw, guint32 time)
 {
 	//printf("call %s\n", __PRETTY_FUNCTION__);
 	ensure_default_notebook()->add_client(mw, time);
@@ -267,7 +267,7 @@ void workspace_t::insert_as_fullscreen(shared_ptr<client_managed_t> mw, shared_p
 	_ctx->schedule_repaint();
 }
 
-void workspace_t::switch_view_to_fullscreen(view_p v, xcb_timestamp_t time)
+void workspace_t::switch_view_to_fullscreen(view_p v, guint32 time)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
 	auto vx = dynamic_pointer_cast<view_floating_t>(v);
@@ -283,7 +283,7 @@ void workspace_t::switch_view_to_fullscreen(view_p v, xcb_timestamp_t time)
 	}
 }
 
-void workspace_t::switch_view_to_floating(view_p v, xcb_timestamp_t time)
+void workspace_t::switch_view_to_floating(view_p v, guint32 time)
 {
 	//printf("call %s\n", __PRETTY_FUNCTION__);
 	auto vn = dynamic_pointer_cast<view_notebook_t>(v);
@@ -299,7 +299,7 @@ void workspace_t::switch_view_to_floating(view_p v, xcb_timestamp_t time)
 	}
 }
 
-void workspace_t::switch_view_to_notebook(view_p v, xcb_timestamp_t time)
+void workspace_t::switch_view_to_notebook(view_p v, guint32 time)
 {
 	//printf("call %s\n", __PRETTY_FUNCTION__);
 	auto vx = dynamic_pointer_cast<view_floating_t>(v);
@@ -315,7 +315,7 @@ void workspace_t::switch_view_to_notebook(view_p v, xcb_timestamp_t time)
 	}
 }
 
-void workspace_t::switch_notebook_to_floating(view_notebook_p vn, xcb_timestamp_t time)
+void workspace_t::switch_notebook_to_floating(view_notebook_p vn, guint32 time)
 {
 	printf("call %s\n", __PRETTY_FUNCTION__);
 	vn->remove_this_view();
@@ -324,7 +324,7 @@ void workspace_t::switch_notebook_to_floating(view_notebook_p vn, xcb_timestamp_
 	_insert_view_floating(vf, time);
 }
 
-void workspace_t::switch_notebook_to_fullscreen(view_notebook_p vn, xcb_timestamp_t time)
+void workspace_t::switch_notebook_to_fullscreen(view_notebook_p vn, guint32 time)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
 
@@ -342,7 +342,7 @@ void workspace_t::switch_notebook_to_fullscreen(view_notebook_p vn, xcb_timestam
 	_ctx->schedule_repaint();
 }
 
-void workspace_t::switch_floating_to_fullscreen(view_floating_p vx, xcb_timestamp_t time)
+void workspace_t::switch_floating_to_fullscreen(view_floating_p vx, guint32 time)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
 	auto viewport = get_any_viewport();
@@ -355,20 +355,20 @@ void workspace_t::switch_floating_to_fullscreen(view_floating_p vx, xcb_timestam
 	_ctx->schedule_repaint();
 }
 
-void workspace_t::switch_floating_to_notebook(view_floating_p vf, xcb_timestamp_t time)
+void workspace_t::switch_floating_to_notebook(view_floating_p vf, guint32 time)
 {
 	vf->remove_this_view();
 	ensure_default_notebook()->add_client_from_view(vf, time);
 }
 
-void workspace_t::switch_fullscreen_to_floating(view_fullscreen_p view, xcb_timestamp_t time)
+void workspace_t::switch_fullscreen_to_floating(view_fullscreen_p view, guint32 time)
 {
 	view->remove_this_view();
 	auto fv = make_shared<view_floating_t>(view.get());
 	_insert_view_floating(fv, time);
 }
 
-void workspace_t::switch_fullscreen_to_notebook(view_fullscreen_p view, xcb_timestamp_t time)
+void workspace_t::switch_fullscreen_to_notebook(view_fullscreen_p view, guint32 time)
 {
 	view->remove_this_view();
 
@@ -383,7 +383,7 @@ void workspace_t::switch_fullscreen_to_notebook(view_fullscreen_p view, xcb_time
 }
 
 /* switch a fullscreened and managed window into floating or notebook window */
-void workspace_t::switch_fullscreen_to_prefered_view_mode(view_p c, xcb_timestamp_t time)
+void workspace_t::switch_fullscreen_to_prefered_view_mode(view_p c, guint32 time)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
 	auto vf = dynamic_pointer_cast<view_fullscreen_t>(c);
@@ -391,7 +391,7 @@ void workspace_t::switch_fullscreen_to_prefered_view_mode(view_p c, xcb_timestam
 		switch_fullscreen_to_prefered_view_mode(vf, time);
 }
 
-void workspace_t::switch_fullscreen_to_prefered_view_mode(view_fullscreen_p view, xcb_timestamp_t time)
+void workspace_t::switch_fullscreen_to_prefered_view_mode(view_fullscreen_p view, guint32 time)
 {
 	view->remove_this_view();
 
@@ -448,7 +448,7 @@ auto workspace_t::lookup_view_for(client_managed_p c) const -> view_p
 	return nullptr;
 }
 
-void workspace_t::set_focus(view_p new_focus, xcb_timestamp_t time) {
+void workspace_t::set_focus(view_p new_focus, guint32 time) {
 	_net_active_window = new_focus;
 	_ctx->apply_focus(time);
 }
@@ -474,7 +474,7 @@ auto workspace_t::_find_viewport_of(tree_p t) -> viewport_p {
 	return nullptr;
 }
 
-void workspace_t::_insert_view_floating(view_floating_p fv, xcb_timestamp_t time)
+void workspace_t::_insert_view_floating(view_floating_p fv, guint32 time)
 {
 	auto c = fv->_client;
 	fv->acquire_client();

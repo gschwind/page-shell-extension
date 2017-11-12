@@ -51,7 +51,7 @@ auto view_t::shared_from_this() -> view_p
 	return static_pointer_cast<view_t>(tree_t::shared_from_this());
 }
 
-void view_t::focus(xcb_timestamp_t t) {
+void view_t::focus(guint32 t) {
 	_client->focus(t);
 }
 

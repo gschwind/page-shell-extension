@@ -142,18 +142,18 @@ class notebook_t : public page_component_t {
 
 	bool _has_client(client_managed_p c);
 
-	void _start_client_menu(view_notebook_p c, xcb_button_t button, gfloat x, gfloat y, xcb_timestamp_t time);
+	void _start_client_menu(view_notebook_p c, xcb_button_t button, gfloat x, gfloat y, guint32 time);
 
 	void _scroll_left(int x);
 	void _scroll_right(int x);
 
-	void _close_view_notebook(view_notebook_p w, xcb_timestamp_t time);
+	void _close_view_notebook(view_notebook_p w, guint32 time);
 
 	void _set_theme_tab_offset(int x);
 	void _set_selected(view_notebook_p c);
-	void _add_client_view(view_notebook_p vn, xcb_timestamp_t time);
+	void _add_client_view(view_notebook_p vn, guint32 time);
 
-	void activate(view_notebook_p c, xcb_timestamp_t time);
+	void activate(view_notebook_p c, guint32 time);
 
 	auto shared_from_this() -> notebook_p;
 
@@ -195,8 +195,8 @@ public:
 	void render_legacy(cairo_t * cr);
 	void update_client_position(view_notebook_p c);
 	void iconify_client(view_notebook_p x);
-	bool add_client(client_managed_p c, xcb_timestamp_t time);
-	void add_client_from_view(view_p c, xcb_timestamp_t time);
+	bool add_client(client_managed_p c, guint32 time);
+	void add_client_from_view(view_p c, guint32 time);
 
 	/* TODO : remove it */
 	friend struct grab_bind_view_notebook_t;

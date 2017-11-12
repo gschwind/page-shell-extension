@@ -31,14 +31,14 @@ class dropdown_menu_entry_t {
 	friend class dropdown_menu_t;
 
 	theme_dropdown_menu_entry_t _theme_data;
-	function<void(xcb_timestamp_t time)> _on_click;
+	function<void(guint32 time)> _on_click;
 
 	dropdown_menu_entry_t(dropdown_menu_entry_t const &) = delete;
 	dropdown_menu_entry_t & operator=(dropdown_menu_entry_t const &) = delete;
 
 public:
 	dropdown_menu_entry_t(shared_ptr<icon16> icon,
-			string const & label, function<void(xcb_timestamp_t time)> on_click);
+			string const & label, function<void(guint32 time)> on_click);
 	~dropdown_menu_entry_t();
 	shared_ptr<icon16> icon() const;
 	string const & label() const;
@@ -82,7 +82,7 @@ protected:
 	shared_ptr<dropdown_menu_overlay_t> pop;
 	rect _start_position;
 	xcb_button_t _button;
-	xcb_timestamp_t _time;
+	guint32 _time;
 	bool has_been_released;
 
 public:
@@ -92,7 +92,7 @@ public:
 	~dropdown_menu_t();
 
 	int selected();
-	xcb_timestamp_t time();
+	guint32 time();
 
 	void draw(ClutterCanvas * canvas, cairo_t * cr, int width, int height);
 

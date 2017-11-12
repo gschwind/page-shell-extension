@@ -18,7 +18,7 @@ namespace page {
 using namespace std;
 
 dropdown_menu_entry_t::dropdown_menu_entry_t(shared_ptr<icon16> icon,
-		string const & label, function<void(xcb_timestamp_t time)> on_click) :
+		string const & label, function<void(guint32 time)> on_click) :
 	_theme_data{icon, label},
 	_on_click{on_click}
 {
@@ -130,7 +130,7 @@ int dropdown_menu_t::selected()
 	return _selected;
 }
 
-xcb_timestamp_t dropdown_menu_t::time()
+guint32 dropdown_menu_t::time()
 {
 	return _time;
 }

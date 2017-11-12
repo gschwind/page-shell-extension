@@ -654,7 +654,7 @@ void page_t::unmanage(client_managed_p mw)
 	schedule_repaint();
 }
 
-void page_t::insert_as_fullscreen(client_managed_p c, xcb_timestamp_t time) {
+void page_t::insert_as_fullscreen(client_managed_p c, guint32 time) {
 	//printf("call %s\n", __PRETTY_FUNCTION__);
 
 	workspace_p workspace;
@@ -666,7 +666,7 @@ void page_t::insert_as_fullscreen(client_managed_p c, xcb_timestamp_t time) {
 	workspace->insert_as_fullscreen(c, time);
 }
 
-void page_t::insert_as_notebook(client_managed_p c, xcb_timestamp_t time)
+void page_t::insert_as_notebook(client_managed_p c, guint32 time)
 {
 	//printf("call %s\n", __PRETTY_FUNCTION__);
 	workspace_p workspace;
@@ -678,7 +678,7 @@ void page_t::insert_as_notebook(client_managed_p c, xcb_timestamp_t time)
 	workspace->insert_as_notebook(c, time);
 }
 
-void page_t::move_view_to_notebook(view_p v, notebook_p n, xcb_timestamp_t time)
+void page_t::move_view_to_notebook(view_p v, notebook_p n, guint32 time)
 {
 	auto vn = dynamic_pointer_cast<view_notebook_t>(v);
 	if(vn) {
@@ -693,21 +693,21 @@ void page_t::move_view_to_notebook(view_p v, notebook_p n, xcb_timestamp_t time)
 	}
 }
 
-void page_t::move_notebook_to_notebook(view_notebook_p vn, notebook_p n, xcb_timestamp_t time)
+void page_t::move_notebook_to_notebook(view_notebook_p vn, notebook_p n, guint32 time)
 {
 	//printf("call %s\n", __PRETTY_FUNCTION__);
 	vn->remove_this_view();
 	n->add_client_from_view(vn, time);
 }
 
-void page_t::move_floating_to_notebook(view_floating_p vf, notebook_p n, xcb_timestamp_t time)
+void page_t::move_floating_to_notebook(view_floating_p vf, notebook_p n, guint32 time)
 {
 	//printf("call %s\n", __PRETTY_FUNCTION__);
 	vf->detach_myself();
 	n->add_client_from_view(vf, time);
 }
 
-void page_t::toggle_fullscreen(view_p c, xcb_timestamp_t time) {
+void page_t::toggle_fullscreen(view_p c, guint32 time) {
 	auto vf = dynamic_pointer_cast<view_fullscreen_t>(c);
 	if(vf) {
 		vf->workspace()->switch_fullscreen_to_prefered_view_mode(vf, time);
@@ -716,14 +716,14 @@ void page_t::toggle_fullscreen(view_p c, xcb_timestamp_t time) {
 	}
 }
 
-void page_t::apply_focus(xcb_timestamp_t time) {
+void page_t::apply_focus(guint32 time) {
 	auto w = current_workspace();
 	if(not w->_net_active_window.expired()) {
 		meta_window_focus(w->_net_active_window.lock()->_client->meta_window(), time);
 	}
 }
 
-void page_t::split_left(notebook_p nbk, view_p c, xcb_timestamp_t time) {
+void page_t::split_left(notebook_p nbk, view_p c, guint32 time) {
 	auto parent = dynamic_pointer_cast<page_component_t>(nbk->parent()->shared_from_this());
 	auto n = make_shared<notebook_t>(nbk.get());
 	auto split = make_shared<split_t>(nbk.get(), VERTICAL_SPLIT);
@@ -735,7 +735,7 @@ void page_t::split_left(notebook_p nbk, view_p c, xcb_timestamp_t time) {
 		move_view_to_notebook(c, n, time);
 }
 
-void page_t::split_right(notebook_p nbk, view_p c, xcb_timestamp_t time) {
+void page_t::split_right(notebook_p nbk, view_p c, guint32 time) {
 	auto parent = dynamic_pointer_cast<page_component_t>(nbk->parent()->shared_from_this());
 	auto n = make_shared<notebook_t>(nbk.get());
 	auto split = make_shared<split_t>(nbk.get(), VERTICAL_SPLIT);
@@ -747,7 +747,7 @@ void page_t::split_right(notebook_p nbk, view_p c, xcb_timestamp_t time) {
 		move_view_to_notebook(c, n, time);
 }
 
-void page_t::split_top(notebook_p nbk, view_p c, xcb_timestamp_t time) {
+void page_t::split_top(notebook_p nbk, view_p c, guint32 time) {
 	auto parent = dynamic_pointer_cast<page_component_t>(nbk->parent()->shared_from_this());
 	auto n = make_shared<notebook_t>(nbk.get());
 	auto split = make_shared<split_t>(nbk.get(), HORIZONTAL_SPLIT);
@@ -759,7 +759,7 @@ void page_t::split_top(notebook_p nbk, view_p c, xcb_timestamp_t time) {
 		move_view_to_notebook(c, n, time);
 }
 
-void page_t::split_bottom(notebook_p nbk, view_p c, xcb_timestamp_t time) {
+void page_t::split_bottom(notebook_p nbk, view_p c, guint32 time) {
 	auto parent = dynamic_pointer_cast<page_component_t>(nbk->parent()->shared_from_this());
 	auto n = make_shared<notebook_t>(nbk.get());
 	auto split = make_shared<split_t>(nbk.get(), HORIZONTAL_SPLIT);
@@ -771,7 +771,7 @@ void page_t::split_bottom(notebook_p nbk, view_p c, xcb_timestamp_t time) {
 		move_view_to_notebook(c, n, time);
 }
 
-void page_t::notebook_close(notebook_p nbk, xcb_timestamp_t time) {
+void page_t::notebook_close(notebook_p nbk, guint32 time) {
 	/**
 	 * Closing notebook mean destroying the split base of this
 	 * notebook, plus this notebook.
@@ -833,7 +833,7 @@ void page_t::update_viewport_layout()
 	}
 }
 
-void page_t::insert_as_floating(client_managed_p c, xcb_timestamp_t time) {
+void page_t::insert_as_floating(client_managed_p c, guint32 time) {
 	//printf("call %s\n", __PRETTY_FUNCTION__);
 
 	workspace_p workspace;
@@ -878,7 +878,7 @@ auto page_t::ensure_workspace(MetaWorkspace * w) -> workspace_p
 	}
 }
 
-void page_t::switch_to_workspace(unsigned int workspace_id, xcb_timestamp_t time) {
+void page_t::switch_to_workspace(unsigned int workspace_id, guint32 time) {
 	auto meta_workspace = meta_screen_get_workspace_by_index(_screen, workspace_id);
 	auto workspace = ensure_workspace(meta_workspace);
 	if(not workspace)

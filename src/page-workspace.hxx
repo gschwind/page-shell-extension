@@ -84,41 +84,41 @@ public:
 	void disable();
 	bool is_enable();
 
-	void insert_as_floating(client_managed_p c, xcb_timestamp_t time);
-	void insert_as_fullscreen(client_managed_p c, xcb_timestamp_t time);
-	void insert_as_notebook(client_managed_p c, xcb_timestamp_t time);
+	void insert_as_floating(client_managed_p c, guint32 time);
+	void insert_as_fullscreen(client_managed_p c, guint32 time);
+	void insert_as_notebook(client_managed_p c, guint32 time);
 
 	void insert_as_fullscreen(shared_ptr<client_managed_t> c, viewport_p v);
 
-	void unfullscreen(view_fullscreen_p view, xcb_timestamp_t time);
+	void unfullscreen(view_fullscreen_p view, guint32 time);
 
-	void switch_view_to_fullscreen(view_p v, xcb_timestamp_t time);
-	void switch_view_to_floating(view_p v, xcb_timestamp_t time);
-	void switch_view_to_notebook(view_p mw, xcb_timestamp_t time);
+	void switch_view_to_fullscreen(view_p v, guint32 time);
+	void switch_view_to_floating(view_p v, guint32 time);
+	void switch_view_to_notebook(view_p mw, guint32 time);
 
-	void switch_notebook_to_floating(view_notebook_p v, xcb_timestamp_t time);
-	void switch_notebook_to_fullscreen(view_notebook_p v, xcb_timestamp_t time);
+	void switch_notebook_to_floating(view_notebook_p v, guint32 time);
+	void switch_notebook_to_fullscreen(view_notebook_p v, guint32 time);
 
-	void switch_floating_to_fullscreen(view_floating_p v, xcb_timestamp_t time);
-	void switch_floating_to_notebook(view_floating_p v, xcb_timestamp_t time);
+	void switch_floating_to_fullscreen(view_floating_p v, guint32 time);
+	void switch_floating_to_notebook(view_floating_p v, guint32 time);
 
-	void switch_fullscreen_to_floating(view_fullscreen_p v, xcb_timestamp_t time);
-	void switch_fullscreen_to_notebook(view_fullscreen_p v, xcb_timestamp_t time);
+	void switch_fullscreen_to_floating(view_fullscreen_p v, guint32 time);
+	void switch_fullscreen_to_notebook(view_fullscreen_p v, guint32 time);
 
 	/* switch a fullscreened and managed window into floating or notebook window */
-	void switch_fullscreen_to_prefered_view_mode(view_p c, xcb_timestamp_t time);
-	void switch_fullscreen_to_prefered_view_mode(view_fullscreen_p c, xcb_timestamp_t time);
+	void switch_fullscreen_to_prefered_view_mode(view_p c, guint32 time);
+	void switch_fullscreen_to_prefered_view_mode(view_fullscreen_p c, guint32 time);
 
 	void add_floating(tree_p c);
 	void add_fullscreen(tree_p c);
 	void add_overlay(tree_p c);
 
 	auto lookup_view_for(client_managed_p c) const -> view_p;
-	void set_focus(view_p new_focus, xcb_timestamp_t tfocus);
+	void set_focus(view_p new_focus, guint32 tfocus);
 	void unmanage(client_managed_p mw);
 
 	auto _find_viewport_of(tree_p t) -> viewport_p;
-	void _insert_view_floating(view_floating_p view, xcb_timestamp_t time);
+	void _insert_view_floating(view_floating_p view, guint32 time);
 
 	/**
 	 * tree_t virtual API

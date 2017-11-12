@@ -213,19 +213,19 @@ private:
 public:
 
 	/* toggle fullscreen */
-	void toggle_fullscreen(view_p c, xcb_timestamp_t time);
+	void toggle_fullscreen(view_p c, guint32 time);
 
-	void move_view_to_notebook(view_p v, notebook_p n, xcb_timestamp_t time);
-	void move_notebook_to_notebook(view_notebook_p v, notebook_p n, xcb_timestamp_t time);
-	void move_floating_to_notebook(view_floating_p v, notebook_p n, xcb_timestamp_t time);
+	void move_view_to_notebook(view_p v, notebook_p n, guint32 time);
+	void move_notebook_to_notebook(view_notebook_p v, notebook_p n, guint32 time);
+	void move_floating_to_notebook(view_floating_p v, notebook_p n, guint32 time);
 
 	/* split a notebook into two notebook */
 	void split(shared_ptr<notebook_t> nbk, split_type_e type);
 
 
-	void insert_as_floating(client_managed_p c, xcb_timestamp_t time = XCB_CURRENT_TIME);
-	void insert_as_fullscreen(client_managed_p c, xcb_timestamp_t time = XCB_CURRENT_TIME);
-	void insert_as_notebook(client_managed_p c, xcb_timestamp_t time = XCB_CURRENT_TIME);
+	void insert_as_floating(client_managed_p c, guint32 time = XCB_CURRENT_TIME);
+	void insert_as_fullscreen(client_managed_p c, guint32 time = XCB_CURRENT_TIME);
+	void insert_as_notebook(client_managed_p c, guint32 time = XCB_CURRENT_TIME);
 
 	void grab_pointer();
 	/* if grab is linked to a given window remove this grab */
@@ -240,7 +240,7 @@ public:
 	bool check_for_managed_window(xcb_window_t w);
 	bool check_for_destroyed_window(xcb_window_t w);
 
-	void switch_to_workspace(unsigned int workspace, xcb_timestamp_t time);
+	void switch_to_workspace(unsigned int workspace, guint32 time);
 
 	/**
 	 * page_t virtual API
@@ -252,12 +252,12 @@ public:
 	auto current_workspace() const -> workspace_p const &;
 	void grab_start(shared_ptr<grab_handler_t> handler, guint32 time);
 	void grab_stop(guint32 time);
-	void split_left(notebook_p nbk, view_p c, xcb_timestamp_t time);
-	void split_right(notebook_p nbk, view_p c, xcb_timestamp_t time);
-	void split_top(notebook_p nbk, view_p c, xcb_timestamp_t time);
-	void split_bottom(notebook_p nbk, view_p c, xcb_timestamp_t time);
-	void apply_focus(xcb_timestamp_t tfocus);
-	void notebook_close(shared_ptr<notebook_t> nbk, xcb_timestamp_t time);
+	void split_left(notebook_p nbk, view_p c, guint32 time);
+	void split_right(notebook_p nbk, view_p c, guint32 time);
+	void split_top(notebook_p nbk, view_p c, guint32 time);
+	void split_bottom(notebook_p nbk, view_p c, guint32 time);
+	void apply_focus(guint32 tfocus);
+	void notebook_close(shared_ptr<notebook_t> nbk, guint32 time);
 	auto net_client_list() -> list<client_managed_p> const &;
 	void schedule_repaint();
 	bool has_grab_handler();
