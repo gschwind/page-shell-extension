@@ -185,9 +185,9 @@ public:
 			double border_width
 	) const;
 
-	virtual void render_popup_notebook0(cairo_t * cr, icon64 * icon, unsigned int width,
+	virtual void render_popup_notebook0(cairo_t * cr, unsigned int width,
 			unsigned int height, std::string const & title) const;
-	virtual void render_popup_move_frame(cairo_t * cr, icon64 * icon, unsigned int width,
+	virtual void render_popup_move_frame(cairo_t * cr, unsigned int width,
 			unsigned int height, std::string const & title) const;
 
 	virtual void render_popup_split(cairo_t * cr, theme_split_t const * s, double current_split) const;

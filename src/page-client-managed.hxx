@@ -21,7 +21,7 @@ extern "C" {
 #include <meta/meta-plugin.h>
 }
 
-#include "page-icon-handler.hxx"
+#include "page-page-types.hxx"
 #include "page-theme.hxx"
 #include "page-utils.hxx"
 

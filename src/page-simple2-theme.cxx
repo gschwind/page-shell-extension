@@ -1267,15 +1267,6 @@ void simple2_theme_t::render_floating_base(
 		bicon.y += 4;
 
 		CHECK_CAIRO(cairo_set_operator(cr, CAIRO_OPERATOR_OVER));
-		if (mw->icon != 0) {
-			if (mw->icon->get_cairo_surface() != nullptr) {
-				CHECK_CAIRO(::cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0));
-				CHECK_CAIRO(cairo_set_source_surface(cr, mw->icon->get_cairo_surface(),
-						bicon.x, bicon.y));
-				CHECK_CAIRO(cairo_mask_surface(cr, mw->icon->get_cairo_surface(),
-						bicon.x, bicon.y));
-			}
-		}
 
 		/** draw application title **/
 		rect btext = tab_area;
@@ -1427,9 +1418,9 @@ void simple2_theme_t::render_floating_base(
 
 }
 
-void simple2_theme_t::render_popup_notebook0(cairo_t * cr, icon64 * icon, unsigned int width,
-		unsigned int height, string const & title) const {
-
+void simple2_theme_t::render_popup_notebook0(cairo_t * cr, unsigned int width,
+		unsigned int height, string const & title) const
+{
 	cairo_save(cr);
 	cairo_set_line_width(cr, 6.0);
 	cairo_rectangle_arc_corner(cr, 3, 3, width - 6, height - 6, 10.0, CAIRO_CORNER_ALL);
@@ -1438,52 +1429,13 @@ void simple2_theme_t::render_popup_notebook0(cairo_t * cr, icon64 * icon, unsign
 	cairo_set_line_width(cr, 4.0);
 	cairo_set_source_color(cr, popup_background_color);
 	cairo_stroke(cr);
-
-	if (icon != nullptr) {
-		double x_offset = (width - 64) / 2.0;
-		double y_offset = (height - 64) / 2.0;
-
-		CHECK_CAIRO(cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE));
-		CHECK_CAIRO(::cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0));
-		CHECK_CAIRO(cairo_set_source_surface(cr, icon->get_cairo_surface(), x_offset, y_offset));
-		CHECK_CAIRO(cairo_mask_surface(cr, icon->get_cairo_surface(), x_offset, y_offset));
-
-		/* draw title */
-		CHECK_CAIRO(cairo_translate(cr, 0.0, y_offset + 68.0));
-
-		{
-			PangoLayout * pango_layout = pango_layout_new(pango_context);
-			pango_layout_set_font_description(pango_layout, pango_popup_font);
-			pango_cairo_update_layout(cr, pango_layout);
-			pango_layout_set_text(pango_layout, title.c_str(), -1);
-			pango_layout_set_width(pango_layout, width * PANGO_SCALE);
-			pango_layout_set_alignment(pango_layout, PANGO_ALIGN_CENTER);
-			pango_layout_set_wrap(pango_layout, PANGO_WRAP_CHAR);
-			pango_cairo_layout_path(cr, pango_layout);
-			g_object_unref(pango_layout);
-		}
-
-		CHECK_CAIRO(cairo_set_line_width(cr, 5.0));
-		CHECK_CAIRO(cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND));
-		CHECK_CAIRO(cairo_set_line_join(cr, CAIRO_LINE_JOIN_BEVEL));
-
-		CHECK_CAIRO(cairo_set_source_color_alpha(cr, popup_outline_color));
-
-		CHECK_CAIRO(cairo_stroke_preserve(cr));
-
-		CHECK_CAIRO(cairo_set_line_width(cr, 1.0));
-		CHECK_CAIRO(cairo_set_source_color_alpha(cr, popup_text_color));
-		CHECK_CAIRO(cairo_fill(cr));
-
-	}
-
 	cairo_restore(cr);
-
 }
 
-void simple2_theme_t::render_popup_move_frame(cairo_t * cr, icon64 * icon, unsigned int width,
-		unsigned int height, std::string const & title) const {
-	render_popup_notebook0(cr, icon, width, height, title);
+void simple2_theme_t::render_popup_move_frame(cairo_t * cr, unsigned int width,
+		unsigned int height, std::string const & title) const
+{
+	render_popup_notebook0(cr, width, height, title);
 }
 
 void simple2_theme_t::draw_hatched_i_rect(cairo_t * cr, int space, int x, int y, int w, int h) const {
@@ -1623,15 +1575,6 @@ void simple2_theme_t::render_menuentry(cairo_t * cr, theme_dropdown_menu_entry_t
 	bicon.y += 5;
 
 	CHECK_CAIRO(cairo_set_operator(cr, CAIRO_OPERATOR_OVER));
-	if (item.icon != nullptr) {
-		if (item.icon->get_cairo_surface() != 0) {
-			CHECK_CAIRO(::cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0));
-			CHECK_CAIRO(cairo_set_source_surface(cr, item.icon->get_cairo_surface(),
-					bicon.x, bicon.y));
-			CHECK_CAIRO(cairo_mask_surface(cr, item.icon->get_cairo_surface(),
-					bicon.x, bicon.y));
-		}
-	}
 
 	/** draw application title **/
 	rect btext = area;

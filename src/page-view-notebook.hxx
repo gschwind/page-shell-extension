@@ -28,7 +28,6 @@ extern "C" {
 #include "page-page-types.hxx"
 
 #include "page-view.hxx"
-#include "page-icon-handler.hxx"
 
 namespace page {
 

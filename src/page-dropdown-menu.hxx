@@ -37,10 +37,8 @@ class dropdown_menu_entry_t {
 	dropdown_menu_entry_t & operator=(dropdown_menu_entry_t const &) = delete;
 
 public:
-	dropdown_menu_entry_t(shared_ptr<icon16> icon,
-			string const & label, function<void(guint32 time)> on_click);
+	dropdown_menu_entry_t(string const & label, function<void(guint32 time)> on_click);
 	~dropdown_menu_entry_t();
-	shared_ptr<icon16> icon() const;
 	string const & label() const;
 	theme_dropdown_menu_entry_t const & get_theme_item();
 

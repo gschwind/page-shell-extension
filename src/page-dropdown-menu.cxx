@@ -17,9 +17,9 @@ namespace page {
 
 using namespace std;
 
-dropdown_menu_entry_t::dropdown_menu_entry_t(shared_ptr<icon16> icon,
+dropdown_menu_entry_t::dropdown_menu_entry_t(
 		string const & label, function<void(guint32 time)> on_click) :
-	_theme_data{icon, label},
+	_theme_data{label},
 	_on_click{on_click}
 {
 
@@ -28,11 +28,6 @@ dropdown_menu_entry_t::dropdown_menu_entry_t(shared_ptr<icon16> icon,
 dropdown_menu_entry_t::~dropdown_menu_entry_t()
 {
 
-}
-
-shared_ptr<icon16> dropdown_menu_entry_t::icon() const
-{
-	return _theme_data.icon;
 }
 
 string const & dropdown_menu_entry_t::label() const

@@ -15,6 +15,7 @@
 
 #include <cairo.h>
 
+#include "page-page-types.hxx"
 #include "page-color.hxx"
 
 #include "page-theme-split.hxx"
@@ -31,13 +32,13 @@ struct margin_t {
 	int right;
 };
 
-struct theme_alttab_entry_t {
-	std::shared_ptr<icon64> icon;
+struct theme_alttab_entry_t
+{
 	std::string label;
 };
 
-struct theme_dropdown_menu_entry_t {
-	std::shared_ptr<icon16> icon;
+struct theme_dropdown_menu_entry_t
+{
 	std::string label;
 };
 
@@ -97,11 +98,9 @@ public:
 
 	virtual void render_floating(theme_managed_window_t * nw) const = 0;
 
-	virtual void render_popup_notebook0(cairo_t * cr,
-			icon64 * icon, unsigned int width,
+	virtual void render_popup_notebook0(cairo_t * cr, unsigned int width,
 			unsigned int height, std::string const & title) const = 0;
-	virtual void render_popup_move_frame(cairo_t * cr,
-			icon64 * icon, unsigned int width,
+	virtual void render_popup_move_frame(cairo_t * cr, unsigned int width,
 			unsigned int height, std::string const & title) const = 0;
 
 	virtual void render_popup_split(cairo_t * cr, theme_split_t const * s, double current_split) const = 0;
