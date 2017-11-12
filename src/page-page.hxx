@@ -84,6 +84,7 @@ class page_t:
 		public connectable_t,
 		public g_connectable_t
 {
+
 	static time64_t const default_wait;
 
 	workspace_p _current_workspace;
@@ -151,8 +152,12 @@ public:
 
 	void set_default_pop(shared_ptr<notebook_t> x);
 
+private:
+	void sync_tree_view();
+
 	// Plugin API
 
+public:
 	void _handler_plugin_start(MetaDisplay * display, MetaScreen * screen, ClutterStage * stage);
 	void _handler_plugin_minimize(MetaWindowActor * actor);
 	void _handler_plugin_unminimize(MetaWindowActor * actor);
@@ -173,6 +178,7 @@ public:
 	//auto _handler_plugin_create_close_dialog(void * wm, MetaWindow * window) -> MetaCloseDialog *;
 	//auto _handler_plugin_create_inhibit_shortcuts_dialog(void * wm, MetaWindow * window) -> MetaInhibitShortcutsDialog *;
 
+private:
 	auto _handler_stage_button_press_event(ClutterActor * actor, ClutterEvent * event) -> gboolean;
 	auto _handler_stage_button_release_event(ClutterActor * actor, ClutterEvent * event) -> gboolean;
 	auto _handler_stage_motion_event(ClutterActor * actor, ClutterEvent * event) -> gboolean;
@@ -203,6 +209,8 @@ public:
 
 	/* unmanage a managed window */
 	void unmanage(client_managed_p mw);
+
+public:
 
 	/* toggle fullscreen */
 	void toggle_fullscreen(view_p c, xcb_timestamp_t time);
@@ -252,7 +260,6 @@ public:
 	void notebook_close(shared_ptr<notebook_t> nbk, xcb_timestamp_t time);
 	auto net_client_list() -> list<client_managed_p> const &;
 	void schedule_repaint();
-	void sync_tree_view();
 	bool has_grab_handler();
 
 };

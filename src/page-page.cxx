@@ -266,7 +266,6 @@ void page_t::_handler_plugin_start(MetaDisplay * display, MetaScreen * screen, C
 	g_connect(_display, "window-created", &page_t::_handler_meta_display_window_created);
 
 	update_viewport_layout();
-	sync_tree_view();
 
 	switch_to_workspace(meta_screen_get_active_workspace_index(_screen), 0);
 
@@ -652,7 +651,7 @@ void page_t::unmanage(client_managed_p mw)
 		d.second->unmanage(mw);
 	}
 
-	sync_tree_view();
+	schedule_repaint();
 }
 
 void page_t::insert_as_fullscreen(client_managed_p c, xcb_timestamp_t time) {
@@ -677,7 +676,6 @@ void page_t::insert_as_notebook(client_managed_p c, xcb_timestamp_t time)
 		workspace = current_workspace();
 
 	workspace->insert_as_notebook(c, time);
-	sync_tree_view();
 }
 
 void page_t::move_view_to_notebook(view_p v, notebook_p n, xcb_timestamp_t time)
@@ -845,7 +843,6 @@ void page_t::insert_as_floating(client_managed_p c, xcb_timestamp_t time) {
 		workspace = current_workspace();
 
 	workspace->insert_as_floating(c, time);
-	sync_tree_view();
 }
 
 auto page_t::lookup_client_managed_with(MetaWindow * w) const -> client_managed_p {
@@ -892,7 +889,7 @@ void page_t::switch_to_workspace(unsigned int workspace_id, xcb_timestamp_t time
 		_current_workspace->disable();
 		_current_workspace = workspace;
 		_current_workspace->enable();
-		sync_tree_view();
+		schedule_repaint();
 	}
 }
 

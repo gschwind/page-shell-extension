@@ -85,7 +85,7 @@ void client_managed_t::_handler_meta_window_raised(MetaWindow * metawindow)
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
 
 	/* ensure preservation of stack */
-	_ctx->sync_tree_view();
+	_ctx->schedule_repaint();
 }
 
 void client_managed_t::_handler_meta_window_size_changed(MetaWindow * window)

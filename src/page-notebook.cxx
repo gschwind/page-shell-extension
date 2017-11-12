@@ -151,7 +151,6 @@ void notebook_t::_add_client_view(view_notebook_p vn, xcb_timestamp_t time)
 	}
 
 	_selected->reconfigure();
-	_ctx->sync_tree_view();
 	_update_all_layout();
 }
 
@@ -160,7 +159,6 @@ void notebook_t::activate(view_notebook_p vn, xcb_timestamp_t time)
 	assert(has_key(_clients_tab_order, vn));
 	_set_selected(vn);
 	vn->raise();
-	_ctx->sync_tree_view();
 	_ctx->schedule_repaint();
 	_root->set_focus(vn, time);
 }
@@ -294,7 +292,6 @@ void notebook_t::_update_all_layout() {
 	_update_notebook_buttons_area();
 
 	_ctx->schedule_repaint();
-	queue_redraw();
 }
 
 rect notebook_t::_compute_client_size(shared_ptr<client_managed_t> c) {

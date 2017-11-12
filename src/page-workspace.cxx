@@ -245,7 +245,6 @@ void workspace_t::insert_as_notebook(client_managed_p mw, xcb_timestamp_t time)
 {
 	//printf("call %s\n", __PRETTY_FUNCTION__);
 	ensure_default_notebook()->add_client(mw, time);
-	_ctx->sync_tree_view();
 }
 
 void workspace_t::insert_as_fullscreen(shared_ptr<client_managed_t> mw, shared_ptr<viewport_t> v) {
@@ -265,7 +264,7 @@ void workspace_t::insert_as_fullscreen(shared_ptr<client_managed_t> mw, shared_p
 
 	/* hide the viewport because he is covered by the fullscreen client */
 	v->hide();
-	_ctx->sync_tree_view();
+	_ctx->schedule_repaint();
 }
 
 void workspace_t::switch_view_to_fullscreen(view_p v, xcb_timestamp_t time)
@@ -340,7 +339,7 @@ void workspace_t::switch_notebook_to_fullscreen(view_notebook_p vn, xcb_timestam
 
 	vf->acquire_client();
 	add_fullscreen(vf);
-	_ctx->sync_tree_view();
+	_ctx->schedule_repaint();
 }
 
 void workspace_t::switch_floating_to_fullscreen(view_floating_p vx, xcb_timestamp_t time)
@@ -353,6 +352,7 @@ void workspace_t::switch_floating_to_fullscreen(view_floating_p vx, xcb_timestam
 		vf->acquire_client();
 	vf->revert_type = MANAGED_FLOATING;
 	add_fullscreen(vf);
+	_ctx->schedule_repaint();
 }
 
 void workspace_t::switch_floating_to_notebook(view_floating_p vf, xcb_timestamp_t time)
@@ -379,7 +379,7 @@ void workspace_t::switch_fullscreen_to_notebook(view_fullscreen_p view, xcb_time
 
 	//meta_window_unmake_fullscreen(view->_client->_meta_window);
 	n->add_client_from_view(view, time);
-	_ctx->sync_tree_view();
+
 }
 
 /* switch a fullscreened and managed window into floating or notebook window */
@@ -412,7 +412,6 @@ void workspace_t::switch_fullscreen_to_prefered_view_mode(view_fullscreen_p view
 		_insert_view_floating(vf, time);
 	}
 
-	_ctx->sync_tree_view();
 }
 
 void workspace_t::add_floating(tree_p c)
@@ -483,7 +482,7 @@ void workspace_t::_insert_view_floating(view_floating_p fv, xcb_timestamp_t time
 	fv->raise();
 	fv->show();
 	set_focus(fv, time);
-	_ctx->sync_tree_view();
+	_ctx->schedule_repaint();
 }
 
 }
