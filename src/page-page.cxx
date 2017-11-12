@@ -718,16 +718,6 @@ void page_t::toggle_fullscreen(view_p c, xcb_timestamp_t time) {
 	}
 }
 
-void page_t::insert_window_in_notebook(
-		client_managed_p x,
-		notebook_p n,
-		bool prefer_activate) {
-	assert(x != nullptr);
-	assert(n != nullptr);
-	n->add_client(x, prefer_activate);
-	sync_tree_view();
-}
-
 void page_t::apply_focus(xcb_timestamp_t time) {
 	auto w = current_workspace();
 	if(not w->_net_active_window.expired()) {
@@ -821,43 +811,8 @@ void page_t::notebook_close(notebook_p nbk, xcb_timestamp_t time) {
 
 }
 
-vector<shared_ptr<tree_t>> page_t::get_all_children() const
-{
-	vector<shared_ptr<tree_t>> ret;
-	for(auto const & x: _workspace_map) {
-		auto tmp = x.second->get_all_children();
-		ret.insert(ret.end(), tmp.begin(), tmp.end());
-	}
-	return ret;
-}
-
 void page_t::cleanup_grab() {
 	_grab_handler = nullptr;
-}
-
-/* look for a notebook in tree base, that is deferent from nbk */
-shared_ptr<notebook_t> page_t::get_another_notebook(shared_ptr<tree_t> base, shared_ptr<tree_t> nbk) {
-	vector<shared_ptr<notebook_t>> l;
-
-	if (base == nullptr) {
-		l = current_workspace()->gather_children_root_first<notebook_t>();
-	} else {
-		l = base->gather_children_root_first<notebook_t>();
-	}
-
-	if (!l.empty()) {
-		if (l.front() != nbk)
-			return l.front();
-		if (l.back() != nbk)
-			return l.back();
-	}
-
-	return nullptr;
-
-}
-
-shared_ptr<workspace_t> page_t::find_workspace_of(shared_ptr<tree_t> n) {
-	return n->workspace();
 }
 
 /**
@@ -878,19 +833,6 @@ void page_t::update_viewport_layout()
 	for(auto & w: _workspace_map) {
 		w.second->update_viewports_layout();
 	}
-}
-
-void page_t::remove_viewport(shared_ptr<workspace_t> d, shared_ptr<viewport_t> v) {
-
-	/* Transfer clients to a valid notebook */
-	for (auto x : v->gather_children_root_first<view_notebook_t>()) {
-		d->ensure_default_notebook()->add_client_from_view(x, XCB_CURRENT_TIME);
-	}
-
-	for (auto x : v->gather_children_root_first<view_floating_t>()) {
-		d->insert_as_floating(x->_client, XCB_CURRENT_TIME);
-	}
-
 }
 
 void page_t::insert_as_floating(client_managed_p c, xcb_timestamp_t time) {
@@ -939,24 +881,6 @@ auto page_t::ensure_workspace(MetaWorkspace * w) -> workspace_p
 	}
 }
 
-
-void replace(shared_ptr<page_component_t> const & src, shared_ptr<page_component_t> by) {
-	throw exception_t{"Unexpectected use of page::replace function\n"};
-}
-
-/** debug function that try to print the state of page in stdout **/
-void page_t::print_state() const {
-	current_workspace()->print_tree(0);
-	cout << "_current_workspace = " << _current_workspace << endl;
-
-//	cout << "clients list:" << endl;
-//	for(auto c: filter_class<client_base_t>(get_all_children())) {
-//		cout << "client " << c->get_node_name() << " id = " << c->orig() << " ptr = " << c << " parent = " << c->parent() << endl;
-//	}
-//	cout << "end" << endl;
-
-}
-
 void page_t::switch_to_workspace(unsigned int workspace_id, xcb_timestamp_t time) {
 	auto meta_workspace = meta_screen_get_workspace_by_index(_screen, workspace_id);
 	auto workspace = ensure_workspace(meta_workspace);
@@ -970,62 +894,6 @@ void page_t::switch_to_workspace(unsigned int workspace_id, xcb_timestamp_t time
 		_current_workspace->enable();
 		sync_tree_view();
 	}
-}
-
-/* Inspired from openbox */
-void page_t::run_cmd(std::string const & cmd_with_args)
-{
-	log::printf("executing %s\n", cmd_with_args.c_str());
-
-    GError *e;
-    gchar **argv = NULL;
-    gchar *cmd;
-
-    if (cmd_with_args == "null")
-    	return;
-
-    cmd = g_filename_from_utf8(cmd_with_args.c_str(), -1, NULL, NULL, NULL);
-    if (!cmd) {
-    	log::printf("Failed to convert the path \"%s\" from utf8\n", cmd_with_args.c_str());
-        return;
-    }
-
-    e = NULL;
-    if (!g_shell_parse_argv(cmd, NULL, &argv, &e)) {
-    	log::printf("%s\n", e->message);
-        g_error_free(e);
-    } else {
-        gchar *program = NULL;
-        gboolean ok;
-
-        e = NULL;
-        ok = g_spawn_async(NULL, argv, NULL,
-                           (GSpawnFlags)(G_SPAWN_SEARCH_PATH |
-                           G_SPAWN_DO_NOT_REAP_CHILD),
-                           NULL, NULL, NULL, &e);
-        if (!ok) {
-        	log::printf("%s\n", e->message);
-            g_error_free(e);
-        }
-
-        g_free(program);
-        g_strfreev(argv);
-    }
-
-    g_free(cmd);
-
-    return;
-}
-
-shared_ptr<viewport_t> page_t::find_viewport_of(shared_ptr<tree_t> t) {
-	while(t != nullptr) {
-		auto ret = dynamic_pointer_cast<viewport_t>(t);
-		if(ret != nullptr)
-			return ret;
-		t = t->parent()->shared_from_this();
-	}
-
-	return nullptr;
 }
 
 theme_t const * page_t::theme() const {
@@ -1061,10 +929,6 @@ void page_t::grab_stop(guint32 time)
 	shell_global_end_modal(global, time);
 }
 
-void page_t::overlay_add(shared_ptr<tree_t> x) {
-	current_workspace()->add_overlay(x);
-}
-
 shared_ptr<workspace_t> const & page_t::current_workspace() const {
 	return _current_workspace;
 }
@@ -1080,11 +944,8 @@ auto page_t::net_client_list() -> list<client_managed_p> const &
 
 void page_t::schedule_repaint()
 {
+	sync_tree_view();
 	clutter_actor_queue_redraw(CLUTTER_ACTOR(_stage));
-}
-
-void page_t::damage_all() {
-	schedule_repaint();
 }
 
 void page_t::sync_tree_view()

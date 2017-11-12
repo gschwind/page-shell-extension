@@ -69,7 +69,6 @@ grab_split_t::grab_split_t(page_t * ctx, shared_ptr<split_t> s) : grab_default_t
 	_split_ratio = s->ratio();
 	_split_root_allocation = s->root_location();
 	_ps = make_shared<popup_split_t>(s.get(), s);
-	_ctx->overlay_add(_ps);
 	_ps->show();
 }
 

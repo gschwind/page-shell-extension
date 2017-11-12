@@ -173,10 +173,6 @@ public:
 	//auto _handler_plugin_create_close_dialog(void * wm, MetaWindow * window) -> MetaCloseDialog *;
 	//auto _handler_plugin_create_inhibit_shortcuts_dialog(void * wm, MetaWindow * window) -> MetaInhibitShortcutsDialog *;
 
-
-	/* scan current root window status, finding mapped windows */
-//	void scan();
-
 	auto _handler_stage_button_press_event(ClutterActor * actor, ClutterEvent * event) -> gboolean;
 	auto _handler_stage_button_release_event(ClutterActor * actor, ClutterEvent * event) -> gboolean;
 	auto _handler_stage_motion_event(ClutterActor * actor, ClutterEvent * event) -> gboolean;
@@ -218,74 +214,25 @@ public:
 	/* split a notebook into two notebook */
 	void split(shared_ptr<notebook_t> nbk, split_type_e type);
 
-	/* compute the allocation of viewport taking in account DOCKs */
-	void compute_viewport_allocation(workspace_p d, viewport_p v);
-
-	void cleanup_not_managed_client(client_managed_p c);
-
-	void process_net_vm_state_client_message(xcb_window_t c, long type, xcb_atom_t state_properties);
 
 	void insert_as_floating(client_managed_p c, xcb_timestamp_t time = XCB_CURRENT_TIME);
 	void insert_as_fullscreen(client_managed_p c, xcb_timestamp_t time = XCB_CURRENT_TIME);
 	void insert_as_notebook(client_managed_p c, xcb_timestamp_t time = XCB_CURRENT_TIME);
 
-	client_managed_p get_transient_for(client_managed_p c);
-
-	/* TODO: replace it,
-	 * temporarly gather all tree_t */
-	vector<shared_ptr<tree_t>> get_all_children() const;
-
-	/* attach floating window in a notebook */
-
 	void grab_pointer();
 	/* if grab is linked to a given window remove this grab */
 	void cleanup_grab();
-	/* find a valid notebook, that is in subtree base and that is no nbk */
-	notebook_p get_another_notebook(shared_ptr<tree_t> base, shared_ptr<tree_t> nbk);
-	static viewport_p find_viewport_of(shared_ptr<tree_t> n);
-	static workspace_p find_workspace_of(shared_ptr<tree_t> n);
-	void set_window_cursor(xcb_window_t w, xcb_cursor_t c);
-	void update_viewport_layout();
-	void remove_viewport(shared_ptr<workspace_t> d, shared_ptr<viewport_t> v);
 
-	void ackwoledge_configure_request(xcb_configure_request_event_t const * e);
-	//void create_unmanaged_window(client_proxy_p proxy);
-	void update_page_areas();
-	void set_workspace_geometry(long width, long height);
+	void update_viewport_layout();
 
 	auto lookup_client_managed_with(MetaWindow * w) const -> client_managed_p;
 	auto lookup_client_managed_with(MetaWindowActor * actor) const -> client_managed_p;
 	auto ensure_workspace(MetaWorkspace * w) -> workspace_p;
 
-	void raise_child(shared_ptr<tree_t> t);
-	void process_notebook_client_menu(shared_ptr<client_managed_t> c, int selected);
-
-	void check_x11_extension();
-
-	void render(cairo_t * cr, time64_t time);
-	bool need_render(time64_t time);
-
 	bool check_for_managed_window(xcb_window_t w);
 	bool check_for_destroyed_window(xcb_window_t w);
 
-	shared_ptr<client_managed_t> find_hidden_client_with(xcb_window_t w);
-
-	void render();
-
-	/** debug function that try to print the state of page in stdout **/
-	void print_state() const;
 	void switch_to_workspace(unsigned int workspace, xcb_timestamp_t time);
-	void update_fullscreen_clients_position();
-	void process_error(xcb_generic_event_t const * e);
-	void start_compositor();
-	void stop_compositor();
-	void run_cmd(string const & cmd_with_args);
-
-	void reconfigure_docks(shared_ptr<workspace_t> const & d);
-
-	void mark_durty(shared_ptr<tree_t> t);
-
-	void process_pending_events();
 
 	/**
 	 * page_t virtual API
@@ -294,22 +241,17 @@ public:
 	auto conf() const -> page_configuration_t const &;
 	auto theme() const -> theme_t const *;
 	auto dpy() const -> MetaDisplay *;
-	void overlay_add(shared_ptr<tree_t> x);
 	auto current_workspace() const -> workspace_p const &;
 	void grab_start(shared_ptr<grab_handler_t> handler, guint32 time);
 	void grab_stop(guint32 time);
-	void insert_window_in_notebook(shared_ptr<client_managed_t> x, shared_ptr<notebook_t> n, bool prefer_activate);
 	void split_left(notebook_p nbk, view_p c, xcb_timestamp_t time);
 	void split_right(notebook_p nbk, view_p c, xcb_timestamp_t time);
 	void split_top(notebook_p nbk, view_p c, xcb_timestamp_t time);
 	void split_bottom(notebook_p nbk, view_p c, xcb_timestamp_t time);
 	void apply_focus(xcb_timestamp_t tfocus);
 	void notebook_close(shared_ptr<notebook_t> nbk, xcb_timestamp_t time);
-	auto global_client_focus_history() -> list<view_w>;
 	auto net_client_list() -> list<client_managed_p> const &;
-	void make_surface_stats(int & size, int & count);
 	void schedule_repaint();
-	void damage_all();
 	void sync_tree_view();
 	bool has_grab_handler();
 
