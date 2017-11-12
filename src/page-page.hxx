@@ -47,8 +47,6 @@ class page_t:
 		public connectable_t,
 		public g_connectable_t
 {
-	workspace_p _current_workspace;
-
 public:
 	map<MetaWorkspace *, workspace_p> _workspace_map;
 
@@ -200,7 +198,7 @@ public:
 	bool check_for_managed_window(xcb_window_t w);
 	bool check_for_destroyed_window(xcb_window_t w);
 
-	void switch_to_workspace(unsigned int workspace, guint32 time);
+	void switch_to_workspace(gint from, gint to, MetaMotionDirection direction);
 
 	/**
 	 * page_t virtual API
@@ -209,7 +207,7 @@ public:
 	auto conf() const -> page_configuration_t const &;
 	auto theme() const -> theme_t const *;
 	auto dpy() const -> MetaDisplay *;
-	auto current_workspace() const -> workspace_p const &;
+	auto current_workspace() -> workspace_p;
 	void grab_start(shared_ptr<grab_handler_t> handler, guint32 time);
 	void grab_stop(guint32 time);
 	void split_left(notebook_p nbk, view_p c, guint32 time);

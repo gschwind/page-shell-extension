@@ -135,11 +135,10 @@ page_t::page_t() :
 	_display{nullptr},
 	_screen{nullptr},
 	_stage{nullptr},
-	_overlay_group{nullptr}
+	_overlay_group{nullptr},
+	_viewport_group{nullptr}
 {
 
-	_viewport_group = nullptr;
-	_current_workspace = nullptr;
 	_grab_handler = nullptr;
 
 	char const * conf_file_name = 0;
@@ -228,8 +227,6 @@ void page_t::_handler_plugin_start(MetaDisplay * display, MetaScreen * screen, C
 
 	log::printf("n_work_space =%d\n", meta_screen_get_n_workspaces(_screen));
 
-	_current_workspace = ensure_workspace(meta_screen_get_active_workspace(_screen));
-
 	_viewport_group = clutter_actor_new();
 	clutter_actor_show(_viewport_group);
 
@@ -263,7 +260,10 @@ void page_t::_handler_plugin_start(MetaDisplay * display, MetaScreen * screen, C
 
 	update_viewport_layout();
 
-	switch_to_workspace(meta_screen_get_active_workspace_index(_screen), 0);
+	auto workspace = ensure_workspace(meta_screen_get_active_workspace(_screen));
+	assert(workspace != nullptr);
+	workspace->enable();
+	schedule_repaint();
 
 }
 
@@ -390,7 +390,7 @@ void page_t::_handler_plugin_destroy(MetaWindowActor * actor)
 void page_t::_handler_plugin_switch_workspace(gint from, gint to, MetaMotionDirection direction)
 {
 	log::printf("call %s %d %d %d\n", __PRETTY_FUNCTION__, from, to, static_cast<int>(direction));
-	switch_to_workspace(to, 0);
+	switch_to_workspace(from, to, direction);
 }
 
 void page_t::_handler_plugin_show_tile_preview(MetaWindow * window, MetaRectangle *tile_rect, int tile_monitor_number)
@@ -862,6 +862,7 @@ auto page_t::lookup_client_managed_with(MetaWindowActor * w) const -> client_man
 
 auto page_t::ensure_workspace(MetaWorkspace * w) -> workspace_p
 {
+	assert(w != nullptr);
 	if (has_key(_workspace_map, w)) {
 		return _workspace_map[w];
 	} else {
@@ -874,19 +875,17 @@ auto page_t::ensure_workspace(MetaWorkspace * w) -> workspace_p
 	}
 }
 
-void page_t::switch_to_workspace(unsigned int workspace_id, guint32 time) {
-	auto meta_workspace = meta_screen_get_workspace_by_index(_screen, workspace_id);
-	auto workspace = ensure_workspace(meta_workspace);
-	if(not workspace)
-		return;
+void page_t::switch_to_workspace(gint from, gint to, MetaMotionDirection direction)
+{
+	auto workspace_from = ensure_workspace(meta_screen_get_workspace_by_index(_screen, from));
+	auto workspace_to   = ensure_workspace(meta_screen_get_workspace_by_index(_screen, to));
 
-	if (workspace != current_workspace()) {
-		log::printf("switch to workspace #%p\n", meta_workspace);
-		_current_workspace->disable();
-		_current_workspace = workspace;
-		_current_workspace->enable();
-		schedule_repaint();
-	}
+	assert(workspace_from != nullptr);
+	assert(workspace_to   != nullptr);
+
+	workspace_from->disable();
+	workspace_to->enable();
+	schedule_repaint();
 }
 
 theme_t const * page_t::theme() const {
@@ -922,8 +921,9 @@ void page_t::grab_stop(guint32 time)
 	shell_global_end_modal(global, time);
 }
 
-shared_ptr<workspace_t> const & page_t::current_workspace() const {
-	return _current_workspace;
+auto page_t::current_workspace() -> workspace_p
+{
+	return ensure_workspace(meta_screen_get_active_workspace(_screen));
 }
 
 auto page_t::conf() const -> page_configuration_t const & {
