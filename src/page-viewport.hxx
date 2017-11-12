@@ -34,7 +34,7 @@ class viewport_t:
 	/** the viewport work area **/
 	rect _work_area;
 
-	shared_ptr<page_component_t> _subtree;
+	page_component_p _subtree;
 
 	viewport_t(viewport_t const & v) = delete;
 	viewport_t & operator= (viewport_t const &) = delete;
@@ -91,9 +91,6 @@ public:
 
 
 };
-
-using viewport_p = shared_ptr<viewport_t>;
-using viewport_w = weak_ptr<viewport_t>;
 
 }
 

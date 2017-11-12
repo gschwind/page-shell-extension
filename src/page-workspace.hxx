@@ -22,17 +22,14 @@ namespace page {
 
 using namespace std;
 
-enum workspace_switch_direction_e {
-	WORKSPACE_SWITCH_LEFT,
-	WORKSPACE_SWITCH_RIGHT
-};
-
-struct workspace_t: public tree_t {
+struct workspace_t:
+		public tree_t
+{
 	page_t * _ctx;
 
+private:
 	MetaWorkspace * _meta_workspace;
 
-private:
 	/* list of viewports in creation order, to make a sane reconfiguration */
 	vector<viewport_p> _viewport_outputs;
 
@@ -41,14 +38,9 @@ private:
 	tree_p _fullscreen_layer;
 	tree_p _overlays_layer;
 
-	viewport_w _primary_viewport;
 	notebook_w _default_pop;
 
-	workspace_switch_direction_e _switch_direction;
-
 	bool _is_enable;
-
-	void _init();
 
 	/* disable copy */
 	workspace_t(workspace_t const & v) = delete;
@@ -66,15 +58,12 @@ public:
 
 	auto shared_from_this() -> workspace_p;
 
-	auto get_any_viewport() const -> viewport_p;
 	void set_default_pop(notebook_p n);
-	auto primary_viewport() const -> viewport_p;
-	auto get_viewports() const -> vector<viewport_p> ;
 	auto ensure_default_notebook() -> notebook_p;
-	auto get_viewport_map() const -> vector<viewport_p>;
-	void set_primary_viewport(viewport_p v);
 	void update_viewports_layout();
 	void remove_viewport(viewport_p v);
+
+	auto meta_workspace() -> MetaWorkspace *;
 
 	void enable();
 	void disable();
@@ -83,8 +72,6 @@ public:
 	void insert_as_floating(client_managed_p c, guint32 time);
 	void insert_as_fullscreen(client_managed_p c, guint32 time);
 	void insert_as_notebook(client_managed_p c, guint32 time);
-
-	void insert_as_fullscreen(shared_ptr<client_managed_t> c, viewport_p v);
 
 	void unfullscreen(view_fullscreen_p view, guint32 time);
 

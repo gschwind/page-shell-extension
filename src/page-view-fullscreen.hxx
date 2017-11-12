@@ -29,7 +29,6 @@ namespace page {
 struct view_fullscreen_t :
 		public view_t
 {
-
 	managed_window_type_e revert_type;
 
 	/** prefered notebook to revert if available **/

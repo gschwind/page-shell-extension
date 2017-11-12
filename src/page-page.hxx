@@ -43,24 +43,6 @@ namespace page {
 
 using namespace std;
 
-/* process_mode_e define possible state of page */
-enum process_mode_e {
-	PROCESS_NORMAL,						// default evant processing
-	PROCESS_SPLIT_GRAB,					// when split is moving
-	PROCESS_NOTEBOOK_GRAB,				// when notebook tab is moved
-	PROCESS_NOTEBOOK_BUTTON_PRESS,		// when click on close/unbind button
-	PROCESS_FLOATING_MOVE,				// when a floating window is moved
-	PROCESS_FLOATING_RESIZE,			// when resizing a floating window
-	PROCESS_FLOATING_CLOSE,				// when clicking close button of floating window
-	PROCESS_FLOATING_BIND,				// when clicking bind button
-	PROCESS_FULLSCREEN_MOVE,			// when mod4+click to change fullscreen window screen
-	PROCESS_FLOATING_MOVE_BY_CLIENT,	// when moving a floating window started by client himself
-	PROCESS_FLOATING_RESIZE_BY_CLIENT,	// when resizing a floating window started by client himself
-	PROCESS_NOTEBOOK_MENU,				// when notebook menu is shown
-	PROCESS_NOTEBOOK_CLIENT_MENU,		// when switch workspace menu is shown
-	PROCESS_ALT_TAB						// when alt-tab running
-};
-
 class page_t:
 		public connectable_t,
 		public g_connectable_t
