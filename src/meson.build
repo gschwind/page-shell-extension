@@ -40,7 +40,6 @@ libshell_private_headers = [
   'page-dropdown-menu.hxx',
   'page-exception.hxx',
   'page-grab-handlers.hxx',
-  'page-key-desc.hxx',
   'page-notebook.hxx',
   'page-page-component.hxx',
   'page-page-exception.hxx',

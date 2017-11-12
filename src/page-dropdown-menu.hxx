@@ -106,10 +106,6 @@ public:
 
 };
 
-
-
 }
-
-
 
 #endif /* POPUP_ALT_TAB_HXX_ */

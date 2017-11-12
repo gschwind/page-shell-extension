@@ -27,8 +27,6 @@ extern "C" {
 
 #include "page-config-handler.hxx"
 
-#include "page-key-desc.hxx"
-
 #include "page-theme.hxx"
 
 #include "page-client-managed.hxx"
@@ -73,11 +71,6 @@ enum process_mode_e {
 	PROCESS_NOTEBOOK_MENU,				// when notebook menu is shown
 	PROCESS_NOTEBOOK_CLIENT_MENU,		// when switch workspace menu is shown
 	PROCESS_ALT_TAB						// when alt-tab running
-};
-
-struct key_bind_cmd_t {
-	key_desc_t key;
-	string cmd;
 };
 
 class page_t:
