@@ -32,19 +32,9 @@ struct margin_t {
 	int right;
 };
 
-struct theme_alttab_entry_t
-{
-	std::string label;
-};
-
 struct theme_dropdown_menu_entry_t
 {
 	std::string label;
-};
-
-struct theme_thumbnail_t {
-	std::shared_ptr<void> pix;
-	std::shared_ptr<void> title;
 };
 
 class theme_t {
@@ -91,12 +81,6 @@ public:
 	virtual void render_empty(cairo_t * cr, rect const & area) const = 0;
 
 	virtual void render_iconic_notebook(cairo_t * cr, vector<theme_tab_t> const & tabs) const = 0;
-
-	virtual void render_thumbnail(cairo_t * cr, rect position, theme_thumbnail_t const & t) const = 0;
-	virtual void render_thumbnail_title(cairo_t * cr, rect position, std::string const & title) const = 0;
-
-
-	virtual void render_floating(theme_managed_window_t * nw) const = 0;
 
 	virtual void render_popup_notebook0(cairo_t * cr, unsigned int width,
 			unsigned int height, std::string const & title) const = 0;

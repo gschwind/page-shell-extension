@@ -17,10 +17,6 @@ namespace page {
 struct theme_managed_window_t {
 	rect position;
 	std::string title;
-	cairo_t * cairo_top;
-	cairo_t * cairo_bottom;
-	cairo_t * cairo_left;
-	cairo_t * cairo_right;
 	bool focuced;
 	bool demand_attention;
 };

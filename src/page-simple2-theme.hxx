@@ -140,18 +140,10 @@ public:
 	static void rounded_i_rect(cairo_t * cr, double x, double y, double w,
 			double h, double r);
 
-	void create_background_img(int width, int height);
-
 	virtual void render_notebook(cairo_t * cr, theme_notebook_t const * n) const;
 	virtual void render_iconic_notebook(cairo_t * cr, vector<theme_tab_t> const & tabs) const;
 	virtual void render_split(cairo_t * cr, theme_split_t const * s) const;
 	virtual void render_empty(cairo_t * cr, rect const & area) const;
-
-	virtual void render_thumbnail(cairo_t * cr, rect position, theme_thumbnail_t const & t) const;
-	virtual void render_thumbnail_title(cairo_t * cr, rect position, std::string const & title) const;
-
-	virtual void render_floating(theme_managed_window_t * mw) const;
-
 
 	void render_notebook_selected(
 			cairo_t * cr,
@@ -173,16 +165,6 @@ public:
 			color_t const & outline_color,
 			color_t const & border_color,
 			color_t const & background_color
-	) const;
-
-	void render_floating_base(
-			theme_managed_window_t * mw,
-			PangoFontDescription const * pango_font,
-			color_t const & text_color,
-			color_t const & outline_color,
-			color_t const & border_color,
-			color_t const & background_color,
-			double border_width
 	) const;
 
 	virtual void render_popup_notebook0(cairo_t * cr, unsigned int width,

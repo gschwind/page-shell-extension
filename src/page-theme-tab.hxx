@@ -15,7 +15,6 @@ namespace page {
 struct theme_tab_t {
 	rect position;
 	std::string title;
-	//std::shared_ptr<icon16> icon;
 	color_t tab_color;
 	bool is_iconic;
 
