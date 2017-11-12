@@ -130,7 +130,7 @@ void notebook_t::_add_client_view(view_notebook_p vn, xcb_timestamp_t time)
 
 	_clients_tab_order.push_front(vn);
 
-	g_connect(vn->_client->meta_window(), "unmanaged", &notebook_t::_client_destroy);
+	g_connect(vn->_client->meta_window(), "unmanaged", &notebook_t::_meta_window_unmanaged);
 	g_connect(vn->_client->meta_window(), "notify::title", &notebook_t::_client_title_change);
 
 	update_client_position(vn);
@@ -893,7 +893,7 @@ void notebook_t::_client_title_change(MetaWindow * meta_window, GParamSpec * psp
 	queue_redraw();
 }
 
-void notebook_t::_client_destroy(MetaWindow * meta_window)
+void notebook_t::_meta_window_unmanaged(MetaWindow * meta_window)
 {
 	for (auto & x: _clients_tab_order) {
 		if (x->_client->meta_window() == meta_window) {
