@@ -97,7 +97,6 @@ void client_managed_t::_handler_meta_window_size_changed(MetaWindow * window)
 void client_managed_t::_handler_meta_window_unmanaged(MetaWindow * metawindow)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
-	on_unmanage.signal(this);
 }
 
 void client_managed_t::_handler_meta_window_workspace_changed(MetaWindow * metawindow)

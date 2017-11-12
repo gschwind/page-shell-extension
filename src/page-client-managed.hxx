@@ -88,7 +88,6 @@ struct client_managed_t :
 
 	signal_t<client_managed_t *> on_destroy;
 	signal_t<client_managed_t *> on_title_change;
-	signal_t<client_managed_t *> on_unmanage;
 
 	/* wrappers */
 	void delete_window(guint32 t);
