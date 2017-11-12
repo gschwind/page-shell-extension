@@ -131,7 +131,7 @@ void notebook_t::_add_client_view(view_notebook_p vn, xcb_timestamp_t time)
 	_clients_tab_order.push_front(vn);
 
 	g_connect(vn->_client->meta_window(), "unmanaged", &notebook_t::_meta_window_unmanaged);
-	g_connect(vn->_client->meta_window(), "notify::title", &notebook_t::_client_title_change);
+	g_connect(vn->_client->meta_window(), "notify::title", &notebook_t::_meta_window_notify_title);
 
 	update_client_position(vn);
 
@@ -883,7 +883,7 @@ void notebook_t::_mouse_over_set() {
 	}
 }
 
-void notebook_t::_client_title_change(MetaWindow * meta_window, GParamSpec * pspec)
+void notebook_t::_meta_window_notify_title(MetaWindow * meta_window, GParamSpec * pspec)
 {
 	if (_selected == nullptr)
 		return;
