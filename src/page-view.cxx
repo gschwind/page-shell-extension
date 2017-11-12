@@ -51,10 +51,6 @@ auto view_t::shared_from_this() -> view_p
 	return static_pointer_cast<view_t>(tree_t::shared_from_this());
 }
 
-void view_t::focus(guint32 t) {
-	_client->focus(t);
-}
-
 bool view_t::_is_client_owner()
 {
 	return _client->current_owner_view() == this;

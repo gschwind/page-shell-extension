@@ -38,10 +38,6 @@ struct view_t : public tree_t {
 
 	auto shared_from_this() -> view_p;
 
-	void focus(guint32 t);
-	void move_all_window();
-
-	void _on_focus_change(client_managed_t * c);
 	bool _is_client_owner();
 
 	/**
