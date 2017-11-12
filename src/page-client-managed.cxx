@@ -175,18 +175,9 @@ void client_managed_t::_handler_meta_window_workspace_changed(MetaWindow * metaw
 	}
 }
 
-
 void client_managed_t::delete_window(guint32 t) {
 	log(LOG_NONE, "request close for '%s'\n", title().c_str());
 	meta_window_delete(_meta_window, t);
-}
-
-void client_managed_t::set_floating_wished_position(rect const & pos) {
-	_floating_wished_position = pos;
-}
-
-rect const & client_managed_t::get_floating_wished_position() {
-	return _floating_wished_position;
 }
 
 auto client_managed_t::current_owner_view() const -> view_t *

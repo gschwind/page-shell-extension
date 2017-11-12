@@ -91,9 +91,6 @@ struct client_managed_t :
 	signal_t<client_managed_t *> on_configure_notify;
 	signal_t<client_managed_t *> on_unmanage;
 
-	void set_floating_wished_position(rect const & pos);
-	auto get_floating_wished_position() -> rect const & ;
-
 	/* wrappers */
 	void delete_window(guint32 t);
 	void focus(guint32 timestamp);
