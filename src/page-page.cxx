@@ -130,65 +130,9 @@ void page_t::_handler_key_make_floating_window(MetaDisplay * display, MetaScreen
 	current_workspace()->switch_view_to_floating(v, event->time);
 }
 
-void page_t::_handler_key_page_quit(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding)
-{
-	log::printf("call %s\n", __PRETTY_FUNCTION__);
-	//meta_quit(META_EXIT_SUCCESS);
-}
-
 void page_t::_handler_key_toggle_fullscreen(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding)
 {
 	log::printf("call %s\n", __PRETTY_FUNCTION__);
-}
-
-void page_t::_handler_key_debug_1(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding)
-{
-	log::printf("call %s\n", __PRETTY_FUNCTION__);
-}
-
-void page_t::_handler_key_debug_2(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding)
-{
-	log::printf("call %s\n", __PRETTY_FUNCTION__);
-}
-
-void page_t::_handler_key_debug_3(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding)
-{
-	log::printf("call %s\n", __PRETTY_FUNCTION__);
-}
-
-void page_t::_handler_key_debug_4(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding)
-{
-	log::printf("call %s\n", __PRETTY_FUNCTION__);
-}
-
-void page_t::_handler_key_run_cmd_0(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding)
-{
-	log::printf("call %s\n", __PRETTY_FUNCTION__);
-	run_cmd(bind_cmd[0].cmd);
-}
-
-void page_t::_handler_key_run_cmd_1(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding)
-{
-	log::printf("call %s\n", __PRETTY_FUNCTION__);
-	run_cmd(bind_cmd[1].cmd);
-}
-
-void page_t::_handler_key_run_cmd_2(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding)
-{
-	log::printf("call %s\n", __PRETTY_FUNCTION__);
-	run_cmd(bind_cmd[2].cmd);
-}
-
-void page_t::_handler_key_run_cmd_3(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding)
-{
-	log::printf("call %s\n", __PRETTY_FUNCTION__);
-	run_cmd(bind_cmd[3].cmd);
-}
-
-void page_t::_handler_key_run_cmd_4(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding)
-{
-	log::printf("call %s\n", __PRETTY_FUNCTION__);
-	run_cmd(bind_cmd[4].cmd);
 }
 
 page_t::page_t() :
@@ -233,45 +177,6 @@ page_t::page_t() :
 	_theme_engine = _conf.get_string("default", "theme_engine");
 
 	_theme = nullptr;
-
-	bind_page_quit           = _conf.get_string("default", "bind_page_quit");
-	bind_close               = _conf.get_string("default", "bind_close");
-	bind_exposay_all         = _conf.get_string("default", "bind_exposay_all");
-	bind_toggle_fullscreen   = _conf.get_string("default", "bind_toggle_fullscreen");
-	bind_toggle_compositor   = _conf.get_string("default", "bind_toggle_compositor");
-	bind_right_workspace     = _conf.get_string("default", "bind_right_desktop");
-	bind_left_workspace      = _conf.get_string("default", "bind_left_desktop");
-
-	bind_bind_window         = _conf.get_string("default", "bind_bind_window");
-	bind_fullscreen_window   = _conf.get_string("default", "bind_fullscreen_window");
-	bind_float_window        = _conf.get_string("default", "bind_float_window");
-
-	bind_debug_1 = _conf.get_string("default", "bind_debug_1");
-	bind_debug_2 = _conf.get_string("default", "bind_debug_2");
-	bind_debug_3 = _conf.get_string("default", "bind_debug_3");
-	bind_debug_4 = _conf.get_string("default", "bind_debug_4");
-
-	bind_cmd[0].key = _conf.get_string("default", "bind_cmd_0");
-	bind_cmd[1].key = _conf.get_string("default", "bind_cmd_1");
-	bind_cmd[2].key = _conf.get_string("default", "bind_cmd_2");
-	bind_cmd[3].key = _conf.get_string("default", "bind_cmd_3");
-	bind_cmd[4].key = _conf.get_string("default", "bind_cmd_4");
-	bind_cmd[5].key = _conf.get_string("default", "bind_cmd_5");
-	bind_cmd[6].key = _conf.get_string("default", "bind_cmd_6");
-	bind_cmd[7].key = _conf.get_string("default", "bind_cmd_7");
-	bind_cmd[8].key = _conf.get_string("default", "bind_cmd_8");
-	bind_cmd[9].key = _conf.get_string("default", "bind_cmd_9");
-
-	bind_cmd[0].cmd = _conf.get_string("default", "exec_cmd_0");
-	bind_cmd[1].cmd = _conf.get_string("default", "exec_cmd_1");
-	bind_cmd[2].cmd = _conf.get_string("default", "exec_cmd_2");
-	bind_cmd[3].cmd = _conf.get_string("default", "exec_cmd_3");
-	bind_cmd[4].cmd = _conf.get_string("default", "exec_cmd_4");
-	bind_cmd[5].cmd = _conf.get_string("default", "exec_cmd_5");
-	bind_cmd[6].cmd = _conf.get_string("default", "exec_cmd_6");
-	bind_cmd[7].cmd = _conf.get_string("default", "exec_cmd_7");
-	bind_cmd[8].cmd = _conf.get_string("default", "exec_cmd_8");
-	bind_cmd[9].cmd = _conf.get_string("default", "exec_cmd_9");
 
 	if(_conf.get_string("default", "auto_refocus") == "true") {
 		configuration._auto_refocus = true;
@@ -340,16 +245,6 @@ void page_t::_handler_plugin_start(MetaDisplay * display, MetaScreen * screen, C
 	add_keybinding_helper(setting_keybindings, "make-fullscreen-window", &page_t::_handler_key_make_fullscreen_window);
 	add_keybinding_helper(setting_keybindings, "make-floating-window", &page_t::_handler_key_make_floating_window);
 	add_keybinding_helper(setting_keybindings, "toggle-fullscreen-window", &page_t::_handler_key_toggle_fullscreen);
-	add_keybinding_helper(setting_keybindings, "debug-1", &page_t::_handler_key_debug_1);
-	add_keybinding_helper(setting_keybindings, "debug-2", &page_t::_handler_key_debug_2);
-	add_keybinding_helper(setting_keybindings, "debug-3", &page_t::_handler_key_debug_3);
-	add_keybinding_helper(setting_keybindings, "debug-4", &page_t::_handler_key_debug_4);
-	add_keybinding_helper(setting_keybindings, "run-cmd-0", &page_t::_handler_key_run_cmd_0);
-	add_keybinding_helper(setting_keybindings, "run-cmd-1", &page_t::_handler_key_run_cmd_1);
-	add_keybinding_helper(setting_keybindings, "run-cmd-2", &page_t::_handler_key_run_cmd_2);
-	add_keybinding_helper(setting_keybindings, "run-cmd-3", &page_t::_handler_key_run_cmd_3);
-	add_keybinding_helper(setting_keybindings, "run-cmd-4", &page_t::_handler_key_run_cmd_4);
-	add_keybinding_helper(setting_keybindings, "page-quit", &page_t::_handler_key_page_quit);
 
 	g_connect(CLUTTER_ACTOR(stage), "button-press-event", &page_t::_handler_stage_button_press_event);
 	g_connect(CLUTTER_ACTOR(stage), "button-release-event", &page_t::_handler_stage_button_release_event);

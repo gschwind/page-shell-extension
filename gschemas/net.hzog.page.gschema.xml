@@ -14,39 +14,7 @@
 	<key name="toggle-fullscreen-window" type="as">
 		<default><![CDATA[['<Super>f']]]></default>
 	</key>
-	
-	<key name="page-quit" type="as">
-		<default><![CDATA[['<Super>q']]]></default>
-	</key>
 
-	<key name="debug-1" type="as">
-		<default><![CDATA[['<Super>1']]]></default>
-	</key>
-	<key name="debug-2" type="as">
-		<default><![CDATA[['<Super>2']]]></default>
-	</key>
-	<key name="debug-3" type="as">
-		<default><![CDATA[['<Super>3']]]></default>
-	</key>
-	<key name="debug-4" type="as">
-		<default><![CDATA[['<Super>4']]]></default>
-	</key>
-
-	<key name="run-cmd-0" type="as">
-		<default><![CDATA[[]]]></default>
-	</key>
-	<key name="run-cmd-1" type="as">
-		<default><![CDATA[[]]]></default>
-	</key>
-	<key name="run-cmd-2" type="as">
-		<default><![CDATA[[]]]></default>
-	</key>
-	<key name="run-cmd-3" type="as">
-		<default><![CDATA[[]]]></default>
-	</key>
-	<key name="run-cmd-4" type="as">
-		<default><![CDATA[[]]]></default>
-	</key>
 </schema>
 
 </schemalist>

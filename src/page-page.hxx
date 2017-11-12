@@ -84,12 +84,7 @@ class page_t:
 		public connectable_t,
 		public g_connectable_t
 {
-	static uint32_t const DEFAULT_BUTTON_EVENT_MASK = XCB_EVENT_MASK_BUTTON_PRESS|XCB_EVENT_MASK_BUTTON_RELEASE|XCB_EVENT_MASK_BUTTON_MOTION|XCB_EVENT_MASK_POINTER_MOTION;
-	static uint32_t const ROOT_EVENT_MASK = XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_PROPERTY_CHANGE | XCB_EVENT_MASK_FOCUS_CHANGE;
 	static time64_t const default_wait;
-
-	/** define callback function type for event handler **/
-	using callback_event_t = void (page_t::*) (xcb_generic_event_t const *);
 
 	workspace_p _current_workspace;
 
@@ -115,27 +110,6 @@ public:
 
 	string page_base_dir;
 	string _theme_engine;
-
-	key_desc_t bind_page_quit;
-	key_desc_t bind_toggle_fullscreen;
-	key_desc_t bind_toggle_compositor;
-	key_desc_t bind_close;
-
-	key_desc_t bind_exposay_all;
-
-	key_desc_t bind_right_workspace;
-	key_desc_t bind_left_workspace;
-
-	key_desc_t bind_bind_window;
-	key_desc_t bind_fullscreen_window;
-	key_desc_t bind_float_window;
-
-	key_desc_t bind_debug_1;
-	key_desc_t bind_debug_2;
-	key_desc_t bind_debug_3;
-	key_desc_t bind_debug_4;
-
-	array<key_bind_cmd_t, 10> bind_cmd;
 
 	signal_t<client_managed_p> on_focus_changed;
 
@@ -164,17 +138,7 @@ private:
 	void _handler_key_make_notebook_window(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding);
 	void _handler_key_make_fullscreen_window(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding);
 	void _handler_key_make_floating_window(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding);
-	void _handler_key_page_quit(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding);
 	void _handler_key_toggle_fullscreen(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding);
-	void _handler_key_debug_1(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding);
-	void _handler_key_debug_2(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding);
-	void _handler_key_debug_3(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding);
-	void _handler_key_debug_4(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding);
-	void _handler_key_run_cmd_0(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding);
-	void _handler_key_run_cmd_1(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding);
-	void _handler_key_run_cmd_2(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding);
-	void _handler_key_run_cmd_3(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding);
-	void _handler_key_run_cmd_4(MetaDisplay * display, MetaScreen * screen, MetaWindow * window, ClutterKeyEvent * event, MetaKeyBinding * binding);
 
 private:
 	/* do no allow copy */
@@ -186,7 +150,6 @@ public:
 	virtual ~page_t();
 
 	void set_default_pop(shared_ptr<notebook_t> x);
-
 
 	// Plugin API
 

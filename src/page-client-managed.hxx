@@ -86,8 +86,6 @@ struct client_managed_t :
 	void _handler_meta_window_unmanaged(MetaWindow * metawindow);
 	void _handler_meta_window_workspace_changed(MetaWindow * metawindow);
 
-	signal_t<client_managed_t *> on_destroy;
-
 	/* wrappers */
 	void delete_window(guint32 t);
 	void focus(guint32 timestamp);
