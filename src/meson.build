@@ -32,7 +32,6 @@ libshell_public_headers = [
 ]
 
 libshell_private_headers = [
-  'page-init.h',
   'page-box.hxx',
   'page-cairo-surface-type-name.hxx',
   'page-client-managed.hxx',
@@ -94,8 +93,7 @@ libshell_private_sources = [
   'page-view-fullscreen.cxx',
   'page-view-notebook.cxx',
   'page-viewport.cxx',
-  'page-workspace.cxx',
-  'page-init.cxx'
+  'page-workspace.cxx'
 ]
 
 #libshell_enums = gnome.mkenums_simple('page-enum-types',
