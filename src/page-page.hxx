@@ -43,14 +43,6 @@ namespace page {
 
 using namespace std;
 
-struct fullscreen_data_t {
-	weak_ptr<client_managed_t> client;
-	weak_ptr<workspace_t> workspace;
-	weak_ptr<viewport_t> viewport;
-	managed_window_type_e revert_type;
-	weak_ptr<notebook_t> revert_notebook;
-};
-
 /* process_mode_e define possible state of page */
 enum process_mode_e {
 	PROCESS_NORMAL,						// default evant processing
