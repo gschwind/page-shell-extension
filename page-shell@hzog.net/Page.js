@@ -1,6 +1,7 @@
 
 const Lang = imports.lang;
 const Meta = imports.gi.Meta;
+const Clutter = imports.gi.Clutter;
 
 var PageClientManaged = new Lang.Class({
 		Name: 'PageClientManaged',
@@ -300,11 +301,11 @@ var PageShell = new Lang.Class({
 //
 		this._current_workspace = this.ensure_workspace(this._screen.get_active_workspace());
 
-//		_viewport_group = clutter_actor_new();
-//		clutter_actor_show(_viewport_group);
-//
-//		_overlay_group = clutter_actor_new();
-//		clutter_actor_show(_overlay_group);
+		this._viewport_group = new Clutter.Actor();
+		this._viewport_group.show();
+
+		this._overlay_group = new Clutter.Actor();
+		this._overlay_group.show();
 //
 //		GSettings * setting_keybindings = g_settings_new("net.hzog.page.keybindings");
 //		add_keybinding_helper(setting_keybindings, "make-notebook-window", &page_t::_handler_key_make_notebook_window);
@@ -312,29 +313,44 @@ var PageShell = new Lang.Class({
 //		add_keybinding_helper(setting_keybindings, "make-floating-window", &page_t::_handler_key_make_floating_window);
 //		add_keybinding_helper(setting_keybindings, "toggle-fullscreen-window", &page_t::_handler_key_toggle_fullscreen);
 //
-//		g_connect(CLUTTER_ACTOR(stage), "button-press-event", &page_t::_handler_stage_button_press_event);
-//		g_connect(CLUTTER_ACTOR(stage), "button-release-event", &page_t::_handler_stage_button_release_event);
-//		g_connect(CLUTTER_ACTOR(stage), "motion-event", &page_t::_handler_stage_motion_event);
-//		g_connect(CLUTTER_ACTOR(stage), "key-press-event", &page_t::_handler_stage_key_press_event);
-//		g_connect(CLUTTER_ACTOR(stage), "key-release-event", &page_t::_handler_stage_key_release_event);
-//
-//		g_connect(_screen, "monitors-changed", &page_t::_handler_screen_monitors_changed);
-//		g_connect(_screen, "workareas-changed", &page_t::_handler_screen_workareas_changed);
-//		g_connect(_screen, "workspace-added", &page_t::_handler_screen_workspace_added);
-//		g_connect(_screen, "workspace-removed", &page_t::_handler_screen_workspace_removed);
-//
-//		g_connect(_display, "accelerator-activated", &page_t::_handler_meta_display_accelerator_activated);
-//		g_connect(_display, "grab-op-begin”", &page_t::_handler_meta_display_grab_op_begin);
-//		g_connect(_display, "grab-op-end", &page_t::_handler_meta_display_grab_op_end);
-//		g_connect(_display, "modifiers-accelerator-activated", &page_t::_handler_meta_display_modifiers_accelerator_activated);
-//		g_connect(_display, "overlay-key", &page_t::_handler_meta_display_overlay_key);
-//		g_connect(_display, "restart", &page_t::_handler_meta_display_restart);
-//		g_connect(_display, "window-created", &page_t::_handler_meta_display_window_created);
-//
+		this._stage.connect("button-press-event", Lang.bind(this,
+				this._handler_stage_button_press_event));
+		this._stage.connect("button-release-event", Lang.bind(this,
+				this._handler_stage_button_release_event));
+		this._stage.connect("motion-event", Lang.bind(this,
+				this._handler_stage_motion_event));
+		this._stage.connect("key-press-event", Lang.bind(this,
+				this._handler_stage_key_press_event));
+		this._stage.connect("key-release-event", Lang.bind(this,
+				this._handler_stage_key_release_event));
+
+		this._screen.connect("monitors-changed",
+				Lang.bind(this, this._handler_screen_monitors_changed));
+		this._screen.connect("workareas-changed",
+				Lang.bind(this, this._handler_screen_workareas_changed));
+		this._screen.connect("workspace-added",
+				Lang.bind(this, this._handler_screen_workspace_added));
+		this._screen.connect("workspace-removed",
+				Lang.bind(this, this._handler_screen_workspace_removed));
+
+		this._display.connect("accelerator-activated", 
+				Lang.bind(this, this._handler_meta_display_accelerator_activated));
+//		this._display.connect("grab-op-begin”", 
+//				Lang.bind(this, this._handler_meta_display_grab_op_begin));
+//		this._display.connect("grab-op-end", 
+//				Lang.bind(this, this._handler_meta_display_grab_op_end));
+		this._display.connect("modifiers-accelerator-activated", 
+				Lang.bind(this, this._handler_meta_display_modifiers_accelerator_activated));
+		this._display.connect("overlay-key",
+				Lang.bind(this, this._handler_meta_display_overlay_key));
+		this._display.connect("restart", 
+				Lang.bind(this, this._handler_meta_display_restart));
+		this._display.connect("window-created", 
+				Lang.bind(this, this._handler_meta_display_window_created));
+
 //		update_viewport_layout();
 //
 //		switch_to_workspace(meta_screen_get_active_workspace_index(_screen), 0);
-	   
 	   
 	   
        this._shellwm.connect('switch-workspace', Lang.bind(this, this._switchWorkspace));
@@ -374,7 +390,7 @@ var PageShell = new Lang.Class({
    },
    
    _sizeChangedWindow: function(shellwm, actor) {
-	   global.log("[PageShell] _sizeChangedWindow");
+	   //global.log("[PageShell] _sizeChangedWindow");
 //	   this._page.size_changed(actor);
    },
    
@@ -428,9 +444,10 @@ var PageShell = new Lang.Class({
    },
 
    lookup_client_managed_with_meta_window_actor: function(w) {
-		for (let i in this._net_client_list) {
-			if (i._meta_window_actor === w) {
-				return i;
+	   var l = this._net_client_list
+		for (let i = 0; i < l.length; ++i) {
+			if (l[i]._meta_window_actor === w) {
+				return l[i];
 			}
 		}
 		return null;
@@ -453,6 +470,99 @@ var PageShell = new Lang.Class({
 	   global.log("[PageShell] _handler_meta_window_unmanaged");
    },
    
+   _handler_stage_button_press_event: function(actor, event) { 
+	   global.log("[PageShell] _handler_stage_button_press_event");
+   },
+   
+   _handler_stage_button_release_event: function(actor, event) {
+	   global.log("[PageShell] _handler_stage_button_release_event");
+   },
+   
+   _handler_stage_motion_event: function(actor, event) { 
+	   global.log("[PageShell] _handler_stage_motion_event");
+   },
+   
+   _handler_stage_key_press_event: function(actor, event) { 
+	   global.log("[PageShell] _handler_stage_key_press_event");
+   },
+   
+   _handler_stage_key_release_event: function(actor, event) {
+	   global.log("[PageShell] _handler_stage_key_release_event");
+   },
+   
+	_handler_screen_in_fullscreen_changed : function(screen) {
+		global.log("[PageShell] _handler_screen_in_fullscreen_changed");
+	},
+	
+	_handler_screen_monitors_changed : function(screen) {
+		global.log("[PageShell] _handler_screen_monitors_changed");
+	},
+	
+	_handler_screen_restacked : function(screen) {
+		global.log("[PageShell] _handler_screen_restacked");
+	},
+	
+	_handler_screen_startup_sequence_changed : function(screen, arg1) {
+		global
+				.log("[PageShell] _handler_screen_startup_sequence_changed");
+	},
+	
+	_handler_screen_window_entered_monitor : function(screen, monitor_id, meta_window) {
+		global.log("[PageShell] _handler_screen_window_entered_monitor");
+	},
+	
+	_handler_screen_window_left_monitor : function(screen, monitor_id, meta_window) {
+		global.log("[PageShell] _handler_screen_window_left_monitor");
+	},
+	
+	_handler_screen_workareas_changed : function(screen) {
+		global.log("[PageShell] _handler_screen_workareas_changed");
+	},
+	
+	_handler_screen_workspace_added : function(screen, workspace_id) {
+		global.log("[PageShell] _handler_screen_workspace_added");
+	},
+	
+	_handler_screen_workspace_removed : function(screen, workspace_id) {
+		global.log("[PageShell] _handler_screen_workspace_removed");
+	},
+	
+	_handler_screen_workspace_switched : function(Mscreen, from, to,
+			direction) {
+		global.log("[PageShell] _handler_screen_workspace_switched");
+	},
+	
+	
+	_handler_meta_display_accelerator_activated : function(display, arg1, arg2, arg3) {
+		global.log("[PageShell] _handler_meta_display_accelerator_activated");
+	},
+	
+	_handler_meta_display_grab_op_begin : function(display, screen, meta_window, grab_op) {
+		global.log("[PageShell] _handler_meta_display_grab_op_begin");
+	},
+	
+	_handler_meta_display_grab_op_end : function(display, screen, meta_window, grab_op) {
+		global.log("[PageShell] _handler_meta_display_grab_op_end");
+	},
+	
+	_handler_meta_display_modifiers_accelerator_activated : function(display) {
+		global.log("[PageShell] _handler_meta_display_modifiers_accelerator_activated");
+		return false;
+	},
+	
+	_handler_meta_display_overlay_key : function(display) {
+		global.log("[PageShell] _handler_meta_display_overlay_key");
+	},
+	
+	_handler_meta_display_restart : function(display) {
+		global.log("[PageShell] _handler_meta_display_restart");
+		return false;
+	},
+	
+	_handler_meta_display_window_created : function(display, meta_window) {
+		global.log("[PageShell] _handler_meta_display_window_created");
+	},
+
    ensure_workspace: function(meta_workspace)
    {
    	if (this._workspace_map.has(meta_workspace)) {
