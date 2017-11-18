@@ -90,6 +90,20 @@ var PageTree = new Lang.Class({
 		
 		clear: function() {
 			this._children = [];
+		},
+
+		hide: function() {
+			this._is_visible = false;
+			for(let i = 0; i < this._children.length; ++i) {
+				this._children[i].hide();
+			}
+		},
+		
+		show: function() {
+			this._is_visible = true;
+			for(let i = 0; i < this._children.length; ++i) {
+				this._children[i].show();
+			}
 		}
 		
 });
@@ -98,7 +112,9 @@ var PageComponent = new Lang.Class({
 		Name: 'PageComponent',
 		Extends: PageTree,
 		
-		_init: function() {
+		_init: function(ref) {
+			this.parent(ref);
+			
 
 		},
 		
@@ -167,12 +183,12 @@ var PageWorkspace = new Lang.Class({
 			/** store the newer layout, to be able to cleanup obsolete viewports **/
 			this._viewport_outputs = [];
 			/** for each not overlaped rectangle **/
-			for (let i = 0; i < viewport_allocation.size; ++i) {
-				global.log("%p: found viewport (%d,%d,%d,%d)\n", _meta_workspace,
+			for (let i = 0; i < viewport_allocation.length; ++i) {
+				global.log("%p: found viewport (%d,%d,%d,%d)\n",this. _meta_workspace,
 						viewport_allocation[i].x, viewport_allocation[i].y,
-						viewport_allocation[i].w, viewport_allocation[i].h);
+						viewport_allocation[i].width, viewport_allocation[i].height);
 				let vp = undefined;
-				if (i < old_layout.size) {
+				if (i < old_layout.length) {
 					vp = old_layout[i];
 					vp.update_work_area(viewport_allocation[i]);
 				} else {
@@ -183,14 +199,14 @@ var PageWorkspace = new Lang.Class({
 			}
 
 			/** clean up obsolete viewport_allocation **/
-			for (let i = this._viewport_outputs.size(); i < old_layout.size; ++i) {
+			for (let i = this._viewport_outputs.length; i < old_layout.length; ++i) {
 				/** destroy this viewport **/
 				this._remove_viewport(old_layout[i]);
 				old_layout[i] = null;
 			}
 
 			// update visibility
-			if (_is_visible)
+			if (this._is_visible)
 				this.show();
 			else
 				this.hide();
@@ -212,16 +228,61 @@ var PageWorkspace = new Lang.Class({
 });
 
 var PageViewport = new Lang.Class({
-		Name: 'PageViewport',
-		Extends: PageComponent,
+	Name: 'PageViewport',
+	Extends: PageComponent,
+	
+	_init: function(ref, area) {
+		this.parent(ref);
+		this._work_area = area,
+		this._subtree = new PageNotebook(this);
+		this.push_back(this._subtree);
 		
-		_init: function() {
+		this._canvas = new Clutter.Canvas();
+		this._canvas.ref_sink();
+		this._default_view = new Clutter.Actor();
+		this._default_view.ref_sink();
+		this._default_view.set_content(this._canvas);
+		this._default_view.set_content_scaling_filters(Clutter.ScalingFilter.NEAREST, Clutter.ScalingFilter.NEAREST);
+		this._default_view.set_reactive(true);
+		
+		this._update_canvas();
+	
+//	g_connect(CLUTTER_CANVAS(_canvas), "draw", &viewport_t::draw);
+//	
+//	g_connect(_default_view, "button-press-event",
+//			&viewport_t::_handler_button_press_event);
+//	g_connect(_default_view, "button-release-event",
+//			&viewport_t::_handler_button_release_event);
+//	g_connect(_default_view, "motion-event",
+//			&viewport_t::_handler_motion_event);
+//	g_connect(_default_view, "enter-event",
+//			&viewport_t::_handler_enter_event);
+//	g_connect(_default_view, "leave-event",
+//			&viewport_t::_handler_leave_event);
+	
+		this._subtree.set_allocation(Meta.rect(0, 0, this._work_area.width, this._work_area.height));
 
-		},
+	},
+	
+	destroy: function() {
 		
-		destroy: function() {
-			
-		}
+	},
+	
+	_update_canvas: function()
+	{
+		this._canvas.set_size(this._work_area.width, this._work_area.height);
+		this._default_view.set_position(this._work_area.x, this._work_area.y);
+		this._default_view.set_size(this._work_area.width, this._work_area.height);
+		this._canvas.invalidate();
+	},
+	
+	set_allocation: function(area) {
+		this._work_area = area;
+		this._update_canvas();
+		if (this._subtree)
+			this._subtree.set_allocation(Meta.rect(0, 0, this._work_area.width, this._work_area.height));
+//		queue_redraw();
+	}
 		
 });
 
@@ -245,12 +306,42 @@ var PageNotebook = new Lang.Class({
 		Name: 'PageNotebook',
 		Extends: PageComponent,
 		
-		_init: function() {
+		_init: function(ref) {
+			this.parent(ref._root);
+			
+			this._ctx = ref._root._ctx;
+			this._is_default = false;
+			this._can_hsplit = true;
+			this._can_vsplit = true;
+			this._has_scroll_arrow = false;
+			this._has_pending_fading_timeout = false;
+			this._mouse_over = null;
+			this._selected = null;
+			
+			this._stack_is_locked = true;
+			
+			this._notebook_view_layer = new PageTree(this._root);
+			this.push_back(this._notebook_view_layer);
+			this._notebook_view_layer.show();
 
+			// TODO
+			//connect(_ctx->on_focus_changed, this, &notebook_t::_client_focus_change);
+			
 		},
 		
 		destroy: function() {
 			
+		},
+		
+		set_allocation: function(area) {
+//			var width, height;
+//			get_min_allocation(width, height);
+//			assert(area.w >= width);
+//			assert(area.h >= height);
+
+			this._allocation = area;
+//			_update_all_layout();
+//			queue_redraw();
 		}
 		
 });
@@ -637,7 +728,7 @@ var PageShell = new Lang.Class({
    		this._workspace_map.set(meta_workspace, d);
 //   		d.disable();
 //   		d.show(); // make is visible by default
-//   		d.update_viewports_layout();
+   		d.update_viewports_layout();
    		return d;
    	}
    },
