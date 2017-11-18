@@ -1,13 +1,43 @@
 
 const Lang = imports.lang;
+const GObject = imports.gi.GObject;
 const Meta = imports.gi.Meta;
 const Clutter = imports.gi.Clutter;
+const Signals = imports.signals;
 
 var make_rect = function(x, y, width, height) {
 	return new Meta.Rectangle({'x':x,'y':y,'width':width,'height':height});
 };
 
-var PageThemeMarginStruct =  new Lang.Class({
+var PageConnectable = new Lang.Class({
+	Name: 'PageConnectable',
+	Extends: GObject.Object,
+	
+	_init: function() {
+		this.parent();
+		this._connected_signals = [];
+	},
+	
+	g_connect: function(obj, signame, func) {
+		var sigid = obj.connect(signame, Lang.bind(this, func));
+		this._connected_signals.push({'obj': obj, 'sigid': sigid});
+	},
+	
+	destroy: function() {
+		this._connected_signals.forEach((item, k, arr) => {
+			item.obj.disconnect(item.sigid);
+		});
+	},
+	
+	disconnect_object: function(obj) {
+		this._connected_signals.forEach((item, k, arr) => {
+			if (item.obj == obj)
+				item.obj.disconnect(item.sigid);
+		});
+	}
+});
+
+var PageThemeMarginStruct = new Lang.Class({
 	Name: 'PageThemeMarginStruct',
 	_init: function() {
 		this.top = 0;
@@ -220,6 +250,7 @@ var PageWorkspace = new Lang.Class({
 			this._ctx =ctx;
 			this._meta_workspace = meta_workspace;
 			
+			this._default_pop = null;
 			this._stack_is_locked = true;
 			
 			this._viewport_outputs = [];
@@ -542,7 +573,7 @@ var PageNotebook = new Lang.Class({
 				this._area.top.height = (this._allocation.height - this._ctx._theme.notebook.tab_height) * 0.2;
 
 				this._area.bottom.x = this._allocation.x + window_position.x;
-				this._area.bottom.y = this._allocation.y + window_position.y + (0.8 * (this._allocation.h - this._ctx._theme.notebook.tab_height));
+				this._area.bottom.y = this._allocation.y + window_position.y + (0.8 * (this._allocation.height - this._ctx._theme.notebook.tab_height));
 				this._area.bottom.width = this._allocation.width;
 				this._area.bottom.height = (this._allocation.height - this._ctx._theme.notebook.tab_height) * 0.2;
 			} else {
@@ -584,13 +615,13 @@ var PageNotebook = new Lang.Class({
 			this._area.popup_left.width = this._allocation.width * 0.5;
 			this._area.popup_left.h = (this._allocation.height - this._ctx._theme.notebook.tab_height);
 
-			this._area.popup_right.x = this._allocation.x + window_position.x + this._allocation.w * 0.5;
+			this._area.popup_right.x = this._allocation.x + window_position.x + this._allocation.width * 0.5;
 			this._area.popup_right.y = this._allocation.y + window_position.y + this._ctx._theme.notebook.tab_height;
 			this._area.popup_right.width = this._allocation.width * 0.5;
 			this._area.popup_right.h = (this._allocation.height - this._ctx._theme.notebook.tab_height);
 
-			this._area.popup_center.x = this._allocation.x + window_position.x + this._allocation.w * 0.2;
-			this._area.popup_center.y = this._allocation.y + window_position.y + this._ctx._theme.notebook.tab_height + (this._allocation.h - this._ctx._theme.notebook.tab_height) * 0.2;
+			this._area.popup_center.x = this._allocation.x + window_position.x + this._allocation.width * 0.2;
+			this._area.popup_center.y = this._allocation.y + window_position.y + this._ctx._theme.notebook.tab_height + (this._allocation.height - this._ctx._theme.notebook.tab_height) * 0.2;
 			this._area.popup_center.width = this._allocation.width * 0.6;
 			this._area.popup_center.h = (this._allocation.height - this._ctx._theme.notebook.tab_height) * 0.6;
 
@@ -688,13 +719,13 @@ var PageView = new Lang.Class({
 		 **/
 		
 		hide: function() {
-			PageTree.hide.call(this);
-			reconfigure();
+			PageTree.prototype.hide.call(this);
+			this.reconfigure();
 		},
 		
 		show: function() {
-			PageTree.show.call(this);
-			reconfigure();
+			PageTree.prototype.show.call(this);
+			this.reconfigure();
 		},
 
 		reconfigure: undefined
@@ -807,7 +838,7 @@ var PageViewNotebook = new Lang.Class({
 				this._client_area.x,
 				this._client_area.y,
 				this._client_area.width,
-				this._client_area.heigth);
+				this._client_area.height);
 
 		// disable move/resizes.
 		this._client._meta_window.connect("position-changed",
@@ -861,7 +892,16 @@ var PageViewNotebook = new Lang.Class({
 
 var PageShell = new Lang.Class({
     Name: 'PageShell',
+    Extends: PageConnectable,
+    Signals: {
+//        'no-arguments': { },
+        'on-focus-changed': { param_types: [ PageClientManaged ] },
+//        'with-return': { param_types: [ GObject.TYPE_STRING, GObject.TYPE_INT ], return_type: GObject.TYPE_BOOLEAN ),
+    },
+    
    _init: function(display, screen, stage, shellwm) {
+	   this.parent();
+	   
 	   global.log("[PageShell] _init");
 	   
 	   /* map<MetaWorkspace *, workspace_p> */
@@ -927,53 +967,53 @@ var PageShell = new Lang.Class({
 //		add_keybinding_helper(setting_keybindings, "make-floating-window", &page_t::_handler_key_make_floating_window);
 //		add_keybinding_helper(setting_keybindings, "toggle-fullscreen-window", &page_t::_handler_key_toggle_fullscreen);
 //
-		this._stage.connect("button-press-event", Lang.bind(this,
-				this._handler_stage_button_press_event));
-		this._stage.connect("button-release-event", Lang.bind(this,
-				this._handler_stage_button_release_event));
-		this._stage.connect("motion-event", Lang.bind(this,
-				this._handler_stage_motion_event));
-		this._stage.connect("key-press-event", Lang.bind(this,
-				this._handler_stage_key_press_event));
-		this._stage.connect("key-release-event", Lang.bind(this,
-				this._handler_stage_key_release_event));
+		this.g_connect(this._stage, "button-press-event",
+				this._handler_stage_button_press_event);
+		this.g_connect(this._stage, "button-release-event",
+				this._handler_stage_button_release_event);
+		this.g_connect(this._stage, "motion-event",
+				this._handler_stage_motion_event);
+		this.g_connect(this._stage, "key-press-event",
+				this._handler_stage_key_press_event);
+		this.g_connect(this._stage, "key-release-event", 
+				this._handler_stage_key_release_event);
 
-		this._screen.connect("monitors-changed",
-				Lang.bind(this, this._handler_screen_monitors_changed));
-		this._screen.connect("workareas-changed",
-				Lang.bind(this, this._handler_screen_workareas_changed));
-		this._screen.connect("workspace-added",
-				Lang.bind(this, this._handler_screen_workspace_added));
-		this._screen.connect("workspace-removed",
-				Lang.bind(this, this._handler_screen_workspace_removed));
+		this.g_connect(this._screen, "monitors-changed",
+				this._handler_screen_monitors_changed);
+		this.g_connect(this._screen, "workareas-changed",
+				this._handler_screen_workareas_changed);
+		this.g_connect(this._screen, "workspace-added",
+				this._handler_screen_workspace_added);
+		this.g_connect(this._screen, "workspace-removed",
+				this._handler_screen_workspace_removed);
 
-		this._display.connect("accelerator-activated", 
-				Lang.bind(this, this._handler_meta_display_accelerator_activated));
+		this.g_connect(this._display, "accelerator-activated", 
+				this._handler_meta_display_accelerator_activated);
 //		this._display.connect("grab-op-begin”", 
 //				Lang.bind(this, this._handler_meta_display_grab_op_begin));
 //		this._display.connect("grab-op-end", 
 //				Lang.bind(this, this._handler_meta_display_grab_op_end));
-		this._display.connect("modifiers-accelerator-activated", 
-				Lang.bind(this, this._handler_meta_display_modifiers_accelerator_activated));
-		this._display.connect("overlay-key",
-				Lang.bind(this, this._handler_meta_display_overlay_key));
-		this._display.connect("restart", 
-				Lang.bind(this, this._handler_meta_display_restart));
-		this._display.connect("window-created", 
-				Lang.bind(this, this._handler_meta_display_window_created));
+		this.g_connect(this._display, "modifiers-accelerator-activated", 
+				this._handler_meta_display_modifiers_accelerator_activated);
+		this.g_connect(this._display, "overlay-key",
+				this._handler_meta_display_overlay_key);
+		this.g_connect(this._display, "restart", 
+				this._handler_meta_display_restart);
+		this.g_connect(this._display, "window-created", 
+				this._handler_meta_display_window_created);
 
 		this.update_viewport_layout();
 //
 //		switch_to_workspace(meta_screen_get_active_workspace_index(_screen), 0);
 	   
 	   
-       this._shellwm.connect('switch-workspace', Lang.bind(this, this._switchWorkspace));
-       this._shellwm.connect('minimize', Lang.bind(this, this._minimizeWindow));
-       this._shellwm.connect('unminimize', Lang.bind(this, this._unminimizeWindow));
-       this._shellwm.connect('size-change', Lang.bind(this, this._sizeChangeWindow));
-       this._shellwm.connect('size-changed', Lang.bind(this, this._sizeChangedWindow));
-       this._shellwm.connect('map', Lang.bind(this, this._mapWindow));
-       this._shellwm.connect('destroy', Lang.bind(this, this._destroyWindow));
+       this.g_connect(this._shellwm, 'switch-workspace', Lang.bind(this, this._switchWorkspace));
+       this.g_connect(this._shellwm, 'minimize', Lang.bind(this, this._minimizeWindow));
+       this.g_connect(this._shellwm, 'unminimize', Lang.bind(this, this._unminimizeWindow));
+       this.g_connect(this._shellwm, 'size-change', Lang.bind(this, this._sizeChangeWindow));
+       this.g_connect(this._shellwm, 'size-changed', Lang.bind(this, this._sizeChangedWindow));
+       this.g_connect(this._shellwm, 'map', Lang.bind(this, this._mapWindow));
+       this.g_connect(this._shellwm, 'destroy', Lang.bind(this, this._destroyWindow));
        
        this._restackedId = this._screen.connect('restacked', Lang.bind(this, this._syncKnownWindows));
       
@@ -1067,10 +1107,11 @@ var PageShell = new Lang.Class({
 		return null;
    },
    
-   lookup_client_managed_with_meta_window: function(w) {
-		for (let i in this._net_client_list) {
-			if (i._meta_window === w) {
-				return i;
+	lookup_client_managed_with_meta_window: function(w) {
+		var l = this._net_client_list
+		for (let i = 0; i < l.length; ++i) {
+			if (l[i]._meta_window === w) {
+				return l[i];
 			}
 		}
 		return null;
@@ -1078,6 +1119,10 @@ var PageShell = new Lang.Class({
    
    _handler_meta_window_focus: function(shellwm, actor) {
 	   global.log("[PageShell] _handler_meta_window_focus");
+		var c = this.lookup_client_managed_with_meta_window(actor);
+		if (c) {
+			this.emit('on-focus-changed', c);
+		}
    },
    
    _handler_meta_window_unmanaged: function(shellwm, actor) {
