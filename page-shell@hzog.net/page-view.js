@@ -25,3 +25,19 @@ var PageView = new Lang.Class(
 		reconfigure: function() { }
 
 };
+
+var PageViewNotebook = new Lang.Class(
+		Name: 'PageViewNotebook',
+		Extends: 'PageView',
+		
+		_init: function() {
+
+		},
+		
+		destroy: function() {
+			
+		}
+		
+};
+
+

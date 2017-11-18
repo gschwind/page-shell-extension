@@ -47,8 +47,8 @@ mandir = join_paths(prefix, get_option('mandir'))
 sysconfdir = join_paths(prefix, get_option('sysconfdir'))
 includedir = join_paths(prefix, get_option('includedir'))
 
-pkgdatadir = join_paths(datadir, 'page-shell')
-pkglibdir = join_paths(libdir, 'page-shell')
+pkgdatadir = join_paths(datadir, 'gnome-shell')
+pkglibdir = join_paths(libdir, 'gnome-shell')
 
 convertdir = join_paths(datadir, 'GConf', 'gsettings')
 desktopdir = join_paths(datadir, 'applications')
@@ -98,10 +98,10 @@ configure_file(
 conf_inc = include_directories('.')
 
 #subdir('js')
-subdir('src')
+#subdir('src')
 subdir('page-shell@hzog.net')
 subdir('gschemas')
-subdir('page-data')
+#subdir('page-data')
 #subdir('data')
 #subdir('tests')
 
