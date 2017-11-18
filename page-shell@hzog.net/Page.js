@@ -86,6 +86,10 @@ var PageTree = new Lang.Class({
 		
 		push_back: function(t) {
 			this._children.push(t);
+		},
+		
+		clear: function() {
+			this._children = [];
 		}
 		
 });
@@ -115,6 +119,8 @@ var PageWorkspace = new Lang.Class({
 			this._meta_workspace = meta_workspace;
 			
 			this._stack_is_locked = true;
+			
+			this._viewport_outputs = [];
 
 			this._viewport_layer = new PageTree(this);
 			this._floating_layer = new PageTree(this);
@@ -144,6 +150,65 @@ var PageWorkspace = new Lang.Class({
 		_handler_meta_workspace_window_removed: function(meta_workspace, meta_window) {
 			
 		},
+		
+		update_viewports_layout: function()
+		{
+			this._viewport_layer.clear();
+
+			var n_monitor = this._ctx._screen.get_n_monitors();
+			var viewport_allocation = [];
+			for (let monitor_id = 0; monitor_id < n_monitor; ++monitor_id) {
+				let area = this._meta_workspace.get_work_area_for_monitor(monitor_id);
+				viewport_allocation.push(area);
+			}
+			
+			/** get old viewport_allocation to recycle old viewport, and keep unchanged outputs **/
+			var old_layout = this._viewport_outputs;
+			/** store the newer layout, to be able to cleanup obsolete viewports **/
+			this._viewport_outputs = [];
+			/** for each not overlaped rectangle **/
+			for (let i = 0; i < viewport_allocation.size; ++i) {
+				global.log("%p: found viewport (%d,%d,%d,%d)\n", _meta_workspace,
+						viewport_allocation[i].x, viewport_allocation[i].y,
+						viewport_allocation[i].w, viewport_allocation[i].h);
+				let vp = undefined;
+				if (i < old_layout.size) {
+					vp = old_layout[i];
+					vp.update_work_area(viewport_allocation[i]);
+				} else {
+					vp = new PageViewport(this, viewport_allocation[i]);
+				}
+				this._viewport_outputs.push(vp);
+				this._viewport_layer.push_back(vp);
+			}
+
+			/** clean up obsolete viewport_allocation **/
+			for (let i = this._viewport_outputs.size(); i < old_layout.size; ++i) {
+				/** destroy this viewport **/
+				this._remove_viewport(old_layout[i]);
+				old_layout[i] = null;
+			}
+
+			// update visibility
+			if (_is_visible)
+				this.show();
+			else
+				this.hide();
+
+		},
+		
+		remove_viewport: function(v)
+		{
+//			TODO
+//			/* Transfer clients to a valid notebook */
+//			for (auto x : v->gather_children_root_first<view_notebook_t>()) {
+//				ensure_default_notebook()->add_client_from_view(x, XCB_CURRENT_TIME);
+//			}
+//
+//			for (auto x : v->gather_children_root_first<view_floating_t>()) {
+//				this.insert_as_floating(x->_client, XCB_CURRENT_TIME);
+//			}
+		}
 });
 
 var PageViewport = new Lang.Class({
@@ -348,7 +413,7 @@ var PageShell = new Lang.Class({
 		this._display.connect("window-created", 
 				Lang.bind(this, this._handler_meta_display_window_created));
 
-//		update_viewport_layout();
+		this.update_viewport_layout();
 //
 //		switch_to_workspace(meta_screen_get_active_workspace_index(_screen), 0);
 	   
@@ -575,6 +640,21 @@ var PageShell = new Lang.Class({
 //   		d.update_viewports_layout();
    		return d;
    	}
+   },
+   
+   update_viewport_layout: function()
+   {
+
+   	this._overlay_group.set_position(0.0, 0.0);
+   	this._overlay_group.set_size(-1, -1);
+   	this._viewport_group.set_position(0.0, 0.0);
+   	this._viewport_group.set_size(-1, -1);
+
+   	var keys = this._workspace_map.keys();
+   	for (let i = 0; i < keys.length; ++i) {
+   		this._workspace_map.get(keys[i]).update_viewports_layout();
+   	}
+   	
    },
    
 });
