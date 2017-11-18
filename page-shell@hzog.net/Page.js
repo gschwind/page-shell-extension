@@ -159,6 +159,10 @@ var PageClientManaged = new Lang.Class({
 		release: function(v) {
 			if (this._current_owner_view === v)
 				this._current_owner_view = null;
+		},
+		
+		title: function() {
+			return this._meta_window.get_title();
 		}
 
 });
@@ -195,6 +199,10 @@ var PageTree = new Lang.Class({
 			for(let i = 0; i < this._children.length; ++i) {
 				this._children[i].hide();
 			}
+		},
+		
+		remove: function(v) {
+			this._children = this._children.filter((x) => { return x != v; });			
 		},
 		
 		show: function() {
@@ -361,6 +369,25 @@ var PageWorkspace = new Lang.Class({
 			} else {
 				return this._default_pop;
 			}
+		},
+		
+		unmanage: function(mw)
+		{
+			var v = this.lookup_view_for(mw);
+			if (!v)
+				return;
+			/* if managed window have active clients */
+			global.log("unmanaging : 0x%x '%s'\n", 0, mw.title());
+			v.remove_this_view();
+		},
+		
+		lookup_view_for: function(c)
+		{
+			var views = this.gather_children_root_first(PageView);
+			var x = views.findIndex((x) => { return x._client == c; });
+			if (x >= 0)
+				return views[x];
+			return null;
 		}
 		
 });
@@ -424,8 +451,13 @@ var PageViewport = new Lang.Class({
 	
 	get_window_position: function() {
 		return { x: this._work_area.x, y: this._work_area.y };
+	},
+	
+	update_work_area: function(area) {
+		this._work_area = area;
+		if (this._subtree)
+			this._subtree.set_allocation(make_rect(0, 0, this._work_area.width, this._work_area.height));
 	}
-		
 });
 
 
@@ -690,6 +722,35 @@ var PageNotebook = new Lang.Class({
 			vn.set_client_area(absolute_client_area);
 		},
 		
+		remove_view_notebook: function(vn)
+		{
+			/** update selection **/
+			if (this._selected == vn) {
+				this._selected.hide();
+				this._selected = null;
+			}
+
+			// cleanup
+			//g_disconnect_from_obj(vn->_client->meta_window());
+			
+			this._clients_tab_order =
+				this._clients_tab_order.filter((x) => {
+					return x != vn;
+				});
+
+//			_mouse_over_reset();
+
+			if (!this._selected) {
+				this._selected = this._clients_tab_order[0];
+				if (this._selected && this._is_visible) {
+					this._selected.show();
+				}
+			}
+
+			this._notebook_view_layer.remove(vn);
+			this._update_all_layout();
+		}
+		
 });
 
 
@@ -769,7 +830,7 @@ var PageViewNotebook = new Lang.Class({
 	},
 	
 	destroy: function() {
-		
+
 	},
 	
 	is_iconic: function() {
@@ -816,7 +877,7 @@ var PageViewNotebook = new Lang.Class({
 
 	remove_this_view: function()
 	{
-		this._parent.remove_view_notebook(this);
+		this._parent._parent.remove_view_notebook(this);
 	},
 
 	acquire_client: function()
@@ -1079,7 +1140,14 @@ var PageShell = new Lang.Class({
    
    _destroyWindow: function(shellwm, actor) {
 	   global.log("[PageShell] _destroyWindow");
-//	   this._page.destroy(actor);
+		var mw = this.lookup_client_managed_with_meta_window_actor(actor);
+		if (mw) {
+			this.unmanage(mw);
+		}
+
+		var meta_window = actor.get_meta_window();
+		this.disconnect_object(meta_window);
+		
    },
    
    _switchWorkspace: function(shellwm, from, to, direction) {
@@ -1098,23 +1166,23 @@ var PageShell = new Lang.Class({
    },
 
    lookup_client_managed_with_meta_window_actor: function(w) {
-	   var l = this._net_client_list
-		for (let i = 0; i < l.length; ++i) {
-			if (l[i]._meta_window_actor === w) {
-				return l[i];
-			}
-		}
-		return null;
+	   var idx = this._net_client_list.findIndex(function(x) {
+		  return x._meta_window_actor === w; 
+	   });
+	   
+	   if (idx >= 0)
+		   return this._net_client_list[idx];
+	   return null;
    },
    
 	lookup_client_managed_with_meta_window: function(w) {
-		var l = this._net_client_list
-		for (let i = 0; i < l.length; ++i) {
-			if (l[i]._meta_window === w) {
-				return l[i];
-			}
-		}
-		return null;
+	   var idx = this._net_client_list.findIndex(function(x) {
+		  return x._meta_window === w; 
+	   });
+	   
+	   if (idx >= 0)
+		   return this._net_client_list[idx];
+	   return null;
 	},
    
    _handler_meta_window_focus: function(shellwm, actor) {
@@ -1244,10 +1312,9 @@ var PageShell = new Lang.Class({
    	this._viewport_group.set_position(0.0, 0.0);
    	this._viewport_group.set_size(-1, -1);
 
-   	var keys = this._workspace_map.keys();
-   	for (let i = 0; i < keys.length; ++i) {
-   		this._workspace_map.get(keys[i]).update_viewports_layout();
-   	}
+	this._workspace_map.forEach((v, k, m) => {
+		v.update_viewports_layout();
+	});
    	
    },
    
@@ -1260,6 +1327,23 @@ var PageShell = new Lang.Class({
 			workspace = this._current_workspace;
 		}
 		workspace.insert_as_notebook(c, time);
+	},
+	
+	unmanage: function(mw)
+	{
+		this._net_client_list =
+			this._net_client_list.filter((x) => {
+				return x != mw;
+			});
+		
+		/* if window is in move/resize/notebook move, do cleanup */
+//		cleanup_grab();
+
+		this._workspace_map.forEach((v, k, m) => {
+			v.unmanage(mw);
+		});
+
+//		schedule_repaint();
 	}
    
 });
