@@ -4,7 +4,7 @@ const Main = imports.ui.main;
 const Tweener = imports.ui.tweener;
 const Lang = imports.lang;
 const Shell = imports.gi.Shell;
-const GIRepository = imports.gi.GIRepository;
+//const GIRepository = imports.gi.GIRepository;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const PageExtension = ExtensionUtils.getCurrentExtension();
@@ -18,8 +18,9 @@ function init() {
 }
 
 function enable() {
-	global.log("XXX enable");
-	//page_shell = new PageShell();
+	global.log("[Page] call enable");
+	page_shell = new Page.PageShell(global.display, global.screen, global.stage, global.window_manager);
+	global.log("[Page] exit enable");
 }
 
 function disable() {
