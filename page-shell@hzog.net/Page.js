@@ -451,16 +451,10 @@ var PageViewport = new Lang.Class({
 		this._subtree = new PageNotebook(this);
 		this.push_back(this._subtree);
 		
-		//this._canvas = new Clutter.Canvas();
-		//this._canvas.ref_sink();
 		this._default_view = new Clutter.Actor();
 		this._default_view.ref_sink();
-		//this._default_view.set_content(this._canvas);
-//		this._default_view.set_content_scaling_filters(Clutter.ScalingFilter.NEAREST, Clutter.ScalingFilter.NEAREST);
-//		this._default_view.set_reactive(true);
-//		this._default_view.set_background_color(new Clutter.Color({red: 255, green: 255, blue: 255, alpha: 128}));
-		this._update_canvas();
-	
+		this._actor = this._default_view;
+
 //	g_connect(CLUTTER_CANVAS(_canvas), "draw", &viewport_t::draw);
 //	
 //	g_connect(_default_view, "button-press-event",
@@ -475,11 +469,12 @@ var PageViewport = new Lang.Class({
 //			&viewport_t::_handler_leave_event);
 	
 		this._subtree.set_allocation(new Meta.Rectangle({x:0,y:0,width:this._work_area.width,height:this._work_area.height}));
-
+		this.update_actors();
+		
 	},
 	
 	destroy: function() {
-		
+		this._actor.unref();
 	},
 	
 	_update_canvas: function()
@@ -518,6 +513,7 @@ var PageViewport = new Lang.Class({
 			this.remove(this._subtree);
 			this._subtree = by;
 			this.push_back(this._subtree);
+			this.update_actors();
 			this._subtree.set_allocation(make_rect(0, 0, this._work_area.width, this._work_area.height));
 			if(this._is_visible)
 				this._subtree.show();
@@ -530,7 +526,14 @@ var PageViewport = new Lang.Class({
 		if (this._subtree === x) {
 			PageTree.prototype.remove.call(this, this._subtree);
 			this._subtree = null;
+			this.update_actors();
 		} 
+	},
+	
+	update_actors: function() {
+		this._actor.remove_all_children();
+		if (this._subtree)
+			this._actor.add_child(this._subtree._actor);
 	}
 	
 });
@@ -559,11 +562,13 @@ var PageSplit = new Lang.Class({
 			this._bpack0 = make_rect(0, 0, 1, 1);
 			this._bpack1 = make_rect(0, 0, 1, 1);
 			
+			this._actor = new Clutter.Actor();
+			this._actor.ref_sink();
 			
 		},
 		
 		destroy: function() {
-			
+			this._actor.unref();
 		},
 		
 		set_allocation: function(allocation) {
@@ -691,10 +696,14 @@ var PageSplit = new Lang.Class({
 			global.log("[PageSplit]", this._bpack1.x, this._bpack1.y, this._bpack1.width, this._bpack1.height);
 			
 			this._split_bar_area = this.compute_split_bar_location(this._bpack0, this._bpack1);
-			if(this._pack0 != null)
+			
+			if (this._pack0) {
 				this._pack0.set_allocation(this._bpack0);
-			if(this._pack1 != null)
+			}
+			
+			if (this._pack1) {
 				this._pack1.set_allocation(this._bpack1);
+			}
 
 		},
 
@@ -709,6 +718,8 @@ var PageSplit = new Lang.Class({
 				this._pack0.show();
 			else
 				this._pack0.hide();
+			
+			this.update_actors();
 		},
 
 		set_pack1: function(x) {
@@ -722,6 +733,8 @@ var PageSplit = new Lang.Class({
 				this._pack1.show();
 			else
 				this._pack1.hide();
+			
+			this.update_actors();
 		},
 		
 		compute_split_bar_location: function(bpack0, bpack1) {
@@ -747,6 +760,15 @@ var PageSplit = new Lang.Class({
 			} else if (this._pack1 === t) {
 				this._pack1 = null;
 			}
+			
+			this.update_actors();
+		},
+		
+		update_actors: function() {
+			this._actor.remove_all_children();
+			this._children.forEach((item, k, arr) => {
+				this._actor.add_child(item._actor);				
+			});
 		}
 });
 
@@ -809,6 +831,7 @@ var PageNotebook = new Lang.Class({
 			this._clients_tab_order = [];
 			
 			this._actor = new Clutter.Actor();
+			this._actor.ref_sink();
 
 			this._st_close_button = new St.Button({label: 'X'});
 			this._st_close_button.set_reactive(true);
@@ -834,9 +857,6 @@ var PageNotebook = new Lang.Class({
 			this.g_connect(this._st_bookmark_button, "clicked", this._on_button_bookmark_clicked);
 			this._actor.add_child(this._st_bookmark_button);
 			
-			// TODO
-			//connect(_ctx->on_focus_changed, this, &notebook_t::_client_focus_change);
-			
 			this.g_connect(this._ctx, "on-focus-changed", this._client_focus_change);
 			
 		},
@@ -847,6 +867,8 @@ var PageNotebook = new Lang.Class({
 				var xparent = this.get_parent_actor();
 				xparent.remove_child(this._actor);
 			}
+			
+			this._actor.unref();
 		},
 		
 		set_allocation: function(area) {
@@ -981,12 +1003,7 @@ var PageNotebook = new Lang.Class({
 //			this._update_theme_notebook(this._theme_notebook);
 //			this._update_notebook_buttons_area();
 //
-			
-			if (!this._actor.get_parent()) {
-				var xparent = this.get_parent_actor();
-				xparent.add_child(this._actor);
-			}
-
+		
 			{
 				let p = this._compute_notebook_close_position();
 				this._st_close_button.set_position(p.x, p.y);
@@ -1921,25 +1938,28 @@ var PageShell = new Lang.Class({
 		var dst = null;
 		
 		if (nbk === splt._pack0) {
-			dst = splt._pack0;
+			dst = splt._pack1;
 		}
 		
 		if (nbk === splt._pack1) {
-			dst = splt._pack1;
+			dst = splt._pack0;
 		}
 
 		/* remove this split from tree  and replace it by sibling branch */
-		dst._parent.remove(dst);
+		splt.remove(dst);
+		splt.remove(nbk);
 		splt._parent.replace(splt, dst);
 
 		/* move all client from destroyed notebook to new default pop */
 		var clients = nbk.gather_children_root_first(PageViewNotebook);
 		var default_notebook = workspace.ensure_default_notebook();
 		clients.forEach((item, k, array) => {
-			default_notebook.add_client_from_view(item, 0);
+			default_notebook.add_client(item._client, 0);
 		});
 
 //		workspace.set_focus(null, time);
+		
+		nbk.disconnect_all();
 
 	}
 
