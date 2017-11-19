@@ -33,15 +33,19 @@ var PageConnectable = new Lang.Class({
 	
 	disconnect_object: function(obj) {
 		this._connected_signals.forEach((item, k, arr) => {
-			if (item.obj == obj)
+			if (item.obj === obj)
 				item.obj.disconnect(item.sigid);
 		});
+		
+		this._connected_signals = this._connected_signals.filter((x) => { return !(x.obj === obj); });
+		
 	},
 	
 	disconnect_all: function() {
 		this._connected_signals.forEach((item, k, arr) => {
 			item.obj.disconnect(item.sigid);
 		});
+		this._connected_signals = [];
 	}
 });
 
@@ -255,6 +259,18 @@ var PageTree = new Lang.Class({
 				item.disconnect_all();
 			});
 			PageConnectable.prototype.disconnect_all.call(this);
+		},
+		
+		raise: function(t) {
+
+			if (this._parent) {
+				this._parent.raise(this);
+			}
+
+			if (t && (!this._stack_is_locked)) {
+				this._children = this._children.filter((x) => { return !(x === t); });
+				this._children.push(t);
+			}
 		}
 		
 });
@@ -1022,13 +1038,14 @@ var PageNotebook = new Lang.Class({
 			/* remove current selected */
 			if (this._selected) {
 				this._selected.hide();
+				this._selected.reconfigure();
 			}
 
 			/* select the new one */
 			this._selected = vn;
 			if(this._is_visible) {
 				this._selected.show();
-				this._selected.raise();
+				this._selected.xraise();
 			} else {
 				this._selected.hide();
 			}
@@ -1055,7 +1072,7 @@ var PageNotebook = new Lang.Class({
 			}
 
 			// cleanup
-			//g_disconnect_from_obj(vn->_client->meta_window());
+			this.disconnect_object(vn._client._meta_window);
 			
 			this._clients_tab_order =
 				this._clients_tab_order.filter((x) => {
@@ -1151,7 +1168,7 @@ var PageNotebook = new Lang.Class({
 		activate: function(vn, time)
 		{
 			this._set_selected(vn);
-			vn.raise();
+			vn.xraise();
 			this._ctx.schedule_repaint();
 			//this._root.set_focus(vn, time);
 		},
@@ -1213,8 +1230,9 @@ var PageView = new Lang.Class({
 
 		reconfigure: undefined,
 		
-		raise: function() {
-			this._client._meta_window.raise();
+		xraise: function() {
+			this._parent.raise(this);
+			this._root._ctx.sync_tree_view();
 		}
 
 });
@@ -1375,6 +1393,8 @@ var PageViewNotebook = new Lang.Class({
 			if (!this._client._meta_window.minimized)
 				this._client._meta_window.minimize();
 		}
+		
+		this._root._ctx.schedule_repaint();
 	},
 	
 	set_client_area: function(area) {
