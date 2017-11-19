@@ -25,6 +25,7 @@ function enable() {
 
 function disable() {
 	global.log("XXX disable");
+	page_shell.disconnect_all();
 	page_shell = null;
 }
 

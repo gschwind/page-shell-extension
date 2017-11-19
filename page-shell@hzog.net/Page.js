@@ -27,15 +27,19 @@ var PageConnectable = new Lang.Class({
 	},
 	
 	destroy: function() {
-		this._connected_signals.forEach((item, k, arr) => {
-			item.obj.disconnect(item.sigid);
-		});
+		this.disconnect_all();
 	},
 	
 	disconnect_object: function(obj) {
 		this._connected_signals.forEach((item, k, arr) => {
 			if (item.obj == obj)
 				item.obj.disconnect(item.sigid);
+		});
+	},
+	
+	disconnect_all: function() {
+		this._connected_signals.forEach((item, k, arr) => {
+			item.obj.disconnect(item.sigid);
 		});
 	}
 });
@@ -54,11 +58,19 @@ var PageThemeNotebookStruct =  new Lang.Class({
 	Name: 'PageThemeNotebookStruct',
 	_init: function() {
 		this.margin = new PageThemeMarginStruct();
-		this.margin.top = 4;
-		this.margin.bottom = 4;
-		this.margin.left = 4;
-		this.margin.right = 4;
-		this.tab_height = 22;
+//		this.margin.top = 4;
+//		this.margin.bottom = 4;
+//		this.margin.left = 4;
+//		this.margin.right = 4;
+		
+		// Include Shadow;
+		this.margin.top = 20;
+		this.margin.bottom = 20;
+		this.margin.left = 20;
+		this.margin.right = 20;
+		
+//		this.tab_height = 22;
+		this.tab_height = 30;
 		this.iconic_tab_width = 33;
 		this.selected_close_width = 48;
 		this.selected_unbind_width = 20;
@@ -172,8 +184,11 @@ var PageClientManaged = new Lang.Class({
 
 var PageTree = new Lang.Class({
 		Name: 'PageTree',
+		Extends: PageConnectable,
 		
 		_init: function(root) {
+			this.parent();
+			
 			this._parent = null;
 			this._root = root;
 
@@ -229,6 +244,13 @@ var PageTree = new Lang.Class({
 			var ret = [];
 			this._gather_children_root_first(type, ret);
 			return ret;
+		},
+		
+		disconnect_all: function() {
+			this._children.forEach((item, k, arr) => {
+				item.disconnect_all();
+			});
+			PageConnectable.prototype.disconnect_all.call(this);
 		}
 		
 });
@@ -346,7 +368,7 @@ var PageWorkspace = new Lang.Class({
 
 		},
 		
-		remove_viewport: function(v)
+		_remove_viewport: function(v)
 		{
 			/* Transfer clients to a valid notebook */
 			var notebooks = v.gather_children_root_first(PageViewNotebook);
@@ -444,7 +466,7 @@ var PageViewport = new Lang.Class({
 	{
 //		this._canvas.set_size(this._work_area.width, this._work_area.height);
 		this._default_view.set_position(this._work_area.x, this._work_area.y);
-//		this._default_view.set_size(this._work_area.width, this._work_area.height);
+		this._default_view.set_size(this._work_area.width, this._work_area.height);
 //		this._canvas.invalidate();
 	},
 	
@@ -462,29 +484,235 @@ var PageViewport = new Lang.Class({
 	
 	update_work_area: function(area) {
 		this._work_area = area;
+		this._update_canvas();
 		if (this._subtree)
 			this._subtree.set_allocation(make_rect(0, 0, this._work_area.width, this._work_area.height));
 	},
 	
 	get_parent_actor: function() {
 		return this._default_view;
+	},
+	
+
+	replace: function(src, by) {
+		if (this._subtree == src) {
+			this.remove(this._subtree);
+			this._subtree = by;
+			this.push_back(this._subtree);
+			this._subtree.set_allocation(make_rect(0, 0, this._work_area.width, this._work_area.height));
+			if(this._is_visible)
+				this._subtree.show();
+			else
+				this._subtree.hide();
+		} 
 	}
 	
 });
 
+var HORIZONTAL_SPLIT = 0;
+var VERTICAL_SPLIT = 1;
 
 var PageSplit = new Lang.Class({
 		Name: 'PageSplit',
 		Extends: PageComponent,
 		
-		_init: function(ref) {
+		_init: function(ref, direction) {
 			this.parent(ref._root);
+			
+			this._ctx = ref._root._ctx;
+			this._direction = direction;
+			this._ratio = 0.5;
+			this._has_mouse_over = false;
+			
+			this._allocation = make_rect(0, 0, 1, 1);
+			this._split_bar_area= make_rect(0, 0, 1, 1);
+			
+			this._pack0 = null;
+			this._pack1 = null;
+
+			this._bpack0 = make_rect(0, 0, 1, 1);
+			this._bpack1 = make_rect(0, 0, 1, 1);
+			
+			
 		},
 		
 		destroy: function() {
 			
 		},
 		
+		set_allocation: function(allocation) {
+			this._allocation = allocation;
+			this.update_allocation();
+		},
+
+		replace: function(src, by) {
+			if (this._pack0 === src) {
+				this.set_pack0(by);
+			} else if (this._pack1 === src) {
+				this.set_pack1(by);
+			} 
+			this.update_allocation();
+		},
+
+		set_split: function(split) {
+			if(split < 0.05)
+				split = 0.05;
+			if(split > 0.95)
+				split = 0.95;
+			this._ratio = split;
+			this.update_allocation();
+		},
+
+		compute_children_allocation: function(split) {
+
+			var pack0_height = 20, pack0_width = 20;
+			var pack1_height = 20, pack1_width = 20;
+			
+			var bpack0 = new Meta.Rectangle();
+			var bpack1 = new Meta.Rectangle();
+
+//			if(this._pack0 != null)
+//				this._pack0->get_min_allocation(pack0_width, pack0_height);
+//			if(this._pack1 != mull)
+//				this._pack1->get_min_allocation(pack1_width, pack1_height);
+
+			//cout << "pack0 = " << pack0_width << "," << pack0_height << endl;
+			//cout << "pack1 = " << pack1_width << "," << pack1_height << endl;
+
+			if (this._direction === VERTICAL_SPLIT) {
+
+				var w = this._allocation.width
+						- 2 * this._ctx._theme.split.margin.left
+						- 2 * this._ctx._theme.split.margin.right
+						- this._ctx._theme.split.width;
+
+				var w0 = Math.floor(w * split + 0.5);
+				var w1 = w - w0;
+
+
+				if(w0 < pack0_width) {
+					w1 -= pack0_width - w0;
+					w0 = pack0_width;
+				}
+
+				if(w1 < pack1_width) {
+					w0 -= pack1_width - w1;
+					w1 = pack1_width;
+				}
+
+				bpack0.x = this._allocation.x + this._ctx._theme.split.margin.left;
+				bpack0.y = this._allocation.y + this._ctx._theme.split.margin.top;
+				bpack0.width = w0;
+				bpack0.height = this._allocation.height - this._ctx._theme.split.margin.top - this._ctx._theme.split.margin.bottom;
+
+				bpack1.x = this._allocation.x + this._ctx._theme.split.margin.left + w0 + this._ctx._theme.split.margin.right + this._ctx._theme.split.width + this._ctx._theme.split.margin.left;
+				bpack1.y = this._allocation.y + this._ctx._theme.split.margin.top;
+				bpack1.width = w1;
+				bpack1.height = this._allocation.height - this._ctx._theme.split.margin.top - this._ctx._theme.split.margin.bottom;
+
+//				if(_parent != nullptr) {
+//					assert(bpack0.w >= pack0_width);
+//					assert(bpack0.h >= pack0_height);
+//					assert(bpack1.w >= pack1_width);
+//					assert(bpack1.h >= pack1_height);
+//				}
+
+			} else {
+
+				var h = this._allocation.height - 2 * this._ctx._theme.split.margin.top - 2 * this._ctx._theme.split.margin.bottom - this._ctx._theme.split.width;
+				var h0 = Math.floor(h * split + 0.5);
+				var h1 = h - h0;
+
+				if(h0 < pack0_height) {
+					h1 -= pack0_height - h0;
+					h0 = pack0_height;
+				}
+
+				if(h1 < pack1_height) {
+					h0 -= pack1_height - h1;
+					h1 = pack1_height;
+				}
+
+				bpack0.x = this._allocation.x + this._ctx._theme.split.margin.left;
+				bpack0.y = this._allocation.y + this._ctx._theme.split.margin.top;
+				bpack0.width = this._allocation.width - this._ctx._theme.split.margin.left - this._ctx._theme.split.margin.right;
+				bpack0.height = h0;
+
+				bpack1.x = this._allocation.x + this._ctx._theme.split.margin.left;
+				bpack1.y = this._allocation.y + this._ctx._theme.split.margin.top + h0 + this._ctx._theme.split.margin.bottom + this._ctx._theme.split.width + this._ctx._theme.split.margin.top;
+				bpack1.width = this._allocation.width - this._ctx._theme.split.margin.left - this._ctx._theme.split.margin.right;
+				bpack1.height = h1;
+
+//				if(_parent != nullptr) {
+//					assert(bpack0.w >= pack0_width);
+//					assert(bpack0.h >= pack0_height);
+//					assert(bpack1.w >= pack1_width);
+//					assert(bpack1.h >= pack1_height);
+//				}
+
+			}
+			
+			return [bpack0, bpack1];
+		},
+
+		update_allocation: function() {
+			//cout << "allocation = " << _allocation.to_string() << endl;
+			[this._bpack0, this._bpack1] = this.compute_children_allocation(this._ratio);
+			//cout << "allocation pack0 = " << _bpack0.to_string() << endl;
+			//cout << "allocation pack1 = " << _bpack1.to_string() << endl;
+			
+			global.log("[PageSplit]", this._bpack0.x, this._bpack0.y, this._bpack0.width, this._bpack0.height);
+			global.log("[PageSplit]", this._bpack1.x, this._bpack1.y, this._bpack1.width, this._bpack1.height);
+			
+			this._split_bar_area = this.compute_split_bar_location(this._bpack0, this._bpack1);
+			if(this._pack0 != null)
+				this._pack0.set_allocation(this._bpack0);
+			if(this._pack1 != null)
+				this._pack1.set_allocation(this._bpack1);
+
+		},
+
+		set_pack0: function(x) {
+			if(this._pack0 != null) {
+				this.remove(this._pack0);
+			}
+			this._pack0 = x;
+			this.push_back(this._pack0);
+			this.update_allocation();
+			if(this._is_visible)
+				this._pack0.show();
+			else
+				this._pack0.hide();
+		},
+
+		set_pack1: function(x) {
+			if(this._pack1 != null) {
+				this.remove(this._pack1);
+			}
+			this._pack1 = x;
+			this.push_back(this._pack1);
+			this.update_allocation();
+			if(this._is_visible)
+				this._pack1.show();
+			else
+				this._pack1.hide();
+		},
+		
+		compute_split_bar_location: function(bpack0, bpack1) {
+			var ret = new Meta.Rectangle();
+			if (this._direction == VERTICAL_SPLIT) {
+				ret.x = this._allocation.x + this._ctx._theme.split.margin.left + bpack0.width;
+				ret.y = this._allocation.y;
+				ret.w = this._ctx._theme.split.width + this._ctx._theme.split.margin.left + this._ctx._theme.split.margin.right;
+				ret.h = this._allocation.height;
+			} else {
+				ret.x = this._allocation.x;
+				ret.y = this._allocation.y + this._ctx._theme.split.margin.top + bpack0.height;
+				ret.w = this._allocation.width;
+				ret.h = this._ctx._theme.split.width + this._ctx._theme.split.margin.top + this._ctx._theme.split.margin.bottom;
+			}
+			return ret;
+		},
 });
 
 var PageNotebookLayout = new Lang.Class({
@@ -545,8 +773,32 @@ var PageNotebook = new Lang.Class({
 			
 			this._clients_tab_order = [];
 			
-			this._st_close_button = new St.Button({label: 'X'});
+			this._actor = new Clutter.Actor();
 
+			this._st_close_button = new St.Button({label: 'X'});
+			this._st_close_button.set_reactive(true);
+			this._st_close_button.set_background_color(new Clutter.Color({red: 255, green: 0, blue: 0, alpha: 255}))
+			this.g_connect(this._st_close_button, "clicked", this._on_button_close_clicked);
+			this._actor.add_child(this._st_close_button);
+			
+			this._st_hsplit_button = new St.Button({label: 'H'});
+			this._st_hsplit_button.set_reactive(true);
+			this._st_hsplit_button.set_background_color(new Clutter.Color({red: 255, green: 255, blue: 0, alpha: 255}))
+			this.g_connect(this._st_hsplit_button, "clicked", this._on_button_hsplit_clicked);
+			this._actor.add_child(this._st_hsplit_button);
+			
+			this._st_vsplit_button = new St.Button({label: 'V'});
+			this._st_vsplit_button.set_reactive(true);
+			this._st_vsplit_button.set_background_color(new Clutter.Color({red: 255, green: 0, blue: 255, alpha: 255}))
+			this.g_connect(this._st_vsplit_button, "clicked", this._on_button_vsplit_clicked);
+			this._actor.add_child(this._st_vsplit_button);
+			
+			this._st_bookmark_button = new St.Button({label: 'B'});
+			this._st_bookmark_button.set_reactive(true);
+			this._st_bookmark_button.set_background_color(new Clutter.Color({red: 0, green: 255, blue: 0, alpha: 255}))
+			this.g_connect(this._st_bookmark_button, "clicked", this._on_button_bookmark_clicked);
+			this._actor.add_child(this._st_bookmark_button);
+			
 			// TODO
 			//connect(_ctx->on_focus_changed, this, &notebook_t::_client_focus_change);
 			
@@ -688,13 +940,38 @@ var PageNotebook = new Lang.Class({
 //			this._update_theme_notebook(this._theme_notebook);
 //			this._update_notebook_buttons_area();
 //
-
-			if (!this._st_close_button.get_parent()) {
+			
+			if (!this._actor.get_parent()) {
 				var xparent = this.get_parent_actor();
-				xparent.add_child(this._st_close_button);
-				this._st_close_button.set_position(0, 0);
-				this._st_close_button.set_size(40, 40);
+				xparent.add_child(this._actor);
+			}
+
+			{
+				let p = this._compute_notebook_close_position();
+				this._st_close_button.set_position(p.x, p.y);
+				this._st_close_button.set_size(p.width, p.height);
 				this._st_close_button.show();
+			}
+			
+			{
+				let p = this._compute_notebook_hsplit_position();
+				this._st_hsplit_button.set_position(p.x, p.y);
+				this._st_hsplit_button.set_size(p.width, p.height);
+				this._st_hsplit_button.show();
+			}
+			
+			{
+				let p = this._compute_notebook_vsplit_position();
+				this._st_vsplit_button.set_position(p.x, p.y);
+				this._st_vsplit_button.set_size(p.width, p.height);
+				this._st_vsplit_button.show();
+			}
+			
+			{
+				let p = this._compute_notebook_bookmark_position();
+				this._st_bookmark_button.set_position(p.x, p.y);
+				this._st_bookmark_button.set_size(p.width, p.height);
+				this._st_bookmark_button.show();
 			}
 			
 			this._ctx.schedule_repaint();
@@ -772,7 +1049,68 @@ var PageNotebook = new Lang.Class({
 
 			this._notebook_view_layer.remove(vn);
 			this._update_all_layout();
-		}
+		},
+		
+		_compute_notebook_bookmark_position: function() {
+			return new Meta.Rectangle({
+				x: this._allocation.x + this._allocation.width
+				- this._ctx._theme.notebook.close_width
+				- this._ctx._theme.notebook.hsplit_width
+				- this._ctx._theme.notebook.vsplit_width
+				- this._ctx._theme.notebook.mark_width,
+				y: this._allocation.y,
+				width: this._ctx._theme.notebook.mark_width,
+				height: this._ctx._theme.notebook.tab_height
+			});
+		},
+
+		_compute_notebook_vsplit_position: function() {
+			return new Meta.Rectangle({
+				x: this._allocation.x + this._allocation.width
+					- this._ctx._theme.notebook.close_width
+					- this._ctx._theme.notebook.hsplit_width
+					- this._ctx._theme.notebook.vsplit_width,
+				y: this._allocation.y,
+				width: this._ctx._theme.notebook.vsplit_width,
+				height: this._ctx._theme.notebook.tab_height
+			});
+		},
+
+		_compute_notebook_hsplit_position: function() {
+			return new Meta.Rectangle({
+				x: this._allocation.x + this._allocation.width - this._ctx._theme.notebook.close_width - this._ctx._theme.notebook.hsplit_width,
+				y: this._allocation.y,
+				width: this._ctx._theme.notebook.hsplit_width,
+				height: this._ctx._theme.notebook.tab_height
+			});
+		},
+		
+		_compute_notebook_close_position: function() {
+			return new Meta.Rectangle({
+				x: this._allocation.x + this._allocation.width - this._ctx._theme.notebook.close_width,
+				y: this._allocation.y,
+				width: this._ctx._theme.notebook.close_width,
+				height: this._ctx._theme.notebook.tab_height
+			});
+		},
+		
+		_on_button_close_clicked: function(button, clicked_button) {
+			global.log("[PageNotebook] _on_button_close_clicked", clicked_button);
+		},
+		
+		_on_button_hsplit_clicked: function(button, clicked_button) {
+			global.log("[PageNotebook] _on_button_hsplit_clicked", clicked_button);
+			this._root._ctx.split_bottom(this, null, 0);
+		},
+		
+		_on_button_vsplit_clicked: function(button, clicked_button) {
+			global.log("[PageNotebook] _on_button_vsplit_clicked", clicked_button);
+			this._root._ctx.split_left(this, null, 0);
+		},
+		
+		_on_button_bookmark_clicked: function(button, clicked_button) {
+			global.log("[PageNotebook] _on_button_bookmark_clicked", clicked_button);
+		},
 		
 });
 
@@ -1285,7 +1623,8 @@ var PageShell = new Lang.Class({
 	},
 	
 	_handler_screen_workareas_changed : function(screen) {
-//		global.log("[PageShell] _handler_screen_workareas_changed");
+		global.log("[PageShell] _handler_screen_workareas_changed");
+		this.update_viewport_layout();
 	},
 	
 	_handler_screen_workspace_added : function(screen, workspace_id) {
@@ -1423,6 +1762,54 @@ var PageShell = new Lang.Class({
 	{
 		this.sync_tree_view();
 		this._stage.queue_redraw();
+	},
+	
+	split_left: function(nbk, c, time) {
+		var parent = nbk._parent;
+		var n = new PageNotebook(nbk);
+		var split = new PageSplit(nbk, VERTICAL_SPLIT);
+		parent.replace(nbk, split);
+		split.set_pack0(n);
+		split.set_pack1(nbk);
+		split.show();
+		if (c)
+			this.move_view_to_notebook(c, n, time);
+	},
+
+	split_right: function(nbk, c, time) {
+		var parent = nbk._parent;
+		var n = new PageNotebook(nbk);
+		var split = new PageSplit(nbk, VERTICAL_SPLIT);
+		parent.replace(nbk, split);
+		split.set_pack0(nbk);
+		split.set_pack1(n);
+		split.show();
+		if (c)
+			this.move_view_to_notebook(c, n, time);
+	},
+
+	split_top: function(nbk, c, time) {
+		var parent = nbk._parent;
+		var n = new PageNotebook(nbk);
+		var split = new PageSplit(nbk, HORIZONTAL_SPLIT);
+		parent.replace(nbk, split);
+		split.set_pack0(n);
+		split.set_pack1(nbk);
+		split.show();
+		if (c)
+			this.move_view_to_notebook(c, n, time);
+	},
+
+	split_bottom: function(nbk, c, time) {
+		var parent = nbk._parent;
+		var n = new PageNotebook(nbk);
+		var split = new PageSplit(nbk, HORIZONTAL_SPLIT);
+		parent.replace(nbk, split);
+		split.set_pack0(nbk);
+		split.set_pack1(n);
+		split.show();
+		if (c)
+			this.move_view_to_notebook(c, n, time);
 	},
    
 });
