@@ -220,6 +220,7 @@ var PageTree = new Lang.Class({
 		},
 		
 		remove: function(v) {
+			v._parent = null;
 			this._children = this._children.filter((x) => { return x != v; });			
 		},
 		
@@ -493,9 +494,8 @@ var PageViewport = new Lang.Class({
 		return this._default_view;
 	},
 	
-
 	replace: function(src, by) {
-		if (this._subtree == src) {
+		if (this._subtree === src) {
 			this.remove(this._subtree);
 			this._subtree = by;
 			this.push_back(this._subtree);
@@ -504,6 +504,13 @@ var PageViewport = new Lang.Class({
 				this._subtree.show();
 			else
 				this._subtree.hide();
+		} 
+	},
+	
+	remove: function(x) {
+		if (this._subtree === x) {
+			PageTree.prototype.remove.call(this, this._subtree);
+			this._subtree = null;
 		} 
 	}
 	
@@ -550,7 +557,7 @@ var PageSplit = new Lang.Class({
 				this.set_pack0(by);
 			} else if (this._pack1 === src) {
 				this.set_pack1(by);
-			} 
+			}
 			this.update_allocation();
 		},
 
@@ -713,6 +720,15 @@ var PageSplit = new Lang.Class({
 			}
 			return ret;
 		},
+		
+		remove: function(t) {
+			PageTree.prototype.remove.call(this, t);
+			if (this._pack0 === t) {
+				this._pack0 = null;
+			} else if (this._pack1 === t) {
+				this._pack1 = null;
+			}
+		}
 });
 
 var PageNotebookLayout = new Lang.Class({
@@ -805,7 +821,11 @@ var PageNotebook = new Lang.Class({
 		},
 		
 		destroy: function() {
-			
+			this.disconnect_all();
+			if (this._actor.get_parent()) {
+				var xparent = this.get_parent_actor();
+				xparent.remove_child(this._actor);
+			}
 		},
 		
 		set_allocation: function(area) {
@@ -1096,6 +1116,7 @@ var PageNotebook = new Lang.Class({
 		
 		_on_button_close_clicked: function(button, clicked_button) {
 			global.log("[PageNotebook] _on_button_close_clicked", clicked_button);
+			this._root._ctx.notebook_close(this, 0);
 		},
 		
 		_on_button_hsplit_clicked: function(button, clicked_button) {
@@ -1267,10 +1288,10 @@ var PageViewNotebook = new Lang.Class({
 				this._client_area.height);
 
 		// disable move/resizes.
-		this._client._meta_window.connect("position-changed",
-				Lang.bind(this, this._handler_position_changed));
-		this._client._meta_window.connect("size-changed",
-				Lang.bind(this, this._handler_size_changed));
+		this.g_connect(this._client._meta_window, "position-changed",
+				this._handler_position_changed);
+		this.g_connect(this._client._meta_window, "size-changed",
+				this._handler_size_changed);
 		this.reconfigure();
 	},
 
@@ -1280,7 +1301,7 @@ var PageViewNotebook = new Lang.Class({
 		if (! this._is_client_owner())
 			return;
 
-//		g_disconnect_from_obj(_client->meta_window());
+		this.disconnect_object(this._client._meta_window);
 		
 		// Not available, TODO
 //		if (this._client._meta_window.is_tiled(_client->meta_window()))
@@ -1811,6 +1832,48 @@ var PageShell = new Lang.Class({
 		if (c)
 			this.move_view_to_notebook(c, n, time);
 	},
+	
+	
+	notebook_close: function(nbk, time) {
+		/**
+		 * Closing notebook mean destroying the split base of this
+		 * notebook, plus this notebook.
+		 **/
+		
+		if (! (nbk._parent instanceof PageSplit))
+			return;
+
+		var workspace = nbk._root;
+		workspace._default_pop = null;
+
+		var splt = nbk._parent;
+
+		/* find the sibling branch of note that we want close */
+		var dst = null;
+		
+		if (nbk === splt._pack0) {
+			dst = splt._pack0;
+		}
+		
+		if (nbk === splt._pack1) {
+			dst = splt._pack1;
+		}
+
+		/* remove this split from tree  and replace it by sibling branch */
+		dst._parent.remove(dst);
+		splt._parent.replace(splt, dst);
+
+		/* move all client from destroyed notebook to new default pop */
+		var clients = nbk.gather_children_root_first(PageViewNotebook);
+		var default_notebook = workspace.ensure_default_notebook();
+		clients.forEach((item, k, array) => {
+			default_notebook.add_client_from_view(item, 0);
+		});
+
+//		workspace.set_focus(null, time);
+
+	}
+
    
 });
 
