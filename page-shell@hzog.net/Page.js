@@ -4,6 +4,9 @@ const GObject = imports.gi.GObject;
 const Meta = imports.gi.Meta;
 const Clutter = imports.gi.Clutter;
 const Signals = imports.signals;
+const St = imports.gi.St;
+const Main = imports.ui.main;
+const Shell = imports.gi.Shell;
 
 var make_rect = function(x, y, width, height) {
 	return new Meta.Rectangle({'x':x,'y':y,'width':width,'height':height});
@@ -244,6 +247,10 @@ var PageComponent = new Lang.Class({
 		
 		get_window_position: function() {
 			return this._parent.get_window_position();
+		},
+		
+		get_parent_actor: function() {
+			return this._parent.get_parent_actor();
 		}
 		
 });
@@ -402,14 +409,14 @@ var PageViewport = new Lang.Class({
 		this._subtree = new PageNotebook(this);
 		this.push_back(this._subtree);
 		
-		this._canvas = new Clutter.Canvas();
-		this._canvas.ref_sink();
+		//this._canvas = new Clutter.Canvas();
+		//this._canvas.ref_sink();
 		this._default_view = new Clutter.Actor();
 		this._default_view.ref_sink();
-		this._default_view.set_content(this._canvas);
-		this._default_view.set_content_scaling_filters(Clutter.ScalingFilter.NEAREST, Clutter.ScalingFilter.NEAREST);
-		this._default_view.set_reactive(true);
-		
+		//this._default_view.set_content(this._canvas);
+//		this._default_view.set_content_scaling_filters(Clutter.ScalingFilter.NEAREST, Clutter.ScalingFilter.NEAREST);
+//		this._default_view.set_reactive(true);
+//		this._default_view.set_background_color(new Clutter.Color({red: 255, green: 255, blue: 255, alpha: 128}));
 		this._update_canvas();
 	
 //	g_connect(CLUTTER_CANVAS(_canvas), "draw", &viewport_t::draw);
@@ -435,10 +442,10 @@ var PageViewport = new Lang.Class({
 	
 	_update_canvas: function()
 	{
-		this._canvas.set_size(this._work_area.width, this._work_area.height);
+//		this._canvas.set_size(this._work_area.width, this._work_area.height);
 		this._default_view.set_position(this._work_area.x, this._work_area.y);
-		this._default_view.set_size(this._work_area.width, this._work_area.height);
-		this._canvas.invalidate();
+//		this._default_view.set_size(this._work_area.width, this._work_area.height);
+//		this._canvas.invalidate();
 	},
 	
 	set_allocation: function(area) {
@@ -457,7 +464,12 @@ var PageViewport = new Lang.Class({
 		this._work_area = area;
 		if (this._subtree)
 			this._subtree.set_allocation(make_rect(0, 0, this._work_area.width, this._work_area.height));
+	},
+	
+	get_parent_actor: function() {
+		return this._default_view;
 	}
+	
 });
 
 
@@ -532,6 +544,8 @@ var PageNotebook = new Lang.Class({
 			this._allocation = make_rect(0, 0, 1, 1);
 			
 			this._clients_tab_order = [];
+			
+			this._st_close_button = new St.Button({label: 'X'});
 
 			// TODO
 			//connect(_ctx->on_focus_changed, this, &notebook_t::_client_focus_change);
@@ -674,7 +688,16 @@ var PageNotebook = new Lang.Class({
 //			this._update_theme_notebook(this._theme_notebook);
 //			this._update_notebook_buttons_area();
 //
-//			this._ctx.schedule_repaint();
+
+			if (!this._st_close_button.get_parent()) {
+				var xparent = this.get_parent_actor();
+				xparent.add_child(this._st_close_button);
+				this._st_close_button.set_position(0, 0);
+				this._st_close_button.set_size(40, 40);
+				this._st_close_button.show();
+			}
+			
+			this._ctx.schedule_repaint();
 		},
 		
 		add_client: function(c, time) {
@@ -789,7 +812,11 @@ var PageView = new Lang.Class({
 			this.reconfigure();
 		},
 
-		reconfigure: undefined
+		reconfigure: undefined,
+		
+		raise: function() {
+			this._client._meta_window.raise();
+		}
 
 });
 
@@ -995,13 +1022,19 @@ var PageShell = new Lang.Class({
 	   /* string */
 	   this._theme_engine = undefined;
 	   
-	   /* signal_t<client_managed_p> */
-	   this.on_focus_changed = undefined;
+		/* Not thread safe */
+		this._sync_tree_view_guard = false;
 	   
 	   /* list<client_managed_p> */
 	   this._net_client_list = [];
 	   
 	   this._shellwm = shellwm;
+	   
+		this._viewport_group = new Clutter.Actor();
+		this._viewport_group.show();
+
+		this._overlay_group = new Clutter.Actor();
+		this._overlay_group.show();
 	   
 //		if (_theme_engine == "tiny") {
 //			cout << "using tiny theme engine" << endl;
@@ -1016,11 +1049,7 @@ var PageShell = new Lang.Class({
 //
 		this._current_workspace = this.ensure_workspace(this._screen.get_active_workspace());
 
-		this._viewport_group = new Clutter.Actor();
-		this._viewport_group.show();
 
-		this._overlay_group = new Clutter.Actor();
-		this._overlay_group.show();
 //
 //		GSettings * setting_keybindings = g_settings_new("net.hzog.page.keybindings");
 //		add_keybinding_helper(setting_keybindings, "make-notebook-window", &page_t::_handler_key_make_notebook_window);
@@ -1078,9 +1107,11 @@ var PageShell = new Lang.Class({
        
        this._restackedId = this._screen.connect('restacked', Lang.bind(this, this._syncKnownWindows));
       
-//       Main.wm.allowKeybinding('make-notebook-window', Shell.ActionMode.ALL);
-//       Main.layoutManager.uiGroup.insert_child_above(this._page.overlay_group, Main.layoutManager.modalDialogGroup);
-//       Main.layoutManager._backgroundGroup.add_child(this._page.viewport_group);
+       Main.wm.allowKeybinding('make-notebook-window', Shell.ActionMode.ALL);
+       Main.layoutManager.uiGroup.insert_child_above(this._overlay_group, Main.layoutManager.modalDialogGroup);
+       Main.layoutManager._backgroundGroup.add_child(this._viewport_group);
+       
+       this.schedule_repaint();
               
    },
    
@@ -1152,7 +1183,19 @@ var PageShell = new Lang.Class({
    
    _switchWorkspace: function(shellwm, from, to, direction) {
 	   global.log("[PageShell] _switchWorkspace");
-//	   this._page.switch_workspace(from, to, direction);
+
+		var meta_workspace_to = this._screen.get_workspace_by_index(to);
+		var workspace = this.ensure_workspace(meta_workspace_to);
+		if(!workspace)
+			return;
+
+		if (workspace != this._current_workspace) {
+			//this._current_workspace.disable();
+			this._current_workspace = workspace;
+			//_current_workspace->enable();
+			this.schedule_repaint();
+		}
+	   
    },
    
    _syncKnownWindows: function() {
@@ -1198,96 +1241,95 @@ var PageShell = new Lang.Class({
    },
    
    _handler_stage_button_press_event: function(actor, event) { 
-	   global.log("[PageShell] _handler_stage_button_press_event");
+//	   global.log("[PageShell] _handler_stage_button_press_event");
    },
    
    _handler_stage_button_release_event: function(actor, event) {
-	   global.log("[PageShell] _handler_stage_button_release_event");
+//	   global.log("[PageShell] _handler_stage_button_release_event");
    },
    
    _handler_stage_motion_event: function(actor, event) { 
-	   global.log("[PageShell] _handler_stage_motion_event");
+//	   global.log("[PageShell] _handler_stage_motion_event");
    },
    
    _handler_stage_key_press_event: function(actor, event) { 
-	   global.log("[PageShell] _handler_stage_key_press_event");
+//	   global.log("[PageShell] _handler_stage_key_press_event");
    },
    
    _handler_stage_key_release_event: function(actor, event) {
-	   global.log("[PageShell] _handler_stage_key_release_event");
+//	   global.log("[PageShell] _handler_stage_key_release_event");
    },
    
 	_handler_screen_in_fullscreen_changed : function(screen) {
-		global.log("[PageShell] _handler_screen_in_fullscreen_changed");
+//		global.log("[PageShell] _handler_screen_in_fullscreen_changed");
 	},
 	
 	_handler_screen_monitors_changed : function(screen) {
-		global.log("[PageShell] _handler_screen_monitors_changed");
+//		global.log("[PageShell] _handler_screen_monitors_changed");
 	},
 	
 	_handler_screen_restacked : function(screen) {
-		global.log("[PageShell] _handler_screen_restacked");
+//		global.log("[PageShell] _handler_screen_restacked");
 	},
 	
 	_handler_screen_startup_sequence_changed : function(screen, arg1) {
-		global
-				.log("[PageShell] _handler_screen_startup_sequence_changed");
+//		global.log("[PageShell] _handler_screen_startup_sequence_changed");
 	},
 	
 	_handler_screen_window_entered_monitor : function(screen, monitor_id, meta_window) {
-		global.log("[PageShell] _handler_screen_window_entered_monitor");
+//		global.log("[PageShell] _handler_screen_window_entered_monitor");
 	},
 	
 	_handler_screen_window_left_monitor : function(screen, monitor_id, meta_window) {
-		global.log("[PageShell] _handler_screen_window_left_monitor");
+//		global.log("[PageShell] _handler_screen_window_left_monitor");
 	},
 	
 	_handler_screen_workareas_changed : function(screen) {
-		global.log("[PageShell] _handler_screen_workareas_changed");
+//		global.log("[PageShell] _handler_screen_workareas_changed");
 	},
 	
 	_handler_screen_workspace_added : function(screen, workspace_id) {
-		global.log("[PageShell] _handler_screen_workspace_added");
+//		global.log("[PageShell] _handler_screen_workspace_added");
 	},
 	
 	_handler_screen_workspace_removed : function(screen, workspace_id) {
-		global.log("[PageShell] _handler_screen_workspace_removed");
+//		global.log("[PageShell] _handler_screen_workspace_removed");
 	},
 	
 	_handler_screen_workspace_switched : function(Mscreen, from, to,
 			direction) {
-		global.log("[PageShell] _handler_screen_workspace_switched");
+//		global.log("[PageShell] _handler_screen_workspace_switched");
 	},
 	
 	
 	_handler_meta_display_accelerator_activated : function(display, arg1, arg2, arg3) {
-		global.log("[PageShell] _handler_meta_display_accelerator_activated");
+//		global.log("[PageShell] _handler_meta_display_accelerator_activated");
 	},
 	
 	_handler_meta_display_grab_op_begin : function(display, screen, meta_window, grab_op) {
-		global.log("[PageShell] _handler_meta_display_grab_op_begin");
+//		global.log("[PageShell] _handler_meta_display_grab_op_begin");
 	},
 	
 	_handler_meta_display_grab_op_end : function(display, screen, meta_window, grab_op) {
-		global.log("[PageShell] _handler_meta_display_grab_op_end");
+//		global.log("[PageShell] _handler_meta_display_grab_op_end");
 	},
 	
 	_handler_meta_display_modifiers_accelerator_activated : function(display) {
-		global.log("[PageShell] _handler_meta_display_modifiers_accelerator_activated");
+//		global.log("[PageShell] _handler_meta_display_modifiers_accelerator_activated");
 		return false;
 	},
 	
 	_handler_meta_display_overlay_key : function(display) {
-		global.log("[PageShell] _handler_meta_display_overlay_key");
+//		global.log("[PageShell] _handler_meta_display_overlay_key");
 	},
 	
 	_handler_meta_display_restart : function(display) {
-		global.log("[PageShell] _handler_meta_display_restart");
+//		global.log("[PageShell] _handler_meta_display_restart");
 		return false;
 	},
 	
 	_handler_meta_display_window_created : function(display, meta_window) {
-		global.log("[PageShell] _handler_meta_display_window_created");
+//		global.log("[PageShell] _handler_meta_display_window_created");
 	},
 
    ensure_workspace: function(meta_workspace)
@@ -1298,7 +1340,7 @@ var PageShell = new Lang.Class({
    		let d = new PageWorkspace(this, meta_workspace);
    		this._workspace_map.set(meta_workspace, d);
 //   		d.disable();
-//   		d.show(); // make is visible by default
+   		d.show(); // make is visible by default
    		d.update_viewports_layout();
    		return d;
    	}
@@ -1343,8 +1385,45 @@ var PageShell = new Lang.Class({
 			v.unmanage(mw);
 		});
 
-//		schedule_repaint();
-	}
+		this.schedule_repaint();
+	},
+	
+	sync_tree_view: function() {
+		if (this._sync_tree_view_guard)
+			return;
+		this._sync_tree_view_guard = true;
+		
+		global.log("[PageShell] syn_tree_view");
+
+		var current_workspace = this.ensure_workspace(this._screen.get_active_workspace());
+		this._viewport_group.remove_all_children();
+		var viewports = current_workspace.gather_children_root_first(PageViewport);
+		
+		global.log("[PageShell] XXX", viewports);
+		viewports.forEach((x) => {
+			global.log("[PageShell] XXX", x);
+			if (x._default_view) {
+				global.log("[PageShell] XXX", x._default_view);
+				this._viewport_group.add_child(x._default_view);
+				x._default_view.show();
+			}
+		});
+
+		var children = current_workspace.gather_children_root_first(PageView);
+		children.forEach((x) => {
+			x._client._meta_window.raise();
+			x._client._meta_window_actor.sync_visibility();
+		});
+		
+		this._viewport_group.show();
+		this._sync_tree_view_guard = false;
+	},
+	
+	schedule_repaint: function()
+	{
+		this.sync_tree_view();
+		this._stage.queue_redraw();
+	},
    
 });
 
