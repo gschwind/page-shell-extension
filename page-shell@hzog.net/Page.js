@@ -15,6 +15,7 @@ var make_rect = function(x, y, width, height) {
 var PageConnectable = new Lang.Class({
 	Name: 'PageConnectable',
 	Extends: GObject.Object,
+	Signals: { },
 	
 	_init: function() {
 		this.parent();
@@ -106,8 +107,10 @@ var PageThemeStruct =  new Lang.Class({
 
 var PageClientManaged = new Lang.Class({
 		Name: 'PageClientManaged',
+		Extends: PageConnectable,
 		
 		_init: function(ctx, meta_window_actor) {
+			this.parent();
 			
 			this._ctx = ctx;
 			this._meta_window_actor = meta_window_actor;
@@ -117,18 +120,18 @@ var PageClientManaged = new Lang.Class({
 
 			this._floating_wished_position = this.position();
 			
-		    this._meta_window.connect('focus',
-		    		Lang.bind(this, this._handler_meta_window_focus));
-		    this._meta_window.connect('position-changed',
-		    		Lang.bind(this, this._handler_meta_window_position_changed));
-		    this._meta_window.connect('raised',
-		    		Lang.bind(this, this._handler_meta_window_raised));
-		    this._meta_window.connect('size-changed',
-		    		Lang.bind(this, this._handler_meta_window_size_changed));
-		    this._meta_window.connect('unmanaged',
-		    		Lang.bind(this, this._handler_meta_window_unmanaged));
-		    this._meta_window.connect('workspace-changed',
-		    		Lang.bind(this, this._handler_meta_window_workspace_changed));
+		    this.g_connect(this._meta_window, 'focus',
+		    		this._handler_meta_window_focus);
+		    this.g_connect(this._meta_window, 'position-changed',
+		    		this._handler_meta_window_position_changed);
+		    this.g_connect(this._meta_window, 'raised',
+		    		this._handler_meta_window_raised);
+		    this.g_connect(this._meta_window, 'size-changed',
+		    		this._handler_meta_window_size_changed);
+		    this.g_connect(this._meta_window, 'unmanaged',
+		    		this._handler_meta_window_unmanaged);
+		    this.g_connect(this._meta_window, 'workspace-changed',
+		    		this._handler_meta_window_workspace_changed);
 
 			
 		},
@@ -472,7 +475,7 @@ var PageViewport = new Lang.Class({
 	},
 	
 	set_allocation: function(area) {
-		this._work_area = area;
+		this._work_area = new Meta.Rectangle(area);
 		this._update_canvas();
 		if (this._subtree)
 			this._subtree.set_allocation(make_rect(0, 0, this._work_area.width, this._work_area.height));
@@ -480,11 +483,11 @@ var PageViewport = new Lang.Class({
 	},
 	
 	get_window_position: function() {
-		return { x: this._work_area.x, y: this._work_area.y };
+		return new Meta.Rectangle(this._work_area);
 	},
 	
 	update_work_area: function(area) {
-		this._work_area = area;
+		this._work_area = new Meta.Rectangle(area);
 		this._update_canvas();
 		if (this._subtree)
 			this._subtree.set_allocation(make_rect(0, 0, this._work_area.width, this._work_area.height));
@@ -548,7 +551,7 @@ var PageSplit = new Lang.Class({
 		},
 		
 		set_allocation: function(allocation) {
-			this._allocation = allocation;
+			this._allocation = new Meta.Rectangle(allocation);
 			this.update_allocation();
 		},
 
@@ -818,6 +821,8 @@ var PageNotebook = new Lang.Class({
 			// TODO
 			//connect(_ctx->on_focus_changed, this, &notebook_t::_client_focus_change);
 			
+			this.g_connect(this._ctx, "on-focus-changed", this._client_focus_change);
+			
 		},
 		
 		destroy: function() {
@@ -834,7 +839,7 @@ var PageNotebook = new Lang.Class({
 //			assert(area.w >= width);
 //			assert(area.h >= height);
 
-			this._allocation = area;
+			this._allocation = new Meta.Rectangle(area);
 			this._update_all_layout();
 //			queue_redraw();
 		},
@@ -1006,14 +1011,13 @@ var PageNotebook = new Lang.Class({
 		_add_client_view(vn, time)
 		{
 			this._notebook_view_layer.push_back(vn);
+			this.update_client_position(vn);
 			vn.acquire_client();
 
 			this._clients_tab_order.unshift(vn);
 
 //			g_connect(vn->_client->meta_window(), "unmanaged", &notebook_t::_meta_window_unmanaged);
 //			g_connect(vn->_client->meta_window(), "notify::title", &notebook_t::_meta_window_notify_title);
-
-			this.update_client_position(vn);
 
 			/* remove current selected */
 			if (this._selected) {
@@ -1133,6 +1137,42 @@ var PageNotebook = new Lang.Class({
 			global.log("[PageNotebook] _on_button_bookmark_clicked", clicked_button);
 		},
 		
+		_client_focus_change: function(page_shell, c)
+		{
+			global.log("[PageNotebook] _client_focus_change", c);
+			this._clients_tab_order.forEach((item, k, arr) => {
+				if (item._client === c) {
+					this.activate(item, 0);
+				}				
+			});
+			this._update_all_layout();
+		},
+		
+		activate: function(vn, time)
+		{
+			this._set_selected(vn);
+			vn.raise();
+			this._ctx.schedule_repaint();
+			//this._root.set_focus(vn, time);
+		},
+		
+
+		_set_selected: function(c) {
+			/** already selected **/
+			if ((this._selected === c) && (!c.is_iconic()))
+				return;
+
+			if(this._selected && !(c === this._selected)) {
+				this._selected.hide();
+			}
+			/** set selected **/
+			this._selected = c;
+			this.update_client_position(this._selected);
+			if(this._is_visible) {
+				this._selected.show();
+			}
+		}
+		
 });
 
 
@@ -1241,24 +1281,32 @@ var PageViewNotebook = new Lang.Class({
 
 	_handler_position_changed: function(window)
 	{
+		global.log("XXXX", this._client_area.x,
+				this._client_area.y,
+				this._client_area.width,
+				this._client_area.height);
 		/* disable frame move */
-//		if (this._is_client_owner())
-//			window.move_resize_frame(window, false,
-//					this._client_area.x,
-//					this._client_area.y,
-//					this._client_area.width,
-//					this._client_area.height);
+		if (this._is_client_owner())
+			this._client._meta_window.move_resize_frame(false,
+					this._client_area.x,
+					this._client_area.y,
+					this._client_area.width,
+					this._client_area.height);
 	},
 
 	_handler_size_changed: function(window)
 	{
+		global.log("XXXX", this._client_area.x,
+				this._client_area.y,
+				this._client_area.width,
+				this._client_area.height);
 		/* disable frame move */
-//		if (this._is_client_owner())
-//			window.move_resize_frame(window, false,
-//					this._client_area.x,
-//					this._client_area.y,
-//					this._client_area.width,
-//					this._client_area.height);
+		if (this._is_client_owner())
+			this._client._meta_window.move_resize_frame(false,
+					this._client_area.x,
+					this._client_area.y,
+					this._client_area.width,
+					this._client_area.height);
 	},
 
 	remove_this_view: function()
@@ -1330,7 +1378,7 @@ var PageViewNotebook = new Lang.Class({
 	},
 	
 	set_client_area: function(area) {
-		this._client_area = area;
+		this._client_area = new Meta.Rectangle(area);
 		this.reconfigure();
 	}
 });
@@ -1342,7 +1390,7 @@ var PageShell = new Lang.Class({
     Extends: PageConnectable,
     Signals: {
 //        'no-arguments': { },
-        'on-focus-changed': { param_types: [ PageClientManaged ] },
+        'on-focus-changed': { param_types: [ GObject.TYPE_OBJECT ] },
 //        'with-return': { param_types: [ GObject.TYPE_STRING, GObject.TYPE_INT ], return_type: GObject.TYPE_BOOLEAN ),
     },
     
@@ -1535,6 +1583,7 @@ var PageShell = new Lang.Class({
 			this.unmanage(mw);
 		}
 
+		this.disconnect_object(actor);
 		var meta_window = actor.get_meta_window();
 		this.disconnect_object(meta_window);
 		
@@ -1587,15 +1636,15 @@ var PageShell = new Lang.Class({
 	   return null;
 	},
    
-   _handler_meta_window_focus: function(shellwm, actor) {
+   _handler_meta_window_focus: function(meta_window) {
 	   global.log("[PageShell] _handler_meta_window_focus");
-		var c = this.lookup_client_managed_with_meta_window(actor);
+		var c = this.lookup_client_managed_with_meta_window(meta_window);
 		if (c) {
 			this.emit('on-focus-changed', c);
 		}
    },
    
-   _handler_meta_window_unmanaged: function(shellwm, actor) {
+   _handler_meta_window_unmanaged: function(meta_window) {
 	   global.log("[PageShell] _handler_meta_window_unmanaged");
    },
    
