@@ -24,8 +24,9 @@ function enable() {
 }
 
 function disable() {
-	global.log("XXX disable");
+	global.log("[Page] disable");
 	page_shell.disconnect_all();
+	page_shell.destroy();
 	page_shell = null;
 }
 

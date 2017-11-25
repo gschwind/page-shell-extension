@@ -34,6 +34,7 @@ var PageConnectable = new Lang.Class({
 	
 	destroy: function() {
 		this.disconnect_all();
+		this.parent();
 	},
 	
 	disconnect_object: function(obj) {
@@ -146,7 +147,7 @@ var PageClientManaged = new Lang.Class({
 		},
 		
 		destroy: function() {
-			
+			this.parent();
 		},
 		
 		position: function() {
@@ -212,7 +213,7 @@ var PageTree = new Lang.Class({
 		},
 		
 		destroy: function() {
-			
+			this.parent();
 		},
 		
 		push_back: function(t) {
@@ -289,7 +290,7 @@ var PageComponent = new Lang.Class({
 		},
 		
 		destroy: function() {
-			
+			this.parent();
 		},
 		
 		get_window_position: function() {
@@ -335,7 +336,7 @@ var PageWorkspace = new Lang.Class({
 		},
 		
 		destroy: function() {
-			
+			this.parent();
 		},
 		
 		_handler_meta_workspace_window_added: function(meta_workspace, meta_window) {
@@ -560,6 +561,7 @@ var PageViewport = new Lang.Class({
 	
 	destroy: function() {
 		this._actor.unref();
+		this.parent();
 	},
 	
 	_update_canvas: function()
@@ -654,6 +656,7 @@ var PageSplit = new Lang.Class({
 		
 		destroy: function() {
 			this._actor.unref();
+			this.parent();
 		},
 		
 		set_allocation: function(allocation) {
@@ -960,6 +963,7 @@ var PageNotebook = new Lang.Class({
 			}
 			
 			this._actor.unref();
+			this.parent();
 		},
 		
 		set_allocation: function(area) {
@@ -1337,6 +1341,10 @@ var PageView = new Lang.Class({
 			this._stack_is_locked = true;
 		},
 		
+		destroy: function() {
+			this.parent();
+		},
+		
 		_is_client_owner: function() {
 			return this._client._current_owner_view === this;
 		},
@@ -1380,7 +1388,7 @@ var PageViewFullscreen = new Lang.Class({
 		},
 		
 		destroy: function() {
-			
+			this.parent();
 		}
 		
 });
@@ -1394,7 +1402,7 @@ var PageViewFloating = new Lang.Class({
 	},
 	
 	destroy: function() {
-		
+		this.parent();
 	},
 	
 	acquire_client: function()
@@ -1455,7 +1463,7 @@ var PageViewNotebook = new Lang.Class({
 	},
 	
 	destroy: function() {
-
+		this.parent();
 	},
 	
 	is_iconic: function() {
@@ -1933,6 +1941,8 @@ var PageShell = new Lang.Class({
    destroy: function() {
        Main.layoutManager.uiGroup.remove_child(this._page.overlay_group);
        Main.layoutManager._backgroundGroup.remove_child(this._page.viewports_group);
+       
+	   this.parent();
    },
 
    _minimizeWindow: function(shellwm, actor) {
