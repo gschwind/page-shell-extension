@@ -13,6 +13,10 @@ var make_rect = function(x, y, width, height) {
 	return new Meta.Rectangle({'x':x,'y':y,'width':width,'height':height});
 };
 
+var is_inside = function(r, x, y) {
+	return (x>=r.x)&(y>=r.y)&(x<(r.x+r.width))&(y<(r.y+r.height));
+};
+
 var PageConnectable = new Lang.Class({
 	Name: 'PageConnectable',
 	Extends: GObject.Object,
@@ -938,6 +942,12 @@ var PageNotebook = new Lang.Class({
 			this.g_connect(this._st_bookmark_button, "clicked", this._on_button_bookmark_clicked);
 			this._actor.add_child(this._st_bookmark_button);
 			
+			this._st_select_client_button = new St.Button();
+			this._st_select_client_button.set_reactive(true);
+			this._st_select_client_button.set_background_color(new Clutter.Color({red: 0, green: 0, blue: 0, alpha: 200}))
+			this.g_connect(this._st_select_client_button, "button-press-event", this._on_button_select_client_press);
+			this._actor.add_child(this._st_select_client_button);
+			
 			this.g_connect(this._ctx, "on-focus-changed", this._client_focus_change);
 			
 		},
@@ -1029,13 +1039,13 @@ var PageNotebook = new Lang.Class({
 				this._area.left.y = this._allocation.y
 						+ window_position.y + this._ctx._theme.notebook.tab_height;
 				this._area.left.width = this._allocation.width * 0.2;
-				this._area.left.h = this._allocation.height
+				this._area.left.height = this._allocation.height
 					- this._ctx._theme.notebook.tab_height;
 
 				this._area.right.x = this._allocation.x + window_position.x + this._allocation.width * 0.8;
 				this._area.right.y = this._allocation.y + window_position.y + this._ctx._theme.notebook.tab_height;
 				this._area.right.width = this._allocation.width * 0.2;
-				this._area.right.h = (this._allocation.height - this._ctx._theme.notebook.tab_height);
+				this._area.right.height = (this._allocation.height - this._ctx._theme.notebook.tab_height);
 			} else {
 				this._area.left = make_rect(0, 0, 0, 0);
 				this._area.right = make_rect(0, 0, 0, 0);
@@ -1044,28 +1054,28 @@ var PageNotebook = new Lang.Class({
 			this._area.popup_top.x = this._allocation.x + window_position.x;
 			this._area.popup_top.y = this._allocation.y + window_position.y + this._ctx._theme.notebook.tab_height;
 			this._area.popup_top.width = this._allocation.width;
-			this._area.popup_top.h = (this._allocation.height - this._ctx._theme.notebook.tab_height) * 0.5;
+			this._area.popup_top.height = (this._allocation.height - this._ctx._theme.notebook.tab_height) * 0.5;
 
 			this._area.popup_bottom.x = this._allocation.x + window_position.x;
 			this._area.popup_bottom.y = this._allocation.y + window_position.y + this._ctx._theme.notebook.tab_height
 					+ (0.5 * (this._allocation.height - this._ctx._theme.notebook.tab_height));
 			this._area.popup_bottom.width = this._allocation.width;
-			this._area.popup_bottom.h = (this._allocation.height - this._ctx._theme.notebook.tab_height) * 0.5;
+			this._area.popup_bottom.height = (this._allocation.height - this._ctx._theme.notebook.tab_height) * 0.5;
 
 			this._area.popup_left.x = this._allocation.x + window_position.x;
 			this._area.popup_left.y = this._allocation.y + window_position.y + this._ctx._theme.notebook.tab_height;
 			this._area.popup_left.width = this._allocation.width * 0.5;
-			this._area.popup_left.h = (this._allocation.height - this._ctx._theme.notebook.tab_height);
+			this._area.popup_left.height = (this._allocation.height - this._ctx._theme.notebook.tab_height);
 
 			this._area.popup_right.x = this._allocation.x + window_position.x + this._allocation.width * 0.5;
 			this._area.popup_right.y = this._allocation.y + window_position.y + this._ctx._theme.notebook.tab_height;
 			this._area.popup_right.width = this._allocation.width * 0.5;
-			this._area.popup_right.h = (this._allocation.height - this._ctx._theme.notebook.tab_height);
+			this._area.popup_right.height = (this._allocation.height - this._ctx._theme.notebook.tab_height);
 
 			this._area.popup_center.x = this._allocation.x + window_position.x + this._allocation.width * 0.2;
 			this._area.popup_center.y = this._allocation.y + window_position.y + this._ctx._theme.notebook.tab_height + (this._allocation.height - this._ctx._theme.notebook.tab_height) * 0.2;
 			this._area.popup_center.width = this._allocation.width * 0.6;
-			this._area.popup_center.h = (this._allocation.height - this._ctx._theme.notebook.tab_height) * 0.6;
+			this._area.popup_center.height = (this._allocation.height - this._ctx._theme.notebook.tab_height) * 0.6;
 
 			if (this._client_area.width <= 0) {
 				this._client_area.width = 1;
@@ -1113,6 +1123,17 @@ var PageNotebook = new Lang.Class({
 				this._st_bookmark_button.show();
 			}
 			
+			{
+				this._st_select_client_button.set_position(this._allocation.x, this._allocation.y);
+				this._st_select_client_button.set_size(this._allocation.width - 300, this._ctx._theme.notebook.tab_height);
+				if (this._selected) {
+					this._st_select_client_button.label = this._selected.title();
+					this._st_select_client_button.show();
+				} else {
+					this._st_select_client_button.hide();
+				}
+			}
+			
 			this._ctx.schedule_repaint();
 		},
 		
@@ -1122,7 +1143,7 @@ var PageNotebook = new Lang.Class({
 			return true;
 		},
 		
-		_add_client_view(vn, time)
+		_add_client_view: function(vn, time)
 		{
 			this._notebook_view_layer.push_back(vn);
 			this.update_client_position(vn);
@@ -1286,6 +1307,21 @@ var PageNotebook = new Lang.Class({
 			if(this._is_visible) {
 				this._selected.show();
 			}
+		},
+		
+		_on_button_select_client_press: function(actor, event) {
+			global.log("[PageNotebook] _on_button_select_client_press");
+			
+			var time = event.get_time();
+			var button = event.get_button();
+			var x, y;
+			[x, y] = event.get_coords();
+			
+			global.log("[PageNotebook] ", x, y, button, time);
+			
+			if (this._selected)
+				this._root._ctx.grab_start(new PageGrabHandlerMoveNotebook(this._root._ctx, this._selected, button, {'x': x, 'y': y}));
+			
 		}
 		
 });
@@ -1444,10 +1480,10 @@ var PageViewNotebook = new Lang.Class({
 
 	_handler_position_changed: function(window)
 	{
-		global.log("XXXX", this._client_area.x,
-				this._client_area.y,
-				this._client_area.width,
-				this._client_area.height);
+//		global.log("XXXX", this._client_area.x,
+//				this._client_area.y,
+//				this._client_area.width,
+//				this._client_area.height);
 		/* disable frame move */
 		if (this._is_client_owner())
 			this._client._meta_window.move_resize_frame(false,
@@ -1459,10 +1495,10 @@ var PageViewNotebook = new Lang.Class({
 
 	_handler_size_changed: function(window)
 	{
-		global.log("XXXX", this._client_area.x,
-				this._client_area.y,
-				this._client_area.width,
-				this._client_area.height);
+//		global.log("XXXX", this._client_area.x,
+//				this._client_area.y,
+//				this._client_area.width,
+//				this._client_area.height);
 		/* disable frame move */
 		if (this._is_client_owner())
 			this._client._meta_window.move_resize_frame(false,
@@ -1503,6 +1539,10 @@ var PageViewNotebook = new Lang.Class({
 				this._handler_position_changed);
 		this.g_connect(this._client._meta_window, "size-changed",
 				this._handler_size_changed);
+		
+		this.g_connect(this._client._meta_window_actor, "button-press-event",
+				this._handler_button_press_event);
+		
 		this.reconfigure();
 	},
 
@@ -1513,6 +1553,7 @@ var PageViewNotebook = new Lang.Class({
 			return;
 
 		this.disconnect_object(this._client._meta_window);
+		this.disconnect_object(this._client._meta_window_actor);
 		
 		// Not available, TODO
 //		if (this._client._meta_window.is_tiled(_client->meta_window()))
@@ -1545,9 +1586,203 @@ var PageViewNotebook = new Lang.Class({
 	set_client_area: function(area) {
 		this._client_area = new Meta.Rectangle(area);
 		this.reconfigure();
+	},
+	
+	_handler_button_press_event: function(actor, event) {
+		global.log("[PageViewNotebook] _handler_button_press_event");
 	}
 });
 
+const NOTEBOOK_AREA_NONE = 0;
+const NOTEBOOK_AREA_TAB = 1;
+const NOTEBOOK_AREA_TOP = 2;
+const NOTEBOOK_AREA_BOTTOM = 3;
+const NOTEBOOK_AREA_LEFT = 4;
+const NOTEBOOK_AREA_RIGHT = 5;
+const NOTEBOOK_AREA_CENTER = 6;
+
+var PageGrabHandlerMoveNotebook = new Lang.Class({
+    Name: 'PageGrabHandlerMoveNotebook',
+    
+    _init: function(ctx, view_notebook, button, pos) {
+		this._view_notebook = view_notebook;
+		this._button = button;
+		this._ctx = ctx;
+		this.pn0 = new Clutter.Actor();
+		this.pn0.set_background_color(new Clutter.Color({red: 200, green: 0, blue: 0, alpha: 128}));
+		this.pn0.ref_sink();
+		
+		this._target_notebook = null;
+		this._zone = NOTEBOOK_AREA_NONE;
+    },
+    
+    destroy: function() {
+    		if (this.pn0.get_parent())
+    			this.pn0.get_parent().remove_child(this.pn0);
+    		this.pn0.unref();
+    },
+    
+    _find_target_notebook: function(x, y) {
+
+    	var target = null;
+    	var zone = NOTEBOOK_AREA_NONE;
+
+    	/* place the popup */
+    	var ln = this._view_notebook._root.gather_children_root_first(PageNotebook);
+    	ln.forEach((i, k, arr) => {
+    		if (is_inside(i._area.tab, x, y)) {
+    			zone = NOTEBOOK_AREA_TAB;
+    			target = i;
+    		} else if (is_inside(i._area.right, x, y)) {
+    			zone = NOTEBOOK_AREA_RIGHT;
+    			target = i;
+    		} else if (is_inside(i._area.top, x, y)) {
+    			zone = NOTEBOOK_AREA_TOP;
+    			target = i;
+    		} else if (is_inside(i._area.bottom, x, y)) {
+    			zone = NOTEBOOK_AREA_BOTTOM;
+    			target = i;
+    		} else if (is_inside(i._area.left, x, y)) {
+    			zone = NOTEBOOK_AREA_LEFT;
+    			target = i;
+    		} else if (is_inside(i._area.popup_center, x, y)) {
+    			zone = NOTEBOOK_AREA_CENTER;
+    			target = i;
+    		}
+    	});
+    	
+    	global.log("ZONE", target, zone);
+    	return [target, zone];
+    	
+    },
+    
+    button_press_event: function(actor, e) {
+
+    },
+
+    button_motion_event: function(actor, e)
+    {
+    	var x, y;
+    	[x, y] = e.get_coords();
+    	var time = e.get_time(e);
+    	global.log("[PageGrabHandlerMoveotebook] button_motion_event", x, y, time);
+
+    	/* do not start drag&drop for small move */
+    	if (/*!start_position.is_inside(x, y)&&*/ !this.pn0.get_parent()) {
+    		this._ctx._overlay_group.insert_child_above(this.pn0, null);
+    		this.pn0.show();
+    	}
+
+    	var new_target;
+    	var new_zone;
+    	[new_target, new_zone] = this._find_target_notebook(x, y);
+
+    	if((new_target != this._target_notebook || new_zone != this._zone) && new_zone != NOTEBOOK_AREA_NONE) {
+    		this._target_notebook = new_target;
+    		this._zone = new_zone;
+    		var geo = make_rect(0, 0, 0, 0);
+    		switch(this._zone) {
+    		case NOTEBOOK_AREA_TAB:
+    			geo = new_target._area.tab;
+    			break;
+    		case NOTEBOOK_AREA_RIGHT:
+    			geo = new_target._area.popup_right;
+    			break;
+    		case NOTEBOOK_AREA_TOP:
+    			geo = new_target._area.popup_top;
+    			break;
+    		case NOTEBOOK_AREA_BOTTOM:
+    			geo = new_target._area.popup_bottom;
+    			break;
+    		case NOTEBOOK_AREA_LEFT:
+    			geo = new_target._area.popup_left;
+    			break;
+    		case NOTEBOOK_AREA_CENTER:
+    			geo = new_target._area.popup_center;
+    			break;
+    		default:
+    			geo = new_target._area.popup_center;
+    			break;
+    		}
+    		this.pn0.save_easing_state();
+    		this.pn0.set_easing_mode(Clutter.AnimationMode.EASE_IN_CUBIC);
+    		this.pn0.set_easing_duration(100);
+    		this.pn0.set_position(geo.x, geo.y);
+    		this.pn0.set_size(geo.width, geo.height);
+    		this.pn0.restore_easing_state();
+
+    	}
+
+
+    },
+
+    button_release_event: function(actor, e)
+    {
+    	var x, y;
+    	[x, y] = e.get_coords();
+    	var time = e.get_time(e);
+    	var button = e.get_button();
+
+    	var c = this._view_notebook;
+
+    	//if (button == this._button) {
+    		
+		this._ctx.grab_stop(time);
+    		
+		var new_target;
+    		var new_zone;
+    		[new_target, new_zone] = this._find_target_notebook(x, y);
+
+    		/* if the mouse is no where, keep old location */
+    		if ((!new_target || new_zone == NOTEBOOK_AREA_NONE)
+    				&& this._target_notebook) {
+    			new_zone = this._zone;
+    			new_target = this._target_notebook;
+    		}
+
+//    		if (is_inside(start_position, x, y)) {
+//    			c->parent_notebook()->activate(c, time);
+//    			_ctx->grab_stop(time);
+//    			return;
+//    		}
+
+    		switch (new_zone) {
+    		case NOTEBOOK_AREA_TAB:
+    		case NOTEBOOK_AREA_CENTER:
+    			if(new_target != c._parent._parent) {
+    				this._ctx.move_notebook_to_notebook(c, new_target, time);
+    			}
+    			break;
+    		case NOTEBOOK_AREA_TOP:
+    			this._ctx.split_top(new_target, c, time);
+    			break;
+    		case NOTEBOOK_AREA_LEFT:
+    			this._ctx.split_left(new_target, c, time);
+    			break;
+    		case NOTEBOOK_AREA_BOTTOM:
+    			this._ctx.split_bottom(new_target, c, time);
+    			break;
+    		case NOTEBOOK_AREA_RIGHT:
+    			this._ctx.split_right(new_target, c, time);
+    			break;
+    		default:
+    			c._parent._parent.activate(c, time);
+    			break;
+    		}
+
+
+    	//}
+    },
+    
+    key_press_event: function(actor, e) {
+    	
+    },
+    
+    key_release_event: function(actor, e) {
+    	
+    }
+    
+});
 
 
 var PageShell = new Lang.Class({
@@ -1823,22 +2058,33 @@ var PageShell = new Lang.Class({
    
    _handler_stage_button_press_event: function(actor, event) { 
 //	   global.log("[PageShell] _handler_stage_button_press_event");
+	   if (this._grab_handler)
+		   this._grab_handler.button_press_event(actor, event);
+	   
    },
    
    _handler_stage_button_release_event: function(actor, event) {
 //	   global.log("[PageShell] _handler_stage_button_release_event");
+	   if (this._grab_handler)
+		   this._grab_handler.button_release_event(actor, event);
    },
    
    _handler_stage_motion_event: function(actor, event) { 
 //	   global.log("[PageShell] _handler_stage_motion_event");
+	   if (this._grab_handler)
+		   this._grab_handler.button_motion_event(actor, event);
    },
    
    _handler_stage_key_press_event: function(actor, event) { 
 //	   global.log("[PageShell] _handler_stage_key_press_event");
+	   if (this._grab_handler)
+		   this._grab_handler.key_press_event(actor, event);
    },
    
    _handler_stage_key_release_event: function(actor, event) {
 //	   global.log("[PageShell] _handler_stage_key_release_event");
+	   if (this._grab_handler)
+		   this._grab_handler.key_release_event(actor, event);
    },
    
 	_handler_screen_in_fullscreen_changed : function(screen) {
@@ -1996,8 +2242,11 @@ var PageShell = new Lang.Class({
 			x._client._meta_window.raise();
 			x._client._meta_window_actor.sync_visibility();
 		});
-		
+
+		//Main.layoutManager.uiGroup.set_child_above_sibling(this._overlay_group, Main.layoutManager.modalDialogGroup);
+	    
 		this._viewport_group.show();
+		this._overlay_group.show();
 		this._sync_tree_view_guard = false;
 	},
 	
@@ -2140,9 +2389,55 @@ var PageShell = new Lang.Class({
 			return;
 		}
 		this._current_workspace.switch_view_to_floating(v, 0);
-	}
+	},
+	
+	_on_button_select_client_press: function(actor, event) {
+		global.log("[PageNotebook] _on_button_select_client_press");
+	},
+	
+	grab_start: function (handler, time) {
+		global.log("[PageNotebook] grab_start");
+		if (this._grab_handler)
+			return;
+		this._grab_handler = handler;
+		this._stage.grab_key_focus();
+		Main.pushModal(this._stage, {timestamp: time, options: Meta.ModalOptions.POINTER_ALREADY_GRABBED});
+	},
+	
+	grab_stop: function (time) {
+		global.log("[PageNotebook] grab_end");
+		Main.popModal(this._stage, time);
+		this._grab_handler.destroy();
+		this._grab_handler = null;
+	},
+	
+	move_notebook_to_notebook: function(vn, n, time)
+	{
+		//printf("call %s\n", __PRETTY_FUNCTION__);
+		vn.remove_this_view();
+		n.add_client(vn._client, time);
+	},
+	
+	move_floating_to_notebook: function(vn, n, time)
+	{
+		//printf("call %s\n", __PRETTY_FUNCTION__);
+		vn.remove_this_view();
+		n.add_client(vn._client, time);
+	},
+	
+	move_view_to_notebook: function(v, n, time)
+	{
+		if(v instanceof PageViewNotebook) {
+			this.move_notebook_to_notebook(v, n, time);
+			return;
+		}
 
-   
+		if(v instanceof PageViewFloating) {
+			this.move_floating_to_notebook(v, n, time);
+			return;
+		}
+	}
+	
 });
 
 
