@@ -69,10 +69,10 @@ var PageThemeNotebookStruct =  new Lang.Class({
 	Name: 'PageThemeNotebookStruct',
 	_init: function() {
 		this.margin = new PageThemeMarginStruct();
-//		this.margin.top = 4;
-//		this.margin.bottom = 4;
-//		this.margin.left = 4;
-//		this.margin.right = 4;
+// this.margin.top = 4;
+// this.margin.bottom = 4;
+// this.margin.left = 4;
+// this.margin.right = 4;
 		
 		// Include Shadow;
 		this.margin.top = 20;
@@ -80,7 +80,7 @@ var PageThemeNotebookStruct =  new Lang.Class({
 		this.margin.left = 20;
 		this.margin.right = 20;
 		
-//		this.tab_height = 22;
+// this.tab_height = 22;
 		this.tab_height = 30;
 		this.iconic_tab_width = 33;
 		this.selected_close_width = 48;
@@ -359,11 +359,14 @@ var PageWorkspace = new Lang.Class({
 				viewport_allocation.push(area);
 			}
 			
-			/** get old viewport_allocation to recycle old viewport, and keep unchanged outputs **/
+			/**
+			 * get old viewport_allocation to recycle old viewport, and keep
+			 * unchanged outputs *
+			 */
 			var old_layout = this._viewport_outputs;
-			/** store the newer layout, to be able to cleanup obsolete viewports **/
+			/** store the newer layout, to be able to cleanup obsolete viewports * */
 			this._viewport_outputs = [];
-			/** for each not overlaped rectangle **/
+			/** for each not overlaped rectangle * */
 			for (let i = 0; i < viewport_allocation.length; ++i) {
 				global.log("%p: found viewport (%d,%d,%d,%d)\n",
 						this._meta_workspace,
@@ -380,9 +383,9 @@ var PageWorkspace = new Lang.Class({
 				this._viewport_layer.push_back(vp);
 			}
 
-			/** clean up obsolete viewport_allocation **/
+			/** clean up obsolete viewport_allocation * */
 			for (let i = this._viewport_outputs.length; i < old_layout.length; ++i) {
-				/** destroy this viewport **/
+				/** destroy this viewport * */
 				this._remove_viewport(old_layout[i]);
 				old_layout[i] = null;
 			}
@@ -412,7 +415,7 @@ var PageWorkspace = new Lang.Class({
 		
 		insert_as_notebook: function(client, time)
 		{
-			//printf("call %s\n", __PRETTY_FUNCTION__);
+			// printf("call %s\n", __PRETTY_FUNCTION__);
 			this.ensure_default_notebook().add_client(client, time);
 		},
 		
@@ -426,7 +429,7 @@ var PageWorkspace = new Lang.Class({
 			var notebooks = this.gather_children_root_first(PageNotebook);
 			if (notebooks.indexOf(this._default_pop) < 0) {				
 				this._default_pop = notebooks[0];
-				//notebooks[0].set_default(true);
+				// notebooks[0].set_default(true);
 				return notebooks[0];
 			} else {
 				return this._default_pop;
@@ -524,7 +527,7 @@ var PageWorkspace = new Lang.Class({
 			this.add_floating(fv);
 			fv.raise();
 			fv.show();
-			//this.set_focus(fv, time);
+			// this.set_focus(fv, time);
 			this._ctx.schedule_repaint();
 		},
 		
@@ -548,18 +551,18 @@ var PageViewport = new Lang.Class({
 		this._default_view.ref_sink();
 		this._actor = this._default_view;
 
-//	g_connect(CLUTTER_CANVAS(_canvas), "draw", &viewport_t::draw);
+// g_connect(CLUTTER_CANVAS(_canvas), "draw", &viewport_t::draw);
 //	
-//	g_connect(_default_view, "button-press-event",
-//			&viewport_t::_handler_button_press_event);
-//	g_connect(_default_view, "button-release-event",
-//			&viewport_t::_handler_button_release_event);
-//	g_connect(_default_view, "motion-event",
-//			&viewport_t::_handler_motion_event);
-//	g_connect(_default_view, "enter-event",
-//			&viewport_t::_handler_enter_event);
-//	g_connect(_default_view, "leave-event",
-//			&viewport_t::_handler_leave_event);
+// g_connect(_default_view, "button-press-event",
+// &viewport_t::_handler_button_press_event);
+// g_connect(_default_view, "button-release-event",
+// &viewport_t::_handler_button_release_event);
+// g_connect(_default_view, "motion-event",
+// &viewport_t::_handler_motion_event);
+// g_connect(_default_view, "enter-event",
+// &viewport_t::_handler_enter_event);
+// g_connect(_default_view, "leave-event",
+// &viewport_t::_handler_leave_event);
 	
 		this._subtree.set_allocation(new Meta.Rectangle({x:0,y:0,width:this._work_area.width,height:this._work_area.height}));
 		this.update_actors();
@@ -573,10 +576,10 @@ var PageViewport = new Lang.Class({
 	
 	_update_canvas: function()
 	{
-//		this._canvas.set_size(this._work_area.width, this._work_area.height);
+// this._canvas.set_size(this._work_area.width, this._work_area.height);
 		this._default_view.set_position(this._work_area.x, this._work_area.y);
 		this._default_view.set_size(this._work_area.width, this._work_area.height);
-//		this._canvas.invalidate();
+// this._canvas.invalidate();
 	},
 	
 	set_allocation: function(area) {
@@ -584,7 +587,7 @@ var PageViewport = new Lang.Class({
 		this._update_canvas();
 		if (this._subtree)
 			this._subtree.set_allocation(make_rect(0, 0, this._work_area.width, this._work_area.height));
-//		queue_redraw();
+// queue_redraw();
 	},
 	
 	get_window_position: function() {
@@ -712,13 +715,13 @@ var PageSplit = new Lang.Class({
 			var bpack0 = new Meta.Rectangle();
 			var bpack1 = new Meta.Rectangle();
 
-//			if(this._pack0 != null)
-//				this._pack0->get_min_allocation(pack0_width, pack0_height);
-//			if(this._pack1 != mull)
-//				this._pack1->get_min_allocation(pack1_width, pack1_height);
+// if(this._pack0 != null)
+// this._pack0->get_min_allocation(pack0_width, pack0_height);
+// if(this._pack1 != mull)
+// this._pack1->get_min_allocation(pack1_width, pack1_height);
 
-			//cout << "pack0 = " << pack0_width << "," << pack0_height << endl;
-			//cout << "pack1 = " << pack1_width << "," << pack1_height << endl;
+			// cout << "pack0 = " << pack0_width << "," << pack0_height << endl;
+			// cout << "pack1 = " << pack1_width << "," << pack1_height << endl;
 
 			if (this._direction === VERTICAL_SPLIT) {
 
@@ -751,12 +754,12 @@ var PageSplit = new Lang.Class({
 				bpack1.width = w1;
 				bpack1.height = this._allocation.height - this._ctx._theme.split.margin.top - this._ctx._theme.split.margin.bottom;
 
-//				if(_parent != nullptr) {
-//					assert(bpack0.w >= pack0_width);
-//					assert(bpack0.h >= pack0_height);
-//					assert(bpack1.w >= pack1_width);
-//					assert(bpack1.h >= pack1_height);
-//				}
+// if(_parent != nullptr) {
+// assert(bpack0.w >= pack0_width);
+// assert(bpack0.h >= pack0_height);
+// assert(bpack1.w >= pack1_width);
+// assert(bpack1.h >= pack1_height);
+// }
 
 			} else {
 
@@ -784,12 +787,12 @@ var PageSplit = new Lang.Class({
 				bpack1.width = this._allocation.width - this._ctx._theme.split.margin.left - this._ctx._theme.split.margin.right;
 				bpack1.height = h1;
 
-//				if(_parent != nullptr) {
-//					assert(bpack0.w >= pack0_width);
-//					assert(bpack0.h >= pack0_height);
-//					assert(bpack1.w >= pack1_width);
-//					assert(bpack1.h >= pack1_height);
-//				}
+// if(_parent != nullptr) {
+// assert(bpack0.w >= pack0_width);
+// assert(bpack0.h >= pack0_height);
+// assert(bpack1.w >= pack1_width);
+// assert(bpack1.h >= pack1_height);
+// }
 
 			}
 			
@@ -797,10 +800,10 @@ var PageSplit = new Lang.Class({
 		},
 
 		update_allocation: function() {
-			//cout << "allocation = " << _allocation.to_string() << endl;
+			// cout << "allocation = " << _allocation.to_string() << endl;
 			[this._bpack0, this._bpack1] = this.compute_children_allocation(this._ratio);
-			//cout << "allocation pack0 = " << _bpack0.to_string() << endl;
-			//cout << "allocation pack1 = " << _bpack1.to_string() << endl;
+			// cout << "allocation pack0 = " << _bpack0.to_string() << endl;
+			// cout << "allocation pack1 = " << _bpack1.to_string() << endl;
 			
 			global.log("[PageSplit]", this._bpack0.x, this._bpack0.y, this._bpack0.width, this._bpack0.height);
 			global.log("[PageSplit]", this._bpack1.x, this._bpack1.y, this._bpack1.width, this._bpack1.height);
@@ -999,35 +1002,37 @@ var PageNotebook = new Lang.Class({
 		},
 		
 		set_allocation: function(area) {
-//			var width, height;
-//			get_min_allocation(width, height);
-//			assert(area.w >= width);
-//			assert(area.h >= height);
+// var width, height;
+// get_min_allocation(width, height);
+// assert(area.w >= width);
+// assert(area.h >= height);
 
 			this._allocation = new Meta.Rectangle(area);
 			this._update_all_layout();
-//			queue_redraw();
+// queue_redraw();
 		},
 		
 		_update_all_layout: function() {
 
-//			var min_width;
-//			var min_height;
-//			get_min_allocation(min_width, min_height);
+// var min_width;
+// var min_height;
+// get_min_allocation(min_width, min_height);
 //
-//			if (this._allocation.width < min_width * 2 + this._ctx._theme.split.margin.left
-//					+ this._ctx._theme.split.margin.right  + this._ctx._theme.split.width) {
-//				_can_vsplit = false;
-//			} else {
-//				_can_vsplit = true;
-//			}
+// if (this._allocation.width < min_width * 2 +
+// this._ctx._theme.split.margin.left
+// + this._ctx._theme.split.margin.right + this._ctx._theme.split.width) {
+// _can_vsplit = false;
+// } else {
+// _can_vsplit = true;
+// }
 //
-//			if (this._allocation.height < min_height * 2 + this._ctx._theme.split.margin.top
-//					+ this._ctx._theme.split.margin.bottom  + this._ctx._theme.split.width) {
-//				_can_hsplit = false;
-//			} else {
-//				_can_hsplit = true;
-//			}
+// if (this._allocation.height < min_height * 2 +
+// this._ctx._theme.split.margin.top
+// + this._ctx._theme.split.margin.bottom + this._ctx._theme.split.width) {
+// _can_hsplit = false;
+// } else {
+// _can_hsplit = true;
+// }
 			
 			this._can_vsplit = true;
 			this._can_hsplit = true;
@@ -1126,9 +1131,9 @@ var PageNotebook = new Lang.Class({
 				this._selected.reconfigure();
 			}
 
-//			this._mouse_over_reset();
-//			this._update_theme_notebook(this._theme_notebook);
-//			this._update_notebook_buttons_area();
+// this._mouse_over_reset();
+// this._update_theme_notebook(this._theme_notebook);
+// this._update_notebook_buttons_area();
 //
 		
 			{
@@ -1187,8 +1192,10 @@ var PageNotebook = new Lang.Class({
 
 			this._clients_tab_order.unshift(vn);
 
-//			g_connect(vn->_client->meta_window(), "unmanaged", &notebook_t::_meta_window_unmanaged);
-//			g_connect(vn->_client->meta_window(), "notify::title", &notebook_t::_meta_window_notify_title);
+// g_connect(vn->_client->meta_window(), "unmanaged",
+// &notebook_t::_meta_window_unmanaged);
+// g_connect(vn->_client->meta_window(), "notify::title",
+// &notebook_t::_meta_window_notify_title);
 
 			/* remove current selected */
 			if (this._selected) {
@@ -1220,7 +1227,7 @@ var PageNotebook = new Lang.Class({
 		
 		remove_view_notebook: function(vn)
 		{
-			/** update selection **/
+			/** update selection * */
 			if (this._selected == vn) {
 				this._selected.hide();
 				this._selected = null;
@@ -1234,7 +1241,7 @@ var PageNotebook = new Lang.Class({
 					return x != vn;
 				});
 
-//			_mouse_over_reset();
+// _mouse_over_reset();
 
 			if (!this._selected) {
 				this._selected = this._clients_tab_order[0];
@@ -1325,19 +1332,19 @@ var PageNotebook = new Lang.Class({
 			this._set_selected(vn);
 			vn.xraise();
 			this._ctx.schedule_repaint();
-			//this._root.set_focus(vn, time);
+			// this._root.set_focus(vn, time);
 		},
 		
 
 		_set_selected: function(c) {
-			/** already selected **/
+			/** already selected * */
 			if ((this._selected === c) && (!c.is_iconic()))
 				return;
 
 			if(this._selected && !(c === this._selected)) {
 				this._selected.hide();
 			}
-			/** set selected **/
+			/** set selected * */
 			this._selected = c;
 			this.update_client_position(this._selected);
 			if(this._is_visible) {
@@ -1390,7 +1397,7 @@ var PageView = new Lang.Class({
 		
 		/**
 		 * tree_t API
-		 **/
+		 */
 		
 		hide: function() {
 			PageTree.prototype.hide.call(this);
@@ -1449,16 +1456,18 @@ var PageViewFloating = new Lang.Class({
 		this._client._meta_window.unminimize();
 		if (this._client._meta_window.is_fullscreen())
 			this._client._meta_window.unmake_fullscreen();
-//		if (this._client._meta_window.is_tiled())
-//			this._client._meta_window.unmake_tiled();
+// if (this._client._meta_window.is_tiled())
+// this._client._meta_window.unmake_tiled();
 
 		this.g_connect(this._client._meta_window, "position-changed",
 				this._handler_position_changed);
 		this.g_connect(this._client._meta_window, "size-changed",
 				this._handler_size_changed);
 		
-//		g_connect(_client->meta_window(), "position-changed", &view_floating_t::_handler_position_changed);
-//		g_connect(_client->meta_window(), "size-changed", &view_floating_t::_handler_size_changed);
+// g_connect(_client->meta_window(), "position-changed",
+// &view_floating_t::_handler_position_changed);
+// g_connect(_client->meta_window(), "size-changed",
+// &view_floating_t::_handler_size_changed);
 	},
 	
 	release_client: function()
@@ -1520,10 +1529,10 @@ var PageViewNotebook = new Lang.Class({
 
 	_handler_position_changed: function(window)
 	{
-//		global.log("XXXX", this._client_area.x,
-//				this._client_area.y,
-//				this._client_area.width,
-//				this._client_area.height);
+// global.log("XXXX", this._client_area.x,
+// this._client_area.y,
+// this._client_area.width,
+// this._client_area.height);
 		/* disable frame move */
 		if (this._is_client_owner())
 			this._client._meta_window.move_resize_frame(false,
@@ -1535,10 +1544,10 @@ var PageViewNotebook = new Lang.Class({
 
 	_handler_size_changed: function(window)
 	{
-//		global.log("XXXX", this._client_area.x,
-//				this._client_area.y,
-//				this._client_area.width,
-//				this._client_area.height);
+// global.log("XXXX", this._client_area.x,
+// this._client_area.y,
+// this._client_area.width,
+// this._client_area.height);
 		/* disable frame move */
 		if (this._is_client_owner())
 			this._client._meta_window.move_resize_frame(false,
@@ -1567,7 +1576,7 @@ var PageViewNotebook = new Lang.Class({
 
 		// Not available in main stream
 		// TODO: detect when it's available.
-		//this._client._meta_window.make_tiled(_client->meta_window());
+		// this._client._meta_window.make_tiled(_client->meta_window());
 		this._client._meta_window.move_resize_frame(false,
 				this._client_area.x,
 				this._client_area.y,
@@ -1596,8 +1605,8 @@ var PageViewNotebook = new Lang.Class({
 		this.disconnect_object(this._client._meta_window_actor);
 		
 		// Not available, TODO
-//		if (this._client._meta_window.is_tiled(_client->meta_window()))
-//			this._client._meta_window.unmake_tiled(_client->meta_window());
+// if (this._client._meta_window.is_tiled(_client->meta_window()))
+// this._client._meta_window.unmake_tiled(_client->meta_window());
 
 		this._client.release(this);
 	},
@@ -1705,10 +1714,11 @@ var PageGrabHandlerMoveNotebook = new Lang.Class({
     	var x, y;
     	[x, y] = e.get_coords();
     	var time = e.get_time(e);
-    	//global.log("[PageGrabHandlerMoveotebook] button_motion_event", x, y, time);
+    	// global.log("[PageGrabHandlerMoveotebook] button_motion_event", x, y,
+		// time);
 
     	/* do not start drag&drop for small move */
-    	if (/*!start_position.is_inside(x, y)&&*/ !this.pn0.get_parent()) {
+    	if (/* !start_position.is_inside(x, y)&& */ !this.pn0.get_parent()) {
     		this._ctx._overlay_group.insert_child_above(this.pn0, null);
     		this.pn0.show();
     	}
@@ -1765,7 +1775,7 @@ var PageGrabHandlerMoveNotebook = new Lang.Class({
 
     	var c = this._view_notebook;
 
-    	//if (button == this._button) {
+    	// if (button == this._button) {
     		
 		this._ctx.grab_stop(time);
     		
@@ -1780,11 +1790,11 @@ var PageGrabHandlerMoveNotebook = new Lang.Class({
     			new_target = this._target_notebook;
     		}
 
-//    		if (is_inside(start_position, x, y)) {
-//    			c->parent_notebook()->activate(c, time);
-//    			_ctx->grab_stop(time);
-//    			return;
-//    		}
+// if (is_inside(start_position, x, y)) {
+// c->parent_notebook()->activate(c, time);
+// _ctx->grab_stop(time);
+// return;
+// }
 
     		switch (new_zone) {
     		case NOTEBOOK_AREA_TAB:
@@ -1811,7 +1821,7 @@ var PageGrabHandlerMoveNotebook = new Lang.Class({
     		}
 
 
-    	//}
+    	// }
     },
     
     key_press_event: function(actor, e) {
@@ -1829,9 +1839,10 @@ var PageShell = new Lang.Class({
     Name: 'PageShell',
     Extends: PageConnectable,
     Signals: {
-//        'no-arguments': { },
+// 'no-arguments': { },
         'on-focus-changed': { param_types: [ GObject.TYPE_OBJECT ] },
-//        'with-return': { param_types: [ GObject.TYPE_STRING, GObject.TYPE_INT ], return_type: GObject.TYPE_BOOLEAN ),
+// 'with-return': { param_types: [ GObject.TYPE_STRING, GObject.TYPE_INT ],
+// return_type: GObject.TYPE_BOOLEAN ),
     },
     
    _init: function(display, screen, stage, shellwm) {
@@ -1883,16 +1894,16 @@ var PageShell = new Lang.Class({
 		this._overlay_group = new Clutter.Actor();
 		this._overlay_group.show();
 	   
-//		if (_theme_engine == "tiny") {
-//			cout << "using tiny theme engine" << endl;
-//			_theme = new tiny_theme_t{_conf};
-//		} else {
-//			/* The default theme engine */
-//			cout << "using simple theme engine" << endl;
-//			_theme = new simple2_theme_t{_conf};
-//		}
+// if (_theme_engine == "tiny") {
+// cout << "using tiny theme engine" << endl;
+// _theme = new tiny_theme_t{_conf};
+// } else {
+// /* The default theme engine */
+// cout << "using simple theme engine" << endl;
+// _theme = new simple2_theme_t{_conf};
+// }
 
-//		log::printf("n_work_space =%d\n", meta_screen_get_n_workspaces(_screen));
+// log::printf("n_work_space =%d\n", meta_screen_get_n_workspaces(_screen));
 //
 		this._current_workspace = this.ensure_workspace(this._screen.get_active_workspace());
 
@@ -1905,11 +1916,16 @@ var PageShell = new Lang.Class({
 
 		
 //
-//		GSettings * setting_keybindings = g_settings_new("net.hzog.page.keybindings");
-//		add_keybinding_helper(setting_keybindings, "make-notebook-window", &page_t::_handler_key_make_notebook_window);
-//		add_keybinding_helper(setting_keybindings, "make-fullscreen-window", &page_t::_handler_key_make_fullscreen_window);
-//		add_keybinding_helper(setting_keybindings, "make-floating-window", &page_t::_handler_key_make_floating_window);
-//		add_keybinding_helper(setting_keybindings, "toggle-fullscreen-window", &page_t::_handler_key_toggle_fullscreen);
+// GSettings * setting_keybindings =
+// g_settings_new("net.hzog.page.keybindings");
+// add_keybinding_helper(setting_keybindings, "make-notebook-window",
+// &page_t::_handler_key_make_notebook_window);
+// add_keybinding_helper(setting_keybindings, "make-fullscreen-window",
+// &page_t::_handler_key_make_fullscreen_window);
+// add_keybinding_helper(setting_keybindings, "make-floating-window",
+// &page_t::_handler_key_make_floating_window);
+// add_keybinding_helper(setting_keybindings, "toggle-fullscreen-window",
+// &page_t::_handler_key_toggle_fullscreen);
 //
 		this.g_connect(this._stage, "button-press-event",
 				this._handler_stage_button_press_event);
@@ -1933,10 +1949,10 @@ var PageShell = new Lang.Class({
 
 		this.g_connect(this._display, "accelerator-activated", 
 				this._handler_meta_display_accelerator_activated);
-//		this._display.connect("grab-op-begin”", 
-//				Lang.bind(this, this._handler_meta_display_grab_op_begin));
-//		this._display.connect("grab-op-end", 
-//				Lang.bind(this, this._handler_meta_display_grab_op_end));
+// this._display.connect("grab-op-begin”",
+// Lang.bind(this, this._handler_meta_display_grab_op_begin));
+// this._display.connect("grab-op-end",
+// Lang.bind(this, this._handler_meta_display_grab_op_end));
 		this.g_connect(this._display, "modifiers-accelerator-activated", 
 				this._handler_meta_display_modifiers_accelerator_activated);
 		this.g_connect(this._display, "overlay-key",
@@ -1948,7 +1964,7 @@ var PageShell = new Lang.Class({
 
 		this.update_viewport_layout();
 //
-//		switch_to_workspace(meta_screen_get_active_workspace_index(_screen), 0);
+// switch_to_workspace(meta_screen_get_active_workspace_index(_screen), 0);
 	   
 	   
        this.g_connect(this._shellwm, 'switch-workspace', Lang.bind(this, this._switchWorkspace));
@@ -1979,22 +1995,22 @@ var PageShell = new Lang.Class({
 
    _minimizeWindow: function(shellwm, actor) {
 	   global.log("[PageShell] _minimizeWindow");
-	   //this._page.minimize(actor);
+	   // this._page.minimize(actor);
    },
    
    _unminimizeWindow: function(shellwm, actor) {
 	   global.log("[PageShell] _unminimizeWindow");
-//	   this._page.unminimize(actor);
+// this._page.unminimize(actor);
    },
    
    _sizeChangeWindow: function(shellwm, actor, which_change, old_frame_rect, old_buffer_rect) {
 	   global.log("[PageShell] _sizeChangeWindow");
-//	   this._page.size_change(actor, which_change, old_frame_rect, old_buffer_rect);
+// this._page.size_change(actor, which_change, old_frame_rect, old_buffer_rect);
    },
    
    _sizeChangedWindow: function(shellwm, actor) {
-	   //global.log("[PageShell] _sizeChangedWindow");
-//	   this._page.size_changed(actor);
+	   // global.log("[PageShell] _sizeChangedWindow");
+// this._page.size_changed(actor);
    },
    
    _mapWindow: function(shellwm, meta_window_actor) {
@@ -2049,9 +2065,9 @@ var PageShell = new Lang.Class({
 			return;
 
 		if (workspace != this._current_workspace) {
-			//this._current_workspace.disable();
+			// this._current_workspace.disable();
 			this._current_workspace = workspace;
-			//_current_workspace->enable();
+			// _current_workspace->enable();
 			this.schedule_repaint();
 		}
 	   
@@ -2100,58 +2116,58 @@ var PageShell = new Lang.Class({
    },
    
    _handler_stage_button_press_event: function(actor, event) { 
-//	   global.log("[PageShell] _handler_stage_button_press_event");
+// global.log("[PageShell] _handler_stage_button_press_event");
 	   if (this._grab_handler)
 		   this._grab_handler.button_press_event(actor, event);
 	   
    },
    
    _handler_stage_button_release_event: function(actor, event) {
-//	   global.log("[PageShell] _handler_stage_button_release_event");
+// global.log("[PageShell] _handler_stage_button_release_event");
 	   if (this._grab_handler)
 		   this._grab_handler.button_release_event(actor, event);
    },
    
    _handler_stage_motion_event: function(actor, event) { 
-//	   global.log("[PageShell] _handler_stage_motion_event");
+// global.log("[PageShell] _handler_stage_motion_event");
 	   if (this._grab_handler)
 		   this._grab_handler.button_motion_event(actor, event);
    },
    
    _handler_stage_key_press_event: function(actor, event) { 
-//	   global.log("[PageShell] _handler_stage_key_press_event");
+// global.log("[PageShell] _handler_stage_key_press_event");
 	   if (this._grab_handler)
 		   this._grab_handler.key_press_event(actor, event);
    },
    
    _handler_stage_key_release_event: function(actor, event) {
-//	   global.log("[PageShell] _handler_stage_key_release_event");
+// global.log("[PageShell] _handler_stage_key_release_event");
 	   if (this._grab_handler)
 		   this._grab_handler.key_release_event(actor, event);
    },
    
 	_handler_screen_in_fullscreen_changed : function(screen) {
-//		global.log("[PageShell] _handler_screen_in_fullscreen_changed");
+// global.log("[PageShell] _handler_screen_in_fullscreen_changed");
 	},
 	
 	_handler_screen_monitors_changed : function(screen) {
-//		global.log("[PageShell] _handler_screen_monitors_changed");
+// global.log("[PageShell] _handler_screen_monitors_changed");
 	},
 	
 	_handler_screen_restacked : function(screen) {
-//		global.log("[PageShell] _handler_screen_restacked");
+// global.log("[PageShell] _handler_screen_restacked");
 	},
 	
 	_handler_screen_startup_sequence_changed : function(screen, arg1) {
-//		global.log("[PageShell] _handler_screen_startup_sequence_changed");
+// global.log("[PageShell] _handler_screen_startup_sequence_changed");
 	},
 	
 	_handler_screen_window_entered_monitor : function(screen, monitor_id, meta_window) {
-//		global.log("[PageShell] _handler_screen_window_entered_monitor");
+// global.log("[PageShell] _handler_screen_window_entered_monitor");
 	},
 	
 	_handler_screen_window_left_monitor : function(screen, monitor_id, meta_window) {
-//		global.log("[PageShell] _handler_screen_window_left_monitor");
+// global.log("[PageShell] _handler_screen_window_left_monitor");
 	},
 	
 	_handler_screen_workareas_changed : function(screen) {
@@ -2160,47 +2176,48 @@ var PageShell = new Lang.Class({
 	},
 	
 	_handler_screen_workspace_added : function(screen, workspace_id) {
-//		global.log("[PageShell] _handler_screen_workspace_added");
+// global.log("[PageShell] _handler_screen_workspace_added");
 	},
 	
 	_handler_screen_workspace_removed : function(screen, workspace_id) {
-//		global.log("[PageShell] _handler_screen_workspace_removed");
+// global.log("[PageShell] _handler_screen_workspace_removed");
 	},
 	
 	_handler_screen_workspace_switched : function(Mscreen, from, to,
 			direction) {
-//		global.log("[PageShell] _handler_screen_workspace_switched");
+// global.log("[PageShell] _handler_screen_workspace_switched");
 	},
 	
 	
 	_handler_meta_display_accelerator_activated : function(display, arg1, arg2, arg3) {
-//		global.log("[PageShell] _handler_meta_display_accelerator_activated");
+// global.log("[PageShell] _handler_meta_display_accelerator_activated");
 	},
 	
 	_handler_meta_display_grab_op_begin : function(display, screen, meta_window, grab_op) {
-//		global.log("[PageShell] _handler_meta_display_grab_op_begin");
+// global.log("[PageShell] _handler_meta_display_grab_op_begin");
 	},
 	
 	_handler_meta_display_grab_op_end : function(display, screen, meta_window, grab_op) {
-//		global.log("[PageShell] _handler_meta_display_grab_op_end");
+// global.log("[PageShell] _handler_meta_display_grab_op_end");
 	},
 	
 	_handler_meta_display_modifiers_accelerator_activated : function(display) {
-//		global.log("[PageShell] _handler_meta_display_modifiers_accelerator_activated");
+// global.log("[PageShell]
+// _handler_meta_display_modifiers_accelerator_activated");
 		return false;
 	},
 	
 	_handler_meta_display_overlay_key : function(display) {
-//		global.log("[PageShell] _handler_meta_display_overlay_key");
+// global.log("[PageShell] _handler_meta_display_overlay_key");
 	},
 	
 	_handler_meta_display_restart : function(display) {
-//		global.log("[PageShell] _handler_meta_display_restart");
+// global.log("[PageShell] _handler_meta_display_restart");
 		return false;
 	},
 	
 	_handler_meta_display_window_created : function(display, meta_window) {
-//		global.log("[PageShell] _handler_meta_display_window_created");
+// global.log("[PageShell] _handler_meta_display_window_created");
 	},
 
    ensure_workspace: function(meta_workspace)
@@ -2210,7 +2227,7 @@ var PageShell = new Lang.Class({
    	} else {
    		let d = new PageWorkspace(this, meta_workspace);
    		this._workspace_map.set(meta_workspace, d);
-//   		d.disable();
+// d.disable();
    		d.show(); // make is visible by default
    		d.update_viewports_layout();
    		return d;
@@ -2259,7 +2276,7 @@ var PageShell = new Lang.Class({
 			});
 		
 		/* if window is in move/resize/notebook move, do cleanup */
-//		cleanup_grab();
+// cleanup_grab();
 
 		this._workspace_map.forEach((v, k, m) => {
 			v.unmanage(mw);
@@ -2295,7 +2312,8 @@ var PageShell = new Lang.Class({
 			x._client._meta_window_actor.sync_visibility();
 		});
 
-		//Main.layoutManager.uiGroup.set_child_above_sibling(this._overlay_group, Main.layoutManager.modalDialogGroup);
+		// Main.layoutManager.uiGroup.set_child_above_sibling(this._overlay_group,
+		// Main.layoutManager.modalDialogGroup);
 	    
 		this._viewport_group.show();
 		this._overlay_group.show();
@@ -2359,9 +2377,9 @@ var PageShell = new Lang.Class({
 	
 	notebook_close: function(nbk, time) {
 		/**
-		 * Closing notebook mean destroying the split base of this
-		 * notebook, plus this notebook.
-		 **/
+		 * Closing notebook mean destroying the split base of this notebook,
+		 * plus this notebook.
+		 */
 		
 		if (! (nbk._parent instanceof PageSplit))
 			return;
@@ -2382,7 +2400,7 @@ var PageShell = new Lang.Class({
 			dst = splt._pack0;
 		}
 
-		/* remove this split from tree  and replace it by sibling branch */
+		/* remove this split from tree and replace it by sibling branch */
 		splt.remove(dst);
 		splt.remove(nbk);
 		splt._parent.replace(splt, dst);
@@ -2394,7 +2412,7 @@ var PageShell = new Lang.Class({
 			default_notebook.add_client(item._client, 0);
 		});
 
-//		workspace.set_focus(null, time);
+// workspace.set_focus(null, time);
 		
 		nbk.disconnect_all();
 
@@ -2465,14 +2483,14 @@ var PageShell = new Lang.Class({
 	
 	move_notebook_to_notebook: function(vn, n, time)
 	{
-		//printf("call %s\n", __PRETTY_FUNCTION__);
+		// printf("call %s\n", __PRETTY_FUNCTION__);
 		vn.remove_this_view();
 		n.add_client(vn._client, time);
 	},
 	
 	move_floating_to_notebook: function(vn, n, time)
 	{
-		//printf("call %s\n", __PRETTY_FUNCTION__);
+		// printf("call %s\n", __PRETTY_FUNCTION__);
 		vn.remove_this_view();
 		n.add_client(vn._client, time);
 	},
