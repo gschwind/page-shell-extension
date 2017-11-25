@@ -1376,6 +1376,11 @@ var PageViewFloating = new Lang.Class({
 //		if (this._client._meta_window.is_tiled())
 //			this._client._meta_window.unmake_tiled();
 
+		this.g_connect(this._client._meta_window, "position-changed",
+				this._handler_position_changed);
+		this.g_connect(this._client._meta_window, "size-changed",
+				this._handler_size_changed);
+		
 //		g_connect(_client->meta_window(), "position-changed", &view_floating_t::_handler_position_changed);
 //		g_connect(_client->meta_window(), "size-changed", &view_floating_t::_handler_size_changed);
 	},
@@ -1391,6 +1396,16 @@ var PageViewFloating = new Lang.Class({
 	reconfigure: function()
 	{
 		// do nothing managed by gnome-shell
+	},
+	
+	_handler_position_changed: function(window)
+	{
+		this._client._floating_wished_position = this._client.position();
+	},
+
+	_handler_size_changed: function(window)
+	{
+		this._client._floating_wished_position = this._client.position();
 	}
 });
 
