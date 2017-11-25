@@ -645,6 +645,8 @@ var PageSplit = new Lang.Class({
 		_init: function(ref, direction) {
 			this.parent(ref._root);
 			
+			this._grab_handler = null;
+			
 			this._ctx = ref._root._ctx;
 			this._direction = direction;
 			this._ratio = 0.5;
@@ -666,7 +668,17 @@ var PageSplit = new Lang.Class({
 			this._st_split_button = new St.Button();
 			this._st_split_button.set_reactive(true);
 			this._st_split_button.set_background_color(new Clutter.Color({red: 255, green: 0, blue: 0, alpha: 255}))
-			this.g_connect(this._st_split_button, "button-press-event", this._on_button_split_clicked);
+			this.g_connect(this._st_split_button, "button-press-event",
+					this._on_button_split_press);
+			this.g_connect(this._st_split_button, "button-release-event",
+					this._on_button_split_release);
+			this.g_connect(this._st_split_button, "motion-event",
+					this._on_button_split_motion);
+			this.g_connect(this._st_split_button, "leave-event",
+					this._on_button_split_leave);
+			this.g_connect(this._st_split_button, "enter-event",
+					this._on_button_split_enter);
+
 			this._actor.add_child(this._st_split_button);
 			this._st_split_button.show();
 			this._actor.show();
@@ -890,10 +902,43 @@ var PageSplit = new Lang.Class({
 			});
 		},
 		
-		_on_button_split_clicked: function(actor, e) {
-			global.log("[PageSplit] _on_button_split_clicked");
+		_on_button_split_press: function(actor, e) {
+			global.log("[PageSplit] _on_button_split_press");
 			var time = e.get_time();
-			this._root._ctx.grab_start(new PageGrabHandlerSplit(this._root._ctx, this), time);
+			Main.pushModal(this._st_split_button, {timestamp: time, options: 0});
+			this._grab_handler = new PageGrabHandlerSplit(this._root._ctx, this);
+		},
+		
+		_on_button_split_release: function(actor, e) {
+			global.log("[PageSplit] _on_button_split_press");
+			if (this._grab_handler) {
+				this._grab_handler.button_release_event(actor, e);
+				this._grab_handler.destroy();
+				this._grab_handler = null;
+				Main.popModal(this._st_split_button, e.get_time());
+			}
+		},
+		
+		_on_button_split_motion: function(actor, e) {
+			if (this._grab_handler) {
+				this._grab_handler.button_motion_event(actor, e);
+			}
+		},
+		
+		_on_button_split_leave: function(actor, e) {
+    		this._st_select_client_button.save_easing_state();
+    		this._st_select_client_button.set_easing_mode(Clutter.AnimationMode.EASE_IN_CUBIC);
+    		this._st_select_client_button.set_easing_duration(300);
+			this._st_select_client_button.set_background_color(new Clutter.Color({red: 255, green: 0, blue: 0, alpha: 0}))
+    		this._st_select_client_button.restore_easing_state();
+		},
+		
+		_on_button_split_enter: function(actor, e) {
+    		this._st_select_client_button.save_easing_state();
+    		this._st_select_client_button.set_easing_mode(Clutter.AnimationMode.EASE_IN_CUBIC);
+    		this._st_select_client_button.set_easing_duration(300);
+			this._st_select_client_button.set_background_color(new Clutter.Color({red: 200, green: 60, blue: 60, alpha: 0}))
+    		this._st_select_client_button.restore_easing_state();
 		},
 		
 		get_split_bar_area: function() {
@@ -1956,7 +2001,7 @@ var PageGrabHandlerSplit = new Lang.Class({
     	var time = e.get_time();
     	var button = e.get_button();
 
-		this._ctx.grab_stop(time);
+		//this._ctx.grab_stop(time);
 		
 // if(_split.expired()) {
 // _ctx->grab_stop(time);
