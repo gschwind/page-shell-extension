@@ -961,6 +961,8 @@ var PageNotebook = new Lang.Class({
 			this._mouse_over = null;
 			this._selected = null;
 			
+			this._grab_handler = null;
+			
 			this._stack_is_locked = true;
 			
 			this._notebook_view_layer = new PageTree(this._root);
@@ -1004,6 +1006,10 @@ var PageNotebook = new Lang.Class({
 			this._st_select_client_button.set_reactive(true);
 			this._st_select_client_button.set_background_color(new Clutter.Color({red: 0, green: 0, blue: 0, alpha: 200}))
 			this.g_connect(this._st_select_client_button, "button-press-event", this._on_button_select_client_press);
+			this.g_connect(this._st_select_client_button, "button-release-event", this._on_button_select_client_release);
+			this.g_connect(this._st_select_client_button, "motion-event", this._on_button_select_client_motion);
+			this.g_connect(this._st_select_client_button, "leave-event", this._on_button_select_client_leave);
+			this.g_connect(this._st_select_client_button, "enter-event", this._on_button_select_client_enter);
 			this._actor.add_child(this._st_select_client_button);
 			
 			this.g_connect(this._ctx, "on-focus-changed", this._client_focus_change);
@@ -1372,19 +1378,48 @@ var PageNotebook = new Lang.Class({
 			}
 		},
 		
-		_on_button_select_client_press: function(actor, event) {
-			global.log("[PageNotebook] _on_button_select_client_press");
-			
+		_on_button_select_client_press: function(actor, event) {			
 			var time = event.get_time();
 			var button = event.get_button();
 			var x, y;
 			[x, y] = event.get_coords();
 			
-			global.log("[PageNotebook] ", x, y, button, time);
+			if (this._selected) {
+				Main.pushModal(this._st_select_client_button, {timestamp: time, options: 0});
+				this._grab_handler = new PageGrabHandlerMoveNotebook(this._root._ctx, this._selected, button, {'x': x, 'y': y});
+			}
 			
-			if (this._selected)
-				this._root._ctx.grab_start(new PageGrabHandlerMoveNotebook(this._root._ctx, this._selected, button, {'x': x, 'y': y}));
-			
+		},
+		
+		_on_button_select_client_release: function(actor, event) {			
+			if (this._grab_handler) {
+				this._grab_handler.button_release_event(actor, event);
+				this._grab_handler.destroy();
+				this._grab_handler = null;
+				Main.popModal(this._st_select_client_button, event.get_time());
+			}
+		},
+		
+		_on_button_select_client_motion: function(actor, event) {
+			if (this._grab_handler) {
+				this._grab_handler.button_motion_event(actor, event);
+			}
+		},
+		
+		_on_button_select_client_enter: function(actor, event) {			
+    		this._st_select_client_button.save_easing_state();
+    		this._st_select_client_button.set_easing_mode(Clutter.AnimationMode.EASE_IN_CUBIC);
+    		this._st_select_client_button.set_easing_duration(300);
+			this._st_select_client_button.set_background_color(new Clutter.Color({red: 60, green: 60, blue: 60, alpha: 200}))
+    		this._st_select_client_button.restore_easing_state();			
+		},
+		
+		_on_button_select_client_leave: function(actor, event) {			
+    		this._st_select_client_button.save_easing_state();
+    		this._st_select_client_button.set_easing_mode(Clutter.AnimationMode.EASE_IN_CUBIC);
+    		this._st_select_client_button.set_easing_duration(300);
+			this._st_select_client_button.set_background_color(new Clutter.Color({red: 0, green: 0, blue: 0, alpha: 200}))
+    		this._st_select_client_button.restore_easing_state();			
 		}
 		
 });
@@ -1797,7 +1832,7 @@ var PageGrabHandlerMoveNotebook = new Lang.Class({
 
     	// if (button == this._button) {
     		
-		this._ctx.grab_stop(time);
+		//this._ctx.grab_stop(time);
     		
 		var new_target;
     		var new_zone;
@@ -1930,21 +1965,21 @@ var PageGrabHandlerSplit = new Lang.Class({
 
 // if (button == 1) {
 
-        	if (this._split._direction == VERTICAL_SPLIT) {
-        		this._split_ratio = (x - this._split_root_allocation.x) / (this._split_root_allocation.width);
-        	} else {
-        		this._split_ratio = (y - this._split_root_allocation.y) / (this._split_root_allocation.height);
-        	}
-
-    		if (this._split_ratio > 0.95)
-    			this._split_ratio = 0.95;
-    		if (this._split_ratio < 0.05)
-    			this._split_ratio = 0.05;
-
-    		// this._split_ratio =
-			// _split.compute_split_constaint(this._split_ratio);
-
-    		this._split.set_split(this._split_ratio);
+		if (this._split._direction == VERTICAL_SPLIT) {
+			this._split_ratio = (x - this._split_root_allocation.x) / (this._split_root_allocation.width);
+		} else {
+			this._split_ratio = (y - this._split_root_allocation.y) / (this._split_root_allocation.height);
+		}
+		
+		if (this._split_ratio > 0.95)
+			this._split_ratio = 0.95;
+		if (this._split_ratio < 0.05)
+			this._split_ratio = 0.05;
+		
+		// this._split_ratio =
+		// _split.compute_split_constaint(this._split_ratio);
+		
+		this._split.set_split(this._split_ratio);
 // }
     },
     

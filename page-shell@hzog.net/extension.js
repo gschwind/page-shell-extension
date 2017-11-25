@@ -13,7 +13,7 @@ const Page = PageExtension.imports.Page;
 var page_shell = null;
 
 function init() {
-	global.log("XXX init");
+	global.log("[Page] init");
 
 }
 
