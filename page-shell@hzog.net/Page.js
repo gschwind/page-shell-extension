@@ -213,6 +213,7 @@ var PageTree = new Lang.Class({
 		},
 		
 		destroy: function() {
+			this.clear();
 			this.parent();
 		},
 		
@@ -413,6 +414,12 @@ var PageWorkspace = new Lang.Class({
 		{
 			//printf("call %s\n", __PRETTY_FUNCTION__);
 			this.ensure_default_notebook().add_client(client, time);
+		},
+		
+		insert_as_floating: function(c, time)
+		{
+			var fv = new PageViewFloating(this, c);
+			this._insert_view_floating(fv, time);
 		},
 		
 		ensure_default_notebook: function() {
@@ -652,9 +659,24 @@ var PageSplit = new Lang.Class({
 			this._actor = new Clutter.Actor();
 			this._actor.ref_sink();
 			
+			
+			this._st_split_button = new St.Button();
+			this._st_split_button.set_reactive(true);
+			this._st_split_button.set_background_color(new Clutter.Color({red: 255, green: 0, blue: 0, alpha: 255}))
+			this.g_connect(this._st_split_button, "clicked", this._on_button_split_clicked);
+			this._actor.add_child(this._st_split_button);
+			this._st_split_button.show();
+			this._actor.show();
+			
 		},
 		
 		destroy: function() {
+			this.disconnect_object(this._st_split_button);
+			if (this._actor.get_parent()) {
+				var xparent = this.get_parent_actor();
+				xparent.remove_child(this._actor);
+			}
+			
 			this._actor.unref();
 			this.parent();
 		},
@@ -784,6 +806,9 @@ var PageSplit = new Lang.Class({
 			global.log("[PageSplit]", this._bpack1.x, this._bpack1.y, this._bpack1.width, this._bpack1.height);
 			
 			this._split_bar_area = this.compute_split_bar_location(this._bpack0, this._bpack1);
+			this._st_split_button.set_position(this._split_bar_area.x, this._split_bar_area.y);
+			this._st_split_button.set_size(this._split_bar_area.width, this._split_bar_area.height);
+			this._st_split_button.show();
 			
 			if (this._pack0) {
 				this._pack0.set_allocation(this._bpack0);
@@ -830,14 +855,16 @@ var PageSplit = new Lang.Class({
 			if (this._direction == VERTICAL_SPLIT) {
 				ret.x = this._allocation.x + this._ctx._theme.split.margin.left + bpack0.width;
 				ret.y = this._allocation.y;
-				ret.w = this._ctx._theme.split.width + this._ctx._theme.split.margin.left + this._ctx._theme.split.margin.right;
-				ret.h = this._allocation.height;
+				ret.width = this._ctx._theme.split.width + this._ctx._theme.split.margin.left + this._ctx._theme.split.margin.right;
+				ret.height = this._allocation.height;
 			} else {
 				ret.x = this._allocation.x;
 				ret.y = this._allocation.y + this._ctx._theme.split.margin.top + bpack0.height;
-				ret.w = this._allocation.width;
-				ret.h = this._ctx._theme.split.width + this._ctx._theme.split.margin.top + this._ctx._theme.split.margin.bottom;
+				ret.width = this._allocation.width;
+				ret.height = this._ctx._theme.split.width + this._ctx._theme.split.margin.top + this._ctx._theme.split.margin.bottom;
 			}
+			
+			global.log("[PageSplit] compute_split_bar_location", ret.x, ret.y, ret.width, ret.height);
 			return ret;
 		},
 		
@@ -854,9 +881,14 @@ var PageSplit = new Lang.Class({
 		
 		update_actors: function() {
 			this._actor.remove_all_children();
+			this._actor.add_child(this._st_split_button);
 			this._children.forEach((item, k, arr) => {
 				this._actor.add_child(item._actor);				
 			});
+		},
+		
+		_on_button_split_clicked: function(actor, e) {
+			global.log("[PageSplit] _on_button_split_clicked");
 		}
 });
 
@@ -1673,7 +1705,7 @@ var PageGrabHandlerMoveNotebook = new Lang.Class({
     	var x, y;
     	[x, y] = e.get_coords();
     	var time = e.get_time(e);
-    	global.log("[PageGrabHandlerMoveotebook] button_motion_event", x, y, time);
+    	//global.log("[PageGrabHandlerMoveotebook] button_motion_event", x, y, time);
 
     	/* do not start drag&drop for small move */
     	if (/*!start_position.is_inside(x, y)&&*/ !this.pn0.get_parent()) {
@@ -1985,12 +2017,13 @@ var PageShell = new Lang.Class({
 		    meta_window.connect('unmanaged',
 		    		Lang.bind(this, this._handler_meta_window_unmanaged));
 		    
-			if (!meta_window.is_fullscreen()) {
-				this.insert_as_notebook(mw, 0);
-			} else {
+		    if (meta_window.is_fullscreen()) {
 				this.insert_as_fullscreen(mw);
-			}
-
+		    } else if (meta_window.get_transient_for()) {
+		    	this.insert_as_floating(mw, 0);
+		    } else {
+		    	this.insert_as_notebook(mw, 0);
+		    }
 		}
    },
    
@@ -2199,7 +2232,6 @@ var PageShell = new Lang.Class({
    },
    
    insert_as_notebook: function(c, time) {
-		// printf("call %s\n", __PRETTY_FUNCTION__);
 		var workspace;
 		if (!c._meta_window.is_always_on_all_workspaces()) {
 			workspace = this.ensure_workspace(c._meta_window.get_workspace());
@@ -2207,6 +2239,16 @@ var PageShell = new Lang.Class({
 			workspace = this._current_workspace;
 		}
 		workspace.insert_as_notebook(c, time);
+	},
+	
+	insert_as_floating: function(c, time) {
+		var workspace;
+		if (!c._meta_window.is_always_on_all_workspaces()) {
+			workspace = this.ensure_workspace(c._meta_window.get_workspace());
+		} else {
+			workspace = this._current_workspace;
+		}
+		workspace.insert_as_floating(c, time);
 	},
 	
 	unmanage: function(mw)
