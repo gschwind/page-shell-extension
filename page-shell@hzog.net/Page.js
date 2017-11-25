@@ -7,6 +7,7 @@ const Signals = imports.signals;
 const St = imports.gi.St;
 const Main = imports.ui.main;
 const Shell = imports.gi.Shell;
+const Gio = imports.gi.Gio
 
 var make_rect = function(x, y, width, height) {
 	return new Meta.Rectangle({'x':x,'y':y,'width':width,'height':height});
@@ -437,8 +438,88 @@ var PageWorkspace = new Lang.Class({
 			if (x >= 0)
 				return views[x];
 			return null;
-		}
+		},
 		
+		switch_view_to_notebook:function (v)
+		{
+			if(v instanceof PageViewFloating) {
+				this.switch_floating_to_notebook(v);
+				return;
+			}
+
+			if(v instanceof PageViewFullscreen) {
+				this.switch_fullscreen_to_notebook(v);
+				return;
+			}
+		},
+
+		switch_floating_to_notebook: function(vf)
+		{
+			vf.remove_this_view();
+			var n = this.ensure_default_notebook();
+			n.add_client(vf._client, 0);
+		},
+		
+		switch_fullscreen_to_notebook:function (view)
+		{
+			view.remove_this_view();
+			var n = ensure_default_notebook();
+			n.add_client(view._client, time);
+		},
+		
+		switch_view_to_floating: function(v, time)
+		{
+			if(v instanceof PageViewNotebook) {
+				this.switch_notebook_to_floating(v, time);
+				return;
+			}
+
+			if(v instanceof PageViewFullscreen) {
+				this.switch_fullscreen_to_floating(v, time);
+				return;
+			}
+		},
+		
+		switch_notebook_to_floating(vn, time)
+		{
+			vn.remove_this_view();
+			vn._client._meta_window.move_resize_frame(false,
+					vn._client._floating_wished_position.x,
+					vn._client._floating_wished_position.y,
+					vn._client._floating_wished_position.width,
+					vn._client._floating_wished_position.height);
+			var vf = new PageViewFloating(this, vn._client);
+			this._insert_view_floating(vf, time);
+		},
+		
+		switch_notebook_to_floating: function(vn, time)
+		{
+			vn.remove_this_view();
+			vn._client._meta_window.move_resize_frame(false,
+					vn._client._floating_wished_position.x,
+					vn._client._floating_wished_position.y,
+					vn._client._floating_wished_position.width,
+					vn._client._floating_wished_position.height);
+			global.log("[PageWorkspace] Switch to floating");
+			var vf = new PageViewFloating(this, vn._client);
+			this._insert_view_floating(vf, time);
+		},
+		
+		_insert_view_floating: function(fv, time)
+		{
+			var c = fv._client;
+			fv.acquire_client();
+			this.add_floating(fv);
+			fv.raise();
+			fv.show();
+			//this.set_focus(fv, time);
+			this._ctx.schedule_repaint();
+		},
+		
+		add_floating: function(view)
+		{
+			this._floating_layer.push_back(view);
+		}
 });
 
 var PageViewport = new Lang.Class({
@@ -1278,6 +1359,38 @@ var PageViewFloating = new Lang.Class({
 	
 	destroy: function() {
 		
+	},
+	
+	acquire_client: function()
+	{
+		/* we already are the owner */
+		if (this._is_client_owner())
+			return;
+
+		/* release the previous owner and aquire the client */
+		this._client.acquire(this);
+
+		this._client._meta_window.unminimize();
+		if (this._client._meta_window.is_fullscreen())
+			this._client._meta_window.unmake_fullscreen();
+//		if (this._client._meta_window.is_tiled())
+//			this._client._meta_window.unmake_tiled();
+
+//		g_connect(_client->meta_window(), "position-changed", &view_floating_t::_handler_position_changed);
+//		g_connect(_client->meta_window(), "size-changed", &view_floating_t::_handler_size_changed);
+	},
+	
+	release_client: function()
+	{
+		if (!this._is_client_owner())
+			return;
+		this.disconnect_object(this._client._meta_window);
+		this._client.release(this);
+	},
+	
+	reconfigure: function()
+	{
+		// do nothing managed by gnome-shell
 	}
 });
 
@@ -1493,7 +1606,14 @@ var PageShell = new Lang.Class({
 //
 		this._current_workspace = this.ensure_workspace(this._screen.get_active_workspace());
 
+		let settings = new Gio.Settings({ schema: "net.hzog.page.keybindings" });
+		
+		this._display.add_keybinding("make-notebook-window", settings, 0,
+				Lang.bind(this, this.make_notebook_window));
+		this._display.add_keybinding("make-floating-window", settings, 0,
+				Lang.bind(this, this.make_floating_window));
 
+		
 //
 //		GSettings * setting_keybindings = g_settings_new("net.hzog.page.keybindings");
 //		add_keybinding_helper(setting_keybindings, "make-notebook-window", &page_t::_handler_key_make_notebook_window);
@@ -1552,6 +1672,7 @@ var PageShell = new Lang.Class({
        this._restackedId = this._screen.connect('restacked', Lang.bind(this, this._syncKnownWindows));
       
        Main.wm.allowKeybinding('make-notebook-window', Shell.ActionMode.ALL);
+       Main.wm.allowKeybinding('make-floating-window', Shell.ActionMode.ALL);
        Main.layoutManager.uiGroup.insert_child_above(this._overlay_group, Main.layoutManager.modalDialogGroup);
        Main.layoutManager._backgroundGroup.add_child(this._viewport_group);
        
@@ -1961,6 +2082,49 @@ var PageShell = new Lang.Class({
 		
 		nbk.disconnect_all();
 
+	},
+	
+	make_notebook_window: function() {
+		global.log("[PageShell] make_notebook_window");
+		
+		var focussed = this._display.get_focus_window();
+		var mw = this.lookup_client_managed_with_meta_window(focussed);
+		if (!mw) {
+			global.log("managed client not found\n");
+			return;
+		}
+
+		/* windows on all workspaces are not alowed to be bound */
+		if (mw._meta_window.is_on_all_workspaces())
+			return;
+
+		var v = this._current_workspace.lookup_view_for(mw);
+		if (!v) {
+			global.log("view not found\n");
+			return;
+		}
+		this._current_workspace.switch_view_to_notebook(v);
+	},
+	
+	make_floating_window: function() {
+		global.log("[PageShell] make_floating_windon");
+		var focussed = this._display.get_focus_window();
+		var mw = this.lookup_client_managed_with_meta_window(focussed);
+		if (!mw) {
+			global.log("managed client not found\n");
+			return;
+		}
+
+		/* windows on all workspaces are not alowed to be bound */
+		if (mw._meta_window.is_on_all_workspaces())
+			return;
+
+		var v = this._current_workspace.lookup_view_for(mw);
+		if (!v) {
+			global.log("view not found\n");
+			return;
+		}
+		this._current_workspace.switch_view_to_floating(v, 0);
 	}
 
    
