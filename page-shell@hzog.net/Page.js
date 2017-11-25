@@ -666,7 +666,7 @@ var PageSplit = new Lang.Class({
 			this._st_split_button = new St.Button();
 			this._st_split_button.set_reactive(true);
 			this._st_split_button.set_background_color(new Clutter.Color({red: 255, green: 0, blue: 0, alpha: 255}))
-			this.g_connect(this._st_split_button, "clicked", this._on_button_split_clicked);
+			this.g_connect(this._st_split_button, "button-press-event", this._on_button_split_clicked);
 			this._actor.add_child(this._st_split_button);
 			this._st_split_button.show();
 			this._actor.show();
@@ -892,7 +892,27 @@ var PageSplit = new Lang.Class({
 		
 		_on_button_split_clicked: function(actor, e) {
 			global.log("[PageSplit] _on_button_split_clicked");
+			var time = e.get_time();
+			this._root._ctx.grab_start(new PageGrabHandlerSplit(this._root._ctx, this), time);
+		},
+		
+		get_split_bar_area: function() {
+			var ret = this.compute_split_bar_location(this._bpack0, this._bpack1);
+			var xpos = this.get_window_position();
+			ret.x += xpos.x;
+			ret.y += xpos.y;
+			return ret; 
+		},
+		
+		compute_split_bar_area_for_split_ratio: function(ratio) {
+			var [bpack0, bpack1] = this.compute_children_allocation(ratio);
+			var ret = this.compute_split_bar_location(bpack0, bpack1);
+			var xpos = this.get_window_position();
+			ret.x += xpos.x;
+			ret.y += xpos.y;
+			return ret; 
 		}
+		
 });
 
 var PageNotebookLayout = new Lang.Class({
@@ -1713,7 +1733,7 @@ var PageGrabHandlerMoveNotebook = new Lang.Class({
     {
     	var x, y;
     	[x, y] = e.get_coords();
-    	var time = e.get_time(e);
+    	var time = e.get_time();
     	// global.log("[PageGrabHandlerMoveotebook] button_motion_event", x, y,
 		// time);
 
@@ -1770,7 +1790,7 @@ var PageGrabHandlerMoveNotebook = new Lang.Class({
     {
     	var x, y;
     	[x, y] = e.get_coords();
-    	var time = e.get_time(e);
+    	var time = e.get_time();
     	var button = e.get_button();
 
     	var c = this._view_notebook;
@@ -1834,6 +1854,106 @@ var PageGrabHandlerMoveNotebook = new Lang.Class({
     
 });
 
+
+var PageGrabHandlerSplit = new Lang.Class({
+    Name: 'PageGrabHandlerSplit',
+    _init: function(ctx, split) {
+    	this._ctx = ctx;
+    	var xpos = split.get_window_position();
+    	this._split = split;
+    	this._slider_area = split.get_split_bar_area();
+    	this._split_ratio = split._ratio;
+    	this._split_root_allocation = new Meta.Rectangle(split._allocation);
+    	this._split_root_allocation.x += xpos.x;
+    	this._split_root_allocation.y += xpos.y;
+    	this._ps = new Clutter.Actor();
+		this._ps.set_background_color(new Clutter.Color({red: 200, green: 0, blue: 0, alpha: 128}));
+		this._ps.ref_sink();
+    	this._ctx._overlay_group.add_child(this._ps);
+    	this._ps.show();
+    },
+    
+    destroy: function() {
+		if (this._ps.get_parent())
+			this._ps.get_parent().remove_child(this._ps);
+		this._ps.unref();
+    },
+    
+    button_press_event: function(actor, e) {
+    	/* ignore */
+    },
+
+    button_motion_event: function(actor, e)
+    {
+    	var x, y;
+    	[x, y] = e.get_coords();
+    	var time = e.get_time();
+
+//    	if(this._split.expired()) {
+//    		this._ctx.grab_stop(time);
+//    		return;
+//    	}
+
+    	if (this._split._direction == VERTICAL_SPLIT) {
+    		this._split_ratio = (x - this._split_root_allocation.x) / (this._split_root_allocation.width);
+    	} else {
+    		this._split_ratio = (y - this._split_root_allocation.y) / (this._split_root_allocation.height);
+    	}
+    	
+		if (this._split_ratio > 0.95)
+			this._split_ratio = 0.95;
+		if (this._split_ratio < 0.05)
+			this._split_ratio = 0.05;
+
+		var pos = this._split.compute_split_bar_area_for_split_ratio(this._split_ratio);
+    	//this._split_ratio = this._split.compute_split_constaint(this._split_ratio);
+    	this._ps.set_position(pos.x, pos.y);
+    	this._ps.set_size(pos.width, pos.height);
+    	this._ctx.schedule_repaint();
+
+    },
+
+    button_release_event: function(actor, e)
+    {
+    	var x, y;
+    	[x, y] = e.get_coords();
+    	var time = e.get_time();
+    	var button = e.get_button();
+
+		this._ctx.grab_stop(time);
+		
+//    	if(_split.expired()) {
+//    		_ctx->grab_stop(time);
+//    		return;
+//    	}
+
+//    	if (button == 1) {
+
+        	if (this._split._direction == VERTICAL_SPLIT) {
+        		this._split_ratio = (x - this._split_root_allocation.x) / (this._split_root_allocation.width);
+        	} else {
+        		this._split_ratio = (y - this._split_root_allocation.y) / (this._split_root_allocation.height);
+        	}
+
+    		if (this._split_ratio > 0.95)
+    			this._split_ratio = 0.95;
+    		if (this._split_ratio < 0.05)
+    			this._split_ratio = 0.05;
+
+    		//this._split_ratio = _split.compute_split_constaint(this._split_ratio);
+
+    		this._split.set_split(this._split_ratio);
+//    	}
+    },
+    
+    key_press_event: function(actor, e) {
+    	
+    },
+    
+    key_release_event: function(actor, e) {
+    	
+    }
+});
 
 var PageShell = new Lang.Class({
     Name: 'PageShell',
@@ -2471,7 +2591,8 @@ var PageShell = new Lang.Class({
 			return;
 		this._grab_handler = handler;
 		this._stage.grab_key_focus();
-		Main.pushModal(this._stage, {timestamp: time, options: Meta.ModalOptions.POINTER_ALREADY_GRABBED});
+		//Main.pushModal(this._stage, {timestamp: time, options: Meta.ModalOptions.POINTER_ALREADY_GRABBED});
+		Main.pushModal(this._stage, {timestamp: time, options: 0});
 	},
 	
 	grab_stop: function (time) {
