@@ -1889,10 +1889,10 @@ var PageGrabHandlerSplit = new Lang.Class({
     	[x, y] = e.get_coords();
     	var time = e.get_time();
 
-//    	if(this._split.expired()) {
-//    		this._ctx.grab_stop(time);
-//    		return;
-//    	}
+// if(this._split.expired()) {
+// this._ctx.grab_stop(time);
+// return;
+// }
 
     	if (this._split._direction == VERTICAL_SPLIT) {
     		this._split_ratio = (x - this._split_root_allocation.x) / (this._split_root_allocation.width);
@@ -1906,7 +1906,8 @@ var PageGrabHandlerSplit = new Lang.Class({
 			this._split_ratio = 0.05;
 
 		var pos = this._split.compute_split_bar_area_for_split_ratio(this._split_ratio);
-    	//this._split_ratio = this._split.compute_split_constaint(this._split_ratio);
+    	// this._split_ratio =
+		// this._split.compute_split_constaint(this._split_ratio);
     	this._ps.set_position(pos.x, pos.y);
     	this._ps.set_size(pos.width, pos.height);
     	this._ctx.schedule_repaint();
@@ -1922,12 +1923,12 @@ var PageGrabHandlerSplit = new Lang.Class({
 
 		this._ctx.grab_stop(time);
 		
-//    	if(_split.expired()) {
-//    		_ctx->grab_stop(time);
-//    		return;
-//    	}
+// if(_split.expired()) {
+// _ctx->grab_stop(time);
+// return;
+// }
 
-//    	if (button == 1) {
+// if (button == 1) {
 
         	if (this._split._direction == VERTICAL_SPLIT) {
         		this._split_ratio = (x - this._split_root_allocation.x) / (this._split_root_allocation.width);
@@ -1940,10 +1941,11 @@ var PageGrabHandlerSplit = new Lang.Class({
     		if (this._split_ratio < 0.05)
     			this._split_ratio = 0.05;
 
-    		//this._split_ratio = _split.compute_split_constaint(this._split_ratio);
+    		// this._split_ratio =
+			// _split.compute_split_constaint(this._split_ratio);
 
     		this._split.set_split(this._split_ratio);
-//    	}
+// }
     },
     
     key_press_event: function(actor, e) {
@@ -2591,7 +2593,8 @@ var PageShell = new Lang.Class({
 			return;
 		this._grab_handler = handler;
 		this._stage.grab_key_focus();
-		//Main.pushModal(this._stage, {timestamp: time, options: Meta.ModalOptions.POINTER_ALREADY_GRABBED});
+		// Main.pushModal(this._stage, {timestamp: time, options:
+		// Meta.ModalOptions.POINTER_ALREADY_GRABBED});
 		Main.pushModal(this._stage, {timestamp: time, options: 0});
 	},
 	
