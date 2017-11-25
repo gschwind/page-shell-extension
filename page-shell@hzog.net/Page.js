@@ -6,6 +6,7 @@ const Clutter = imports.gi.Clutter;
 const Signals = imports.signals;
 const St = imports.gi.St;
 const Main = imports.ui.main;
+const Mainloop = imports.mainloop;
 const Shell = imports.gi.Shell;
 const Gio = imports.gi.Gio
 
@@ -926,19 +927,19 @@ var PageSplit = new Lang.Class({
 		},
 		
 		_on_button_split_leave: function(actor, e) {
-    		this._st_select_client_button.save_easing_state();
-    		this._st_select_client_button.set_easing_mode(Clutter.AnimationMode.EASE_IN_CUBIC);
-    		this._st_select_client_button.set_easing_duration(300);
-			this._st_select_client_button.set_background_color(new Clutter.Color({red: 255, green: 0, blue: 0, alpha: 0}))
-    		this._st_select_client_button.restore_easing_state();
+    		this._st_split_button.save_easing_state();
+    		this._st_split_button.set_easing_mode(Clutter.AnimationMode.EASE_IN_CUBIC);
+    		this._st_split_button.set_easing_duration(300);
+			this._st_split_button.set_background_color(new Clutter.Color({red: 255, green: 0, blue: 0, alpha: 128}))
+    		this._st_split_button.restore_easing_state();
 		},
 		
 		_on_button_split_enter: function(actor, e) {
-    		this._st_select_client_button.save_easing_state();
-    		this._st_select_client_button.set_easing_mode(Clutter.AnimationMode.EASE_IN_CUBIC);
-    		this._st_select_client_button.set_easing_duration(300);
-			this._st_select_client_button.set_background_color(new Clutter.Color({red: 200, green: 60, blue: 60, alpha: 0}))
-    		this._st_select_client_button.restore_easing_state();
+    		this._st_split_button.save_easing_state();
+    		this._st_split_button.set_easing_mode(Clutter.AnimationMode.EASE_IN_CUBIC);
+    		this._st_split_button.set_easing_duration(300);
+			this._st_split_button.set_background_color(new Clutter.Color({red: 255, green: 0, blue: 0, alpha: 255}))
+    		this._st_split_button.restore_easing_state();
 		},
 		
 		get_split_bar_area: function() {
@@ -1314,15 +1315,20 @@ var PageNotebook = new Lang.Class({
 
 // _mouse_over_reset();
 
-			if (!this._selected) {
+			if (!this._selected && (this._clients_tab_order.length > 0)) {
 				this._selected = this._clients_tab_order[0];
-				if (this._selected && this._is_visible) {
+				this.update_client_position(this._selected);
+				if (this._is_visible) {
 					this._selected.show();
+				} else {
+					this._selected.hide();
 				}
+				this._selected.reconfigure();
 			}
 
 			this._notebook_view_layer.remove(vn);
 			this._update_all_layout();
+			
 		},
 		
 		_compute_notebook_bookmark_position: function() {
@@ -1409,18 +1415,25 @@ var PageNotebook = new Lang.Class({
 
 		_set_selected: function(c) {
 			/** already selected * */
-			if ((this._selected === c) && (!c.is_iconic()))
+			if (this._selected === c)
 				return;
 
-			if(this._selected && !(c === this._selected)) {
+			if (this._selected) {
 				this._selected.hide();
+				this._selected.reconfigure();
 			}
+			
 			/** set selected * */
 			this._selected = c;
 			this.update_client_position(this._selected);
-			if(this._is_visible) {
+			if (this._is_visible) {
 				this._selected.show();
+				this._selected.xraise();
+				this.update_client_position(this._selected);
+			} else {
+				this._selected.hide();
 			}
+			this._selected.reconfigure();
 		},
 		
 		_on_button_select_client_press: function(actor, event) {			
@@ -1713,7 +1726,7 @@ var PageViewNotebook = new Lang.Class({
 
 	reconfigure: function()
 	{
-		if(! this._is_client_owner())
+		if (! this._is_client_owner())
 			return;
 		this._client._meta_window.move_resize_frame(false,
 				this._client_area.x,
@@ -1734,7 +1747,6 @@ var PageViewNotebook = new Lang.Class({
 	
 	set_client_area: function(area) {
 		this._client_area = new Meta.Rectangle(area);
-		this.reconfigure();
 	},
 	
 	_handler_button_press_event: function(actor, event) {
@@ -2057,6 +2069,7 @@ var PageShell = new Lang.Class({
 	   
 	   /* shared_ptr<grab_handler_t> */
 	   this._grab_handler = undefined;
+	   this._sheduled_sync_tree_view = 0;
 	   
 	   /* MetaDisplay * */
 	   this._display = display;
@@ -2488,6 +2501,15 @@ var PageShell = new Lang.Class({
 	},
 	
 	sync_tree_view: function() {
+		if (this._sheduled_sync_tree_view)
+			return;
+		/* avoid reschedule synctree view */
+		if (this._sync_tree_view_guard)
+			return;
+		this._sheduled_sync_tree_view = Mainloop.idle_add(Lang.bind(this, this._sync_tree_view_idle));
+	},
+	
+	_sync_tree_view_idle: function() {
 		if (this._sync_tree_view_guard)
 			return;
 		this._sync_tree_view_guard = true;
@@ -2510,8 +2532,10 @@ var PageShell = new Lang.Class({
 
 		var children = current_workspace.gather_children_root_first(PageView);
 		children.forEach((x) => {
-			x._client._meta_window.raise();
-			x._client._meta_window_actor.sync_visibility();
+			if (!x._client._meta_window.minimized) {
+				x._client._meta_window.raise();
+				x._client._meta_window_actor.sync_visibility();
+			}
 		});
 
 		// Main.layoutManager.uiGroup.set_child_above_sibling(this._overlay_group,
@@ -2520,6 +2544,10 @@ var PageShell = new Lang.Class({
 		this._viewport_group.show();
 		this._overlay_group.show();
 		this._sync_tree_view_guard = false;
+		
+		/* remove this idle source */
+		this._sheduled_sync_tree_view = 0;
+		return false;
 	},
 	
 	schedule_repaint: function()
