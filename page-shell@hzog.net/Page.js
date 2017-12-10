@@ -496,18 +496,6 @@ var PageWorkspace = new Lang.Class({
 			}
 		},
 		
-		switch_notebook_to_floating(vn, time)
-		{
-			vn.remove_this_view();
-			vn._client._meta_window.move_resize_frame(false,
-					vn._client._floating_wished_position.x,
-					vn._client._floating_wished_position.y,
-					vn._client._floating_wished_position.width,
-					vn._client._floating_wished_position.height);
-			var vf = new PageViewFloating(this, vn._client);
-			this._insert_view_floating(vf, time);
-		},
-		
 		switch_notebook_to_floating: function(vn, time)
 		{
 			vn.remove_this_view();
@@ -1874,8 +1862,6 @@ var PageGrabHandlerMoveNotebook = new Lang.Class({
     		this.pn0.restore_easing_state();
 
     	}
-
-
     },
 
     button_release_event: function(actor, e)
@@ -2059,9 +2045,8 @@ var PageShell = new Lang.Class({
 // return_type: GObject.TYPE_BOOLEAN ),
     },
     
-   _init: function(display, screen, stage, shellwm) {
+    _init: function(display, screen, stage, shellwm) {
 	   this.parent();
-	   
 	   global.log("[PageShell] _init");
 	   
 	   /* map<MetaWorkspace *, workspace_p> */
@@ -2108,6 +2093,8 @@ var PageShell = new Lang.Class({
 
 		this._overlay_group = new Clutter.Actor();
 		this._overlay_group.show();
+		
+		this._restackedId = 0;
 	   
 // if (_theme_engine == "tiny") {
 // cout << "using tiny theme engine" << endl;
@@ -2123,6 +2110,9 @@ var PageShell = new Lang.Class({
 		this._current_workspace = this.ensure_workspace(this._screen.get_active_workspace());
 
 		let settings = new Gio.Settings({ schema: "net.hzog.page.keybindings" });
+		if (!settings) {
+			throw "net.hzog.page.keybindings schema not found";
+		}
 		
 		this._display.add_keybinding("make-notebook-window", settings, 0,
 				Lang.bind(this, this.make_notebook_window));
@@ -2190,23 +2180,106 @@ var PageShell = new Lang.Class({
        this.g_connect(this._shellwm, 'map', Lang.bind(this, this._mapWindow));
        this.g_connect(this._shellwm, 'destroy', Lang.bind(this, this._destroyWindow));
        
-       this._restackedId = this._screen.connect('restacked', Lang.bind(this, this._syncKnownWindows));
-      
        Main.wm.allowKeybinding('make-notebook-window', Shell.ActionMode.ALL);
        Main.wm.allowKeybinding('make-floating-window', Shell.ActionMode.ALL);
-       Main.layoutManager.uiGroup.insert_child_above(this._overlay_group, Main.layoutManager.modalDialogGroup);
-       Main.layoutManager._backgroundGroup.add_child(this._viewport_group);
        
-       this.schedule_repaint();
-              
+       //this.g_connect(Main.sessionMode, 'updated', Lang.bind(this, this._sessionUpdated));
+       //Main.sessionMode.connect('updated', Lang.bind(this, this._sessionUpdated));
+
    },
    
-   destroy: function() {
-       Main.layoutManager.uiGroup.remove_child(this._page.overlay_group);
-       Main.layoutManager._backgroundGroup.remove_child(this._page.viewports_group);
+    enable: function() {
+	    global.log("[PageShell] enable");
+	    
+		this._current_workspace = this.ensure_workspace(this._screen.get_active_workspace());
+
+		let settings = new Gio.Settings({ schema: "net.hzog.page.keybindings" });
+		if (!settings) {
+			throw "net.hzog.page.keybindings schema not found";
+		}
+		
+		this._display.add_keybinding("make-notebook-window", settings, 0,
+				Lang.bind(this, this.make_notebook_window));
+		this._display.add_keybinding("make-floating-window", settings, 0,
+				Lang.bind(this, this.make_floating_window));
+
+		
+		this.g_connect(this._stage, "button-press-event",
+				this._handler_stage_button_press_event);
+		this.g_connect(this._stage, "button-release-event",
+				this._handler_stage_button_release_event);
+		this.g_connect(this._stage, "motion-event",
+				this._handler_stage_motion_event);
+		this.g_connect(this._stage, "key-press-event",
+				this._handler_stage_key_press_event);
+		this.g_connect(this._stage, "key-release-event", 
+				this._handler_stage_key_release_event);
+
+		this.g_connect(this._screen, "monitors-changed",
+				this._handler_screen_monitors_changed);
+		this.g_connect(this._screen, "workareas-changed",
+				this._handler_screen_workareas_changed);
+		this.g_connect(this._screen, "workspace-added",
+				this._handler_screen_workspace_added);
+		this.g_connect(this._screen, "workspace-removed",
+				this._handler_screen_workspace_removed);
+
+		this.g_connect(this._display, "accelerator-activated", 
+				this._handler_meta_display_accelerator_activated);
+// this._display.connect("grab-op-begin”",
+// Lang.bind(this, this._handler_meta_display_grab_op_begin));
+// this._display.connect("grab-op-end",
+// Lang.bind(this, this._handler_meta_display_grab_op_end));
+		this.g_connect(this._display, "modifiers-accelerator-activated", 
+				this._handler_meta_display_modifiers_accelerator_activated);
+		this.g_connect(this._display, "overlay-key",
+				this._handler_meta_display_overlay_key);
+		this.g_connect(this._display, "restart", 
+				this._handler_meta_display_restart);
+		this.g_connect(this._display, "window-created", 
+				this._handler_meta_display_window_created);
+
+		this.update_viewport_layout();
+//
+// switch_to_workspace(meta_screen_get_active_workspace_index(_screen), 0);
+	   
+	   
+        this.g_connect(this._shellwm, 'switch-workspace', Lang.bind(this, this._switchWorkspace));
+        this.g_connect(this._shellwm, 'minimize', Lang.bind(this, this._minimizeWindow));
+        this.g_connect(this._shellwm, 'unminimize', Lang.bind(this, this._unminimizeWindow));
+        this.g_connect(this._shellwm, 'size-change', Lang.bind(this, this._sizeChangeWindow));
+        this.g_connect(this._shellwm, 'size-changed', Lang.bind(this, this._sizeChangedWindow));
+        this.g_connect(this._shellwm, 'map', Lang.bind(this, this._mapWindow));
+        this.g_connect(this._shellwm, 'destroy', Lang.bind(this, this._destroyWindow));
        
-	   this.parent();
-   },
+        this._schedule_resync_known_windows();
+      
+        Main.layoutManager.uiGroup.insert_child_above(this._overlay_group, Main.layoutManager.modalDialogGroup);
+        Main.layoutManager._backgroundGroup.add_child(this._viewport_group);
+       
+        this.schedule_repaint();
+
+    },
+   
+	disable: function() {
+		global.log("[PageShell] disable");
+		Main.layoutManager.uiGroup.remove_child(this._overlay_group);
+		Main.layoutManager._backgroundGroup.remove_child(this._viewport_group);
+		this.disconnect_all();
+	},
+   
+    destroy: function() {
+		global.log("[PageShell] destroy", [...arguments]);
+		Main.layoutManager.uiGroup.remove_child(this._overlay_group);
+		Main.layoutManager._backgroundGroup.remove_child(this._viewport_group);
+		this.parent();
+    },
+    
+    _schedule_resync_known_windows: function() {
+    	if (this._restackedId === 0) {
+    		this._restackedId = this._screen.connect('restacked', Lang.bind(this, this._syncKnownWindows));
+    	}
+    },
 
    _minimizeWindow: function(shellwm, actor) {
 	   global.log("[PageShell] _minimizeWindow");
@@ -2289,7 +2362,7 @@ var PageShell = new Lang.Class({
    },
    
    _syncKnownWindows: function() {
-	   global.log("[PageShell] _syncKnownWindows");
+	   global.log("[PageShell] _syncKnownWindows", [...arguments]);
        var wl = global.get_window_actors();
        for (let i = 0; i < wl.length; i++) {
     	   this._mapWindow(this._shellwm, wl[i]);
@@ -2308,7 +2381,7 @@ var PageShell = new Lang.Class({
 	   return null;
    },
    
-	lookup_client_managed_with_meta_window: function(w) {
+   lookup_client_managed_with_meta_window: function(w) {
 	   var idx = this._net_client_list.findIndex(function(x) {
 		  return x._meta_window === w; 
 	   });

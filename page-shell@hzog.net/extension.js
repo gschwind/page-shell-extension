@@ -12,22 +12,26 @@ const Page = PageExtension.imports.Page;
 
 var page_shell = null;
 
+// called on reload
 function init() {
-	global.log("[Page] init");
-
-}
-
-function enable() {
-	global.log("[Page] call enable");
+	global.log("[Page] init", [...arguments]);
 	page_shell = new Page.PageShell(global.display, global.screen, global.stage, global.window_manager);
-	global.log("[Page] exit enable");
 }
 
+// Called when we enter into the session
+// Called when we unlock screen
+function enable() {
+	global.log("[Page] call enable", [...arguments]);
+	page_shell.enable()
+	global.log("[Page] exit enable", [...arguments]);
+}
+
+// Called when we leave from the session
+// Called when lock screen
+// TODO: preserved the context
 function disable() {
-	global.log("[Page] disable");
-	page_shell.disconnect_all();
-	page_shell.destroy();
-	page_shell = null;
+	global.log("[Page] disable", [...arguments]);
+	page_shell.disable()
 }
 
 
