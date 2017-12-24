@@ -1327,6 +1327,8 @@ var PageNotebook = new Lang.Class({
             }
             this._selected.reconfigure();
         }
+        
+        this._buttons_actor.remove_child(vn._button);
 
         this._notebook_view_layer.remove(vn);
         this._update_all_layout();
