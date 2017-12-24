@@ -2282,7 +2282,7 @@ var PageShell = new Lang.Class({
     },
 
     destroy: function() {
-        global.log("[PageShell] destroy", [...arguments]);
+        global.log("[PageShell] destroy");
         Main.layoutManager.uiGroup.remove_child(this._overlay_group);
         Main.layoutManager._backgroundGroup.remove_child(this._viewport_group);
         this.parent();
@@ -2315,7 +2315,7 @@ var PageShell = new Lang.Class({
     },
 
     _mapWindow: function(shellwm, meta_window_actor) {
-//        global.log("[PageShell] _mapWindow", [...arguments]);
+//        global.log("[PageShell] _mapWindow", Array.from(arguments));
 
         if (this.lookup_client_managed_with_meta_window_actor(meta_window_actor))
             return;
@@ -2375,7 +2375,7 @@ var PageShell = new Lang.Class({
     },
 
     _syncKnownWindows: function() {
-        //global.log("[PageShell] _syncKnownWindows", [...arguments]);
+        //global.log("[PageShell] _syncKnownWindows", Array.from(arguments));
         var wl = global.get_window_actors();
         for (let i = 0; i < wl.length; i++) {
             this._mapWindow(this._shellwm, wl[i]);
