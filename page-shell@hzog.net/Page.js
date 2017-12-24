@@ -1043,6 +1043,12 @@ var PageNotebook = new Lang.Class({
         this._actor.add_child(this._st_select_client_button);
 
         this.g_connect(this._ctx, "on-focus-changed", this._client_focus_change);
+        
+        this._buttons_actor = new Clutter.Actor();
+        this._buttons_actor.ref_sink();
+        this._actor.add_child(this._buttons_actor);
+        this._buttons_actor.set_reactive(true);
+        this._buttons_actor.show();
 
     },
 
@@ -1176,9 +1182,16 @@ var PageNotebook = new Lang.Class({
             this._client_area.height = 1;
         }
 
+        var xpos = 0;
         this._clients_tab_order.forEach((item, k, arr) => {
             this.update_client_position(item);
             item.reconfigure();
+            
+            var p = make_rect(xpos, 0.0, 20.0, this._ctx._theme.notebook.tab_height);
+            item._button.set_position(p.x, p.y);
+            item._button.set_size(p.width, p.height);
+            xpos = xpos + 25.0;
+            
         });
 
         {
@@ -1210,8 +1223,11 @@ var PageNotebook = new Lang.Class({
         }
 
         {
+            let xx = this._ctx._theme.notebook.close_width + this._ctx._theme.notebook.vsplit_width
+                + this._ctx._theme.notebook.vsplit_width + this._ctx._theme.notebook.mark_width; 
+            this._buttons_actor.set_position(this._allocation.x + this._allocation.width - xpos - 20.0 - xx, this._allocation.y)
             this._st_select_client_button.set_position(this._allocation.x, this._allocation.y);
-            this._st_select_client_button.set_size(this._allocation.width - 300, this._ctx._theme.notebook.tab_height);
+            this._st_select_client_button.set_size(this._allocation.width - xpos - 25.0 - xx, this._ctx._theme.notebook.tab_height);
             if (this._selected) {
                 this._st_select_client_button.label = this._selected.title();
                 this._st_select_client_button.show();
@@ -1256,7 +1272,20 @@ var PageNotebook = new Lang.Class({
         } else {
             this._selected.hide();
         }
-
+        
+        this._selected._button = new St.Button();
+        this._buttons_actor.add_child(this._selected._button);
+        this._selected._button.set_reactive(true);
+        this._selected._button.set_background_color(new Clutter.Color({red: 0, green: 0, blue: 0, alpha: 200}));
+        
+        this.g_connect(this._selected._button, "button-press-event", function(actor, event) {
+            this.activate(vn, event.get_time());
+        });
+        this.g_connect(this._selected._button, "motion-event", this._on_button_select_client_motion);
+        this.g_connect(this._selected._button, "leave-event", this._on_button_select_client_leave);
+        this.g_connect(this._selected._button, "enter-event", this._on_button_select_client_enter);
+        this._selected._button.show();
+        
         this._selected.reconfigure();
         this._update_all_layout();
 
